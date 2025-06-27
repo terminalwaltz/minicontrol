@@ -125,7 +125,7 @@ svg {
 .led.color-23 { fill: hsl(345, 70%, 50%) !important; } /* Red-Pink */
 
 .global-settings {
-    width: 250px;
+    width: 350px;
     background-color: #fff;
     padding: 10px;
     border-radius: 10px;
@@ -307,4 +307,117 @@ svg {
         width: 90%;
         padding: 15px;
     }
+}
+
+/* ... (keep all existing styles) */
+
+/* Container for save/cancel buttons */
+.settings-buttons {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    padding: 10px;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid #ccc;
+}
+
+/* Buttons */
+.settings-content button {
+    padding: 10px 20px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.save-btn {
+    background-color: #2ecc71;
+    color: #fff;
+}
+
+.save-btn:hover {
+    background-color: #27ae60;
+}
+
+.cancel-btn {
+    background-color: #e94e77;
+    color: #fff;
+}
+
+.cancel-btn:hover {
+    background-color: #c0392b;
+}
+
+.status-header {
+    position: absolute; /* Position it relative to the nearest positioned ancestor or body */
+    top: 10px; /* Small offset from the top */
+    left: 10px; /* Small offset from the left */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0; /* Remove bottom margin to avoid affecting layout */
+    z-index: 10; /* Ensure it’s above other elements like SVG */
+}
+
+.status-header h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.connection-status {
+    border-style: solid;
+    border-radius: 1em;
+    border-width: 2px;
+    padding: 5px 10px;
+    font-size: 14px;
+    color: black;
+}
+
+.connection-status.connected {
+    border-color: green;
+    background-color: lightgreen;
+}
+
+.connection-status.connected::after {
+    content: "minichord connected";
+}
+
+.connection-status.disconnected {
+    border-color: orange;
+    background-color: rgba(255, 166, 0, 0.486);
+}
+
+.connection-status.disconnected::after {
+    content: "minichord disconnected";
+}
+
+.control_full {
+    overflow: hidden;
+}
+
+/* Ensure the main container doesn’t overlap with the header */
+.container {
+    margin-top: 50px; /* Add space below the header to prevent overlap */
+}
+
+.parameter-column div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.parameter-column label {
+    font-size: 14px; /* Slightly smaller for snug fit */
+    margin: 0;
+}
+
+.parameter-column input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
 }

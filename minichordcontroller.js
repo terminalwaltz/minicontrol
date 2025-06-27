@@ -6,7 +6,7 @@ class MiniChordController {
       this.color_hue_sysex_adress = 20;
       this.base_adress_rythm = 220;
       this.potentiometer_memory_adress = [4, 5, 6];
-      this.modulation_adress = [14, 10, 12,16];
+      this.modulation_adress = [14, 10, 12, 16];
       this.volume_memory_adress = [2, 3];
       this.active_bank_number = -1;
       this.min_firmware_accepted = 0.02;
@@ -18,7 +18,8 @@ class MiniChordController {
       };
       this.onConnectionChange = null;
       this.onDataReceived = null;
-      this.json_reference="../json/minichord.json";
+      this.json_reference = "../json/minichord.json";
+      this.isProcessingData = false; // Prevent recursive MIDI sends
     }
   
     // Initialize MIDI connection
@@ -33,6 +34,9 @@ class MiniChordController {
       } catch (error) {
         console.log(">> ERROR: MIDI access failed");
         console.error(error);
+        if (this.onConnectionChange) {
+          this.onConnectionChange(false, "MIDI access failed: " + error.message);
+        }
         return false;
       }
     }
@@ -40,15 +44,21 @@ class MiniChordController {
     // Handle MIDI access
     handleMIDIAccess(midiAccess) {
       console.log(">> Available outputs:");
+      let deviceFound = false;
       for (const entry of midiAccess.outputs) {
         const output = entry[1];
-        if (output.name.includes("minichord") && output.name.includes("1") || output.name == "minichord") {
+        const nameLower = output.name.toLowerCase();
+        if (nameLower.includes("minichord") && (nameLower.includes("1") || nameLower === "minichord")) {
           console.log(
             `>>>> minichord sysex control port [type:'${output.type}'] id: '${output.id}' manufacturer: '${output.manufacturer}' name: '${output.name}' version: '${output.version}'`
           );
           this.device = output;
           const sysex_message = [0xF0, 0, 0, 0, 0, 0xF7];
           this.device.send(sysex_message);
+          deviceFound = true;
+          if (this.onConnectionChange) {
+            this.onConnectionChange(true, "minichord connected");
+          }
         } else {
           console.log(
             `>>>> Other port [type:'${output.type}'] id: '${output.id}' manufacturer: '${output.manufacturer}' name: '${output.name}' version: '${output.version}'`
@@ -58,7 +68,8 @@ class MiniChordController {
       console.log(">> Available inputs:");
       for (const entry of midiAccess.inputs) {
         const input = entry[1];
-        if (input.name.includes("minichord") && input.name.includes("1") || input.name == "minichord") {
+        const nameLower = input.name.toLowerCase();
+        if (nameLower.includes("minichord") && (nameLower.includes("1") || nameLower === "minichord")) {
           input.onmidimessage = (message) => this.processCurrentData(message);
           console.log(
             `>>>> minichord sysex control port [type:'${input.type}'] id: '${input.id}' manufacturer: '${input.manufacturer}' name: '${input.name}' version: '${input.version}'`
@@ -69,13 +80,14 @@ class MiniChordController {
           );
         }
       }
-      if (this.device == false) {
+      if (!deviceFound) {
         console.log(">> ERROR: no minichord device found");
+        this.device = false;
         if (this.onConnectionChange) {
           this.onConnectionChange(false, "Make sure the minichord is connected to the computer and turned on");
         }
       } else {
-        console.log(">> minichord succesfully connected");
+        console.log(">> minichord successfully connected");
       }
     }
   
@@ -83,14 +95,15 @@ class MiniChordController {
     handleStateChange(event) {
       console.log(">> MIDI state change received");
       console.log(event);
-      if (event.port.state == "disconnected" && this.device != false && (event.port.name == "minichord Port 1" || event.port.name == "minichord")) {
+      const nameLower = event.port.name.toLowerCase();
+      if (event.port.state === "disconnected" && this.device !== false && (nameLower === "minichord port 1" || nameLower === "minichord")) {
         console.log(">> minichord was disconnected");
         this.device = false;
         if (this.onConnectionChange) {
-          this.onConnectionChange(false, "> minichord disconnected, please reconnect");
+          this.onConnectionChange(false, "minichord disconnected, please reconnect");
         }
       }
-      if (event.port.state == "connected" && this.device == false && (event.port.name == "minichord Port 1" || event.port.name == "minichord")) {
+      if (event.port.state === "connected" && this.device === false && (nameLower === "minichord port 1" || nameLower === "minichord")) {
         console.log(">> a new device was connected");
         this.handleMIDIAccess(event.target);
       }
@@ -98,53 +111,61 @@ class MiniChordController {
   
     // Process incoming MIDI data
     processCurrentData(midiMessage) {
+      if (this.isProcessingData) {
+        console.log(">> Skipped processCurrentData: already processing");
+        return;
+      }
+      this.isProcessingData = true;
       const data = midiMessage.data.slice(1);
-      if (data.length != this.parameter_size * 2 + 1) {
+      if (data.length !== this.parameter_size * 2 + 1) {
         console.log(">> Non-sysex message received, ignoring");
-      } else {
-        const processedData = {
-          parameters: [],
-          rhythmData: [],
-          bankNumber: data[2 * 1],
-          firmwareVersion: 0
-        };
-        
-        for (var i = 2; i < this.parameter_size; i++) {
-          const sysex_value = data[2 * i] + 128 * data[2 * i + 1];
-          if (i == this.firmware_adress) {
-            processedData.firmwareVersion = sysex_value;
-            if (processedData.firmwareVersion < this.min_firmware_accepted) {
-              alert("Please update the minichord firmware");
-            }
-          } else if (i < this.base_adress_rythm + 16 && i > this.base_adress_rythm - 1) {
-            const j = i - this.base_adress_rythm;
-            const rhythmBits = [];
-            for (var k = 0; k < 7; k++) {
-              rhythmBits[k] = !!(sysex_value & (1 << k));
-            }
-            processedData.rhythmData[j] = rhythmBits;
-          } else {
-            processedData.parameters[i] = sysex_value;
+        this.isProcessingData = false;
+        return;
+      }
+      const processedData = {
+        parameters: [],
+        rhythmData: [],
+        bankNumber: data[2 * 1],
+        firmwareVersion: 0
+      };
+      
+      for (var i = 2; i < this.parameter_size; i++) {
+        const sysex_value = data[2 * i] + 128 * data[2 * i + 1];
+        if (i === this.firmware_adress) {
+          processedData.firmwareVersion = sysex_value;
+          if (processedData.firmwareVersion < this.min_firmware_accepted) {
+            alert("Please update the minichord firmware");
           }
+        } else if (i < this.base_adress_rythm + 16 && i > this.base_adress_rythm - 1) {
+          const j = i - this.base_adress_rythm;
+          const rhythmBits = [];
+          for (var k = 0; k < 7; k++) {
+            rhythmBits[k] = !!(sysex_value & (1 << k));
+          }
+          processedData.rhythmData[j] = rhythmBits;
+        } else {
+          processedData.parameters[i] = sysex_value;
         }
-        
-        this.active_bank_number = processedData.bankNumber;
-        
-        // Override potentiometer and volume values
+      }
+      
+      this.active_bank_number = processedData.bankNumber;
+      
+      // Only send overrides if bank number changes
+      if (processedData.bankNumber !== this.active_bank_number) {
         for (const i of this.potentiometer_memory_adress) {
           this.sendParameter(i, 512);
           processedData.parameters[i] = 512;
         }
-        
         for (const i of this.volume_memory_adress) {
           this.sendParameter(i, 0.5 * 100);
           processedData.parameters[i] = 0.5 * 100;
         }
-        
-        if (this.onDataReceived) {
-          this.onDataReceived(processedData);
-        }
       }
+      
+      if (this.onDataReceived) {
+        this.onDataReceived(processedData);
+      }
+      this.isProcessingData = false;
     }
   
     // Send parameter to device
@@ -177,7 +198,7 @@ class MiniChordController {
   
     // Reset current bank
     resetCurrentBank() {
-      if (!this.device || this.active_bank_number == -1) return false;
+      if (!this.device || this.active_bank_number === -1) return false;
       const sysex_message = [0xF0, 0, 0, 3, this.active_bank_number, 0xF7];
       this.device.send(sysex_message);
       return true;
@@ -199,7 +220,4 @@ class MiniChordController {
         floatMultiplier: this.float_multiplier
       };
     }
-
-    
-  }
-  
+}

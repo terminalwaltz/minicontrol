@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div class="status-header">
+  <h1>minicontrol</h1>
+  <div id="connection-status" class="connection-status disconnected"></div>
+</div>
   <div class="container">
     <svg viewBox="0 0 700 400">
       <path
@@ -57,14 +61,16 @@
       <div id="global-settings-form"></div>
     </div>
     <!-- Settings Modal -->
-    <div class="settings-modal" id="settings-modal">
-      <div class="settings-content" id="settings-content">
-        <h2 id="settings-title">Settings</h2>
+    <div id="settings-modal" class="settings-modal">
+    <div class="settings-content">
+        <div class="settings-buttons">
+            <button id="save-btn" class="save-btn">Save</button>
+            <button id="cancel-btn" class="cancel-btn">Cancel</button>
+        </div>
+        <h2 id="settings-title"></h2>
         <div id="settings-form"></div>
-        <button class="save-btn" id="save-btn">Save</button>
-        <button class="cancel-btn" id="cancel-btn">Cancel</button>
-      </div>
     </div>
+</div>
   </div>
     <script src="minichordcontroller.js"></script>
     <script src="index.js"></script>
