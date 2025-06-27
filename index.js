@@ -6,7 +6,8 @@ var controller = new MiniChordController();
 var tempValues = {};
 var bankSettings = {};
 var currentPreset = 0;
-const bankNames = ["a.txt", "b.txt", "c.txt", "d.txt", "e.txt", "f.txt", "g.txt", "h.txt", "i.txt", "j.txt", "k.txt", "l.txt"];
+var presetNames = JSON.parse(localStorage.getItem('presetNames')) || {};
+const bankNames = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"];
 
 async function loadParameters() {
     if (!parameters) {
@@ -23,17 +24,29 @@ async function loadParameters() {
 }
 
 function updateLEDBankColor() {
-    const bankColor = currentValues[20] !== undefined ? currentValues[20] : 0; // Default to 0 (red)
-    console.log(`Updating LED color: bankColor=${bankColor}, currentPreset=${currentPreset}`); // Debug
+    const bankColor = currentValues[20] !== undefined ? currentValues[20] : 0;
+    console.log(`Updating LED color: bankColor=${bankColor}, currentPreset=${currentPreset}`);
     const led = document.getElementById("power_led");
     led.classList.remove("color-0", "color-1", "color-2", "color-3", "color-4");
-    led.classList.add(`color-${Math.floor(bankColor) % 5}`); // Ensure integer and modulo 5
+    led.classList.add(`color-${Math.floor(bankColor) % 5}`);
 }
 
 async function generateGlobalSettingsForm() {
     const params = await loadParameters();
     const form = document.getElementById("global-settings-form");
-    form.innerHTML = `<div class="bank-display">Bank: ${bankNames[currentPreset]}</div>`;
+    const presetName = presetNames[currentPreset] || bankNames[currentPreset];
+    form.innerHTML = `
+        <div class="bank-display">Bank: ${presetName}</div>
+        <input type="text" class="preset-name-input" id="preset-name-input" value="${presetName}" maxlength="16" placeholder="Preset Name">
+    `;
+
+    const presetInput = document.getElementById("preset-name-input");
+    presetInput.addEventListener("input", (e) => {
+        const newName = e.target.value.slice(0, 16);
+        presetNames[currentPreset] = newName || bankNames[currentPreset];
+        localStorage.setItem('presetNames', JSON.stringify(presetNames));
+        form.querySelector(".bank-display").textContent = `Bank: ${presetNames[currentPreset]}`;
+    });
 
     const groupParams = (params["global_parameter"] || []).filter(param => param.group !== "hidden");
     if (groupParams.length === 0) {
@@ -41,11 +54,13 @@ async function generateGlobalSettingsForm() {
         return;
     }
 
-    groupParams.forEach((param) => {
+    // Non-reverb, non-pan parameters
+    const otherParams = groupParams.filter(param => param.sysex_adress < 24 || (param.sysex_adress > 28 && param.sysex_adress !== 29));
+    otherParams.forEach((param) => {
         const container = document.createElement("div");
         const label = document.createElement("label");
         label.textContent = param.name;
-        label.title = param.tooltip;
+        label.title = param.tooltip || "";
         let input;
 
         const currentValue = currentValues[param.sysex_adress] !== undefined 
@@ -105,20 +120,239 @@ async function generateGlobalSettingsForm() {
         container.appendChild(input);
         form.appendChild(container);
     });
-    updateLEDBankColor(); // Ensure LED updates after form generation
+
+    // Pan parameter
+    const panParam = groupParams.find(param => param.sysex_adress === 29);
+    if (panParam) {
+        const container = document.createElement("div");
+        const label = document.createElement("label");
+        label.textContent = panParam.name || "Pan";
+        label.title = panParam.tooltip || "";
+        let input;
+
+        const currentValue = currentValues[29] !== undefined 
+            ? currentValues[29] 
+            : (panParam.data_type === "float" ? panParam.default_value * controller.float_multiplier : panParam.default_value || 64);
+
+        if (panParam.ui_type === "slider") {
+            input = document.createElement("input");
+            input.type = "range";
+            input.min = panParam.min_value || 0;
+            input.max = panParam.max_value || 127;
+            input.value = currentValue / (panParam.data_type === "float" ? controller.float_multiplier : 1);
+            input.step = panParam.data_type === "float" ? 0.01 : 1;
+            input.dataset.address = 29;
+            input.dataset.name = panParam.name || "Pan";
+            input.addEventListener("input", (e) => {
+                const value = panParam.data_type === "float" ? parseFloat(e.target.value) * controller.float_multiplier : parseInt(e.target.value);
+                currentValues[29] = value;
+                bankSettings[currentPreset] = { ...currentValues };
+                controller.sendParameter(29, value);
+            });
+        } else if (panParam.ui_type === "select") {
+            input = document.createElement("select");
+            for (let i = panParam.min_value || 0; i <= (panParam.max_value || 127); i++) {
+                const option = document.createElement("option");
+                option.value = i;
+                option.textContent = i;
+                input.appendChild(option);
+            }
+            input.value = currentValue;
+            input.dataset.address = 29;
+            input.dataset.name = panParam.name || "Pan";
+            input.addEventListener("change", (e) => {
+                const value = parseInt(e.target.value);
+                currentValues[29] = value;
+                bankSettings[currentPreset] = { ...currentValues };
+                controller.sendParameter(29, value);
+            });
+        } else if (panParam.ui_type === "button") {
+            input = document.createElement("input");
+            input.type = "checkbox";
+            input.checked = currentValue === 1;
+            input.dataset.address = 29;
+            input.dataset.name = panParam.name || "Pan";
+            input.addEventListener("change", (e) => {
+                const value = e.target.checked ? 1 : 0;
+                currentValues[29] = value;
+                bankSettings[currentPreset] = { ...currentValues };
+                controller.sendParameter(29, value);
+            });
+        }
+
+        container.appendChild(label);
+        container.appendChild(input);
+        form.appendChild(container);
+    } else {
+        console.warn("Pan parameter (sysex_adress: 29) not found in parameters.json");
+    }
+
+    // Reverb section
+    const reverbParams = groupParams.filter(param => param.sysex_adress >= 24 && param.sysex_adress <= 28).sort((a, b) => a.sysex_adress - b.sysex_adress);
+    if (reverbParams.length > 0) {
+        const reverbHeader = document.createElement("h3");
+        reverbHeader.textContent = "Reverb";
+        form.appendChild(reverbHeader);
+
+        reverbParams.forEach((param) => {
+            const container = document.createElement("div");
+            const label = document.createElement("label");
+            label.textContent = param.name;
+            label.title = param.tooltip || "";
+            let input;
+
+            const currentValue = currentValues[param.sysex_adress] !== undefined 
+                ? currentValues[param.sysex_adress] 
+                : (param.data_type === "float" ? param.default_value * controller.float_multiplier : param.default_value);
+
+            if (param.ui_type === "button") {
+                input = document.createElement("input");
+                input.type = "checkbox";
+                input.checked = currentValue === 1;
+                input.dataset.address = param.sysex_adress;
+                input.dataset.name = param.name;
+                input.addEventListener("change", (e) => {
+                    const value = e.target.checked ? 1 : 0;
+                    currentValues[param.sysex_adress] = value;
+                    bankSettings[currentPreset] = { ...currentValues };
+                    controller.sendParameter(parseInt(param.sysex_adress), value);
+                });
+            } else if (param.ui_type === "slider") {
+                input = document.createElement("input");
+                input.type = "range";
+                input.min = param.min_value;
+                input.max = param.max_value;
+                input.value = currentValue / (param.data_type === "float" ? controller.float_multiplier : 1);
+                input.step = param.data_type === "float" ? 0.01 : 1;
+                input.dataset.address = param.sysex_adress;
+                input.dataset.name = param.name;
+                input.addEventListener("input", (e) => {
+                    const value = param.data_type === "float" ? parseFloat(e.target.value) * controller.float_multiplier : parseInt(e.target.value);
+                    currentValues[param.sysex_adress] = value;
+                    bankSettings[currentPreset] = { ...currentValues };
+                    controller.sendParameter(parseInt(param.sysex_adress), value);
+                });
+            } else if (param.ui_type === "select") {
+                input = document.createElement("select");
+                for (let i = param.min_value; i <= param.max_value; i++) {
+                    const option = document.createElement("option");
+                    option.value = i;
+                    option.textContent = param.name.toLowerCase().includes("octave") ? `Octave ${i}` : i;
+                    input.appendChild(option);
+                }
+                input.value = currentValue;
+                input.dataset.address = param.sysex_adress;
+                input.dataset.name = param.name;
+                input.addEventListener("change", (e) => {
+                    const value = parseInt(e.target.value);
+                    currentValues[param.sysex_adress] = value;
+                    bankSettings[currentPreset] = { ...currentValues };
+                    controller.sendParameter(parseInt(param.sysex_adress), value);
+                });
+            }
+
+            container.appendChild(label);
+            container.appendChild(input);
+            form.appendChild(container);
+        });
+    } else {
+        console.warn("No reverb parameters (sysex_adress: 24–28) found in parameters.json");
+    }
+
+    updateLEDBankColor();
+}
+
+async function generateSettingsForm(paramGroup) {
+    if (paramGroup === "global_parameter") return;
+    const params = await loadParameters();
+    const form = document.getElementById("settings-form");
+    form.innerHTML = "";
+    document.getElementById("settings-title").textContent = paramGroup.replace(/_/g, " ").toUpperCase();
+
+    const groupParams = (params[paramGroup] || []).filter(param => param.group !== "hidden");
+    if (groupParams.length === 0) {
+        form.innerHTML = "<p>No parameters available for this group.</p>";
+        return;
+    }
+
+    tempValues = { ...currentValues };
+    groupParams.forEach((param) => {
+        const container = document.createElement("div");
+        const label = document.createElement("label");
+        label.textContent = param.name;
+        label.title = param.tooltip || "";
+        let input;
+
+        const currentValue = currentValues[param.sysex_adress] !== undefined 
+            ? currentValues[param.sysex_adress] 
+            : (param.data_type === "float" ? param.default_value * controller.float_multiplier : param.default_value);
+
+        if (param.ui_type === "button") {
+            input = document.createElement("input");
+            input.type = "checkbox";
+            input.checked = currentValue === 1;
+            input.dataset.address = param.sysex_adress;
+            input.dataset.name = param.name;
+            input.addEventListener("change", (e) => {
+                const value = e.target.checked ? 1 : 0;
+                tempValues[param.sysex_adress] = value;
+                controller.sendParameter(parseInt(param.sysex_adress), value);
+            });
+        } else if (param.ui_type === "slider") {
+            input = document.createElement("input");
+            input.type = "range";
+            input.min = param.min_value;
+            input.max = param.max_value;
+            input.value = currentValue / (param.data_type === "float" ? controller.float_multiplier : 1);
+            input.step = param.data_type === "float" ? 0.01 : 1;
+            input.dataset.address = param.sysex_adress;
+            input.dataset.name = param.name;
+            input.addEventListener("input", (e) => {
+                const value = param.data_type === "float" ? parseFloat(e.target.value) * controller.float_multiplier : parseInt(e.target.value);
+                tempValues[param.sysex_adress] = value;
+                controller.sendParameter(parseInt(param.sysex_adress), value);
+            });
+        } else if (param.ui_type === "select") {
+            input = document.createElement("select");
+            for (let i = param.min_value; i <= param.max_value; i++) {
+                const option = document.createElement("option");
+                option.value = i;
+                option.textContent = param.name.toLowerCase().includes("octave") ? `Octave ${i}` : i;
+                input.appendChild(option);
+            }
+            input.value = currentValue;
+            input.dataset.address = param.sysex_adress;
+            input.dataset.name = param.name;
+            input.addEventListener("change", (e) => {
+                const value = parseInt(e.target.value);
+                tempValues[param.sysex_adress] = value;
+                controller.sendParameter(parseInt(param.sysex_adress), value);
+            });
+        }
+
+        container.appendChild(label);
+        container.appendChild(input);
+        form.appendChild(container);
+    });
+}
+
+function saveSettings() {
+    controller.saveCurrentSettings(currentPreset);
+    bankSettings[currentPreset] = { ...currentValues };
+    localStorage.setItem('presetNames', JSON.stringify(presetNames));
 }
 
 function loadBankSettings(bankNumber) {
     currentValues = bankSettings[bankNumber] ? { ...bankSettings[bankNumber] } : {};
     controller.active_bank_number = bankNumber;
     currentPreset = bankNumber;
-    console.log(`Loading bank ${bankNumber}:`, currentValues); // Debug
+    console.log(`Loading bank ${bankNumber}:`, currentValues);
     generateGlobalSettingsForm();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     controller.initialize();
-    loadBankSettings(0); // Initialize with bank 0
+    loadBankSettings(0);
 
     controller.onDataReceived = (processedData) => {
         const bankNumber = processedData.bankNumber;
@@ -200,9 +434,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Potentiometers
     const potMappings = {
-        "chord-volume-pot": { address: 3, paramGroup: "chord_parameter" },
-        "harp-volume-pot": { address: 2, paramGroup: "harp_parameter" },
-        "mod-pot": { address: 14, paramGroup: "global_parameter" }
+        "chord-volume-pot": { address: 3, paramGroup: "potentiometer" },
+        "harp-volume-pot": { address: 2, paramGroup: "potentiometer" },
+        "mod-pot": { address: 14, paramGroup: "potentiometer" }
     };
     document.querySelectorAll(".pot").forEach(pot => {
         let isDragging = false;
@@ -226,7 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         }
-        pot.addEventListener("mousedown", handlePotInteraction); // Fixed from handleHarpInteraction
+        pot.addEventListener("mousedown", handlePotInteraction);
         pot.addEventListener("mousemove", handlePotInteraction);
         pot.addEventListener("mouseup", () => isDragging = false);
         pot.addEventListener("touchstart", handlePotInteraction);
@@ -249,85 +483,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("sharp-button").addEventListener("click", () => controller.sendParameter(16, 127));
     document.getElementById("rhythm-button").addEventListener("click", () => controller.sendParameter(17, 127));
 });
-
-async function generateSettingsForm(paramGroup) {
-    if (paramGroup === "global_parameter") return;
-    const params = await loadParameters();
-    const form = document.getElementById("settings-form");
-    form.innerHTML = "";
-    document.getElementById("settings-title").textContent = paramGroup.replace(/_/g, " ").toUpperCase();
-
-    const groupParams = (params[paramGroup] || []).filter(param => param.group !== "hidden");
-    if (groupParams.length === 0) {
-        form.innerHTML = "<p>No parameters available for this group.</p>";
-        return;
-    }
-
-    tempValues = { ...currentValues };
-    groupParams.forEach((param) => {
-        const container = document.createElement("div");
-        const label = document.createElement("label");
-        label.textContent = param.name;
-        label.title = param.tooltip;
-        let input;
-
-        const currentValue = currentValues[param.sysex_adress] !== undefined 
-            ? currentValues[param.sysex_adress] 
-            : (param.data_type === "float" ? param.default_value * controller.float_multiplier : param.default_value);
-
-        if (param.ui_type === "button") {
-            input = document.createElement("input");
-            input.type = "checkbox";
-            input.checked = currentValue === 1;
-            input.dataset.address = param.sysex_adress;
-            input.dataset.name = param.name;
-            input.addEventListener("change", (e) => {
-                const value = e.target.checked ? 1 : 0;
-                tempValues[param.sysex_adress] = value;
-                controller.sendParameter(parseInt(param.sysex_adress), value);
-            });
-        } else if (param.ui_type === "slider") {
-            input = document.createElement("input");
-            input.type = "range";
-            input.min = param.min_value;
-            input.max = param.max_value;
-            input.value = currentValue / (param.data_type === "float" ? controller.float_multiplier : 1);
-            input.step = param.data_type === "float" ? 0.01 : 1;
-            input.dataset.address = param.sysex_adress;
-            input.dataset.name = param.name;
-            input.addEventListener("input", (e) => {
-                const value = param.data_type === "float" ? parseFloat(e.target.value) * controller.float_multiplier : parseInt(e.target.value);
-                tempValues[param.sysex_adress] = value;
-                controller.sendParameter(parseInt(param.sysex_adress), value);
-            });
-        } else if (param.ui_type === "select") {
-            input = document.createElement("select");
-            for (let i = param.min_value; i <= param.max_value; i++) {
-                const option = document.createElement("option");
-                option.value = i;
-                option.textContent = param.name.toLowerCase().includes("octave") ? `Octave ${i}` : i;
-                input.appendChild(option);
-            }
-            input.value = currentValue;
-            input.dataset.address = param.sysex_adress;
-            input.dataset.name = param.name;
-            input.addEventListener("change", (e) => {
-                const value = parseInt(e.target.value);
-                tempValues[param.sysex_adress] = value;
-                controller.sendParameter(parseInt(param.sysex_adress), value);
-            });
-        }
-
-        container.appendChild(label);
-        container.appendChild(input);
-        form.appendChild(container);
-    });
-}
-
-function saveSettings() {
-    controller.saveCurrentSettings(currentPreset);
-    bankSettings[currentPreset] = { ...currentValues };
-}
 
 function triggerChordNote(chordIndex, chordType) {
     var notes = [

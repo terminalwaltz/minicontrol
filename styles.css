@@ -36,6 +36,14 @@ body {
     text-align: center;
 }
 
+.global-settings h3 {
+    margin: 10px 0 5px 0;
+    font-size: 1em;
+    color: #333;
+    font-weight: bold;
+    text-align: left;
+}
+
 .global-settings .bank-display {
     font-size: 0.9em;
     color: #333;
