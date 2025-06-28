@@ -15,6 +15,177 @@ let loadBankSettingsCount = 0;
 let lastMidiProcessed = 0;
 let openParamGroup = null;
 
+const sysexNameMap = {
+//   10: "Chord Alternate Control (Global)",
+//   11: "Chord Alternate Range (Global)",
+//   12: "Harp Alternate Control (Global)",
+//   13: "Harp Alternate Percent Range (Global)",
+//   14: "Mod Main Control (Global)",
+//   15: "Mod Main Percent Range (Global)",
+//   16: "Mod Alternate Control (Global)",
+//   17: "Mod Alternate Percent Range (Global)",
+  20: "Bank Color (Global)",
+  21: "Retrigger Chords (Global)",
+  22: "Change Held Strings (Global)",
+  23: "Slash Level (Global)",
+  24: "Reverb Size (Global)",
+  25: "Reverb High Damping (Global)",
+  26: "Reverb Low Damping (Global)",
+  27: "Reverb Low Pass (Global)",
+  28: "Reverb Diffusion (Global)",
+  29: "Pan (Global)",
+  30: "Transpose (Global)",
+  31: "Sharp Function (Global)",
+  32: "LED Attenuation (Global)",
+  33: "Barry Harris Mode (Global)",
+  40: "Harp Harp Shuffling",
+  41: "Harp Oscillator Amplitude",
+  42: "Harp Oscillator Waveform",
+  43: "Harp Envelope Attack",
+  44: "Harp Envelope Hold",
+  45: "Harp Envelope Decay",
+  46: "Harp Envelope Sustain",
+  47: "Harp Envelope Release",
+  48: "Harp Envelope Retrigger Release",
+  49: "Harp Low Pass Filter Base Frequency",
+  50: "Harp Low Pass Filter Keytrack Value",
+  51: "Harp Low Pass Filter Resonance",
+  52: "Harp Low Pass Filter Attack",
+  53: "Harp Low Pass Filter Hold",
+  54: "Harp Low Pass Filter Decay",
+  55: "Harp Low Pass Filter Sustain",
+  56: "Harp Low Pass Filter Release",
+  57: "Harp Low Pass Filter Retrigger Release",
+  58: "Harp Low Pass Filter Filter Sensitivity",
+  59: "Harp Tremolo Waveform",
+  60: "Harp Tremolo Frequency",
+  61: "Harp Tremolo Amplitude",
+  62: "Harp Vibrato Waveform",
+  63: "Harp Vibrato Frequency",
+  64: "Harp Vibrato Amplitude",
+  65: "Harp Vibrato Attack",
+  66: "Harp Vibrato Hold",
+  67: "Harp Vibrato Decay",
+  68: "Harp Vibrato Sustain",
+  69: "Harp Vibrato Release",
+  70: "Harp Vibrato Retrigger Release",
+  71: "Harp Vibrato Pitch Bend",
+  72: "Harp Vibrato Attack Bend",
+  73: "Harp Vibrato Hold Bend",
+  74: "Harp Vibrato Decay Bend",
+  75: "Harp Vibrato Retrigger Release Bend",
+  76: "Harp Vibrato Intensity",
+  77: "Harp Effects Delay Length",
+  78: "Harp Effects Delay Filter Frequency",
+  79: "Harp Effects Delay Filter Resonance",
+  80: "Harp Effects Delay Lowpass",
+  81: "Harp Effects Delay Bandpass",
+  82: "Harp Effects Delay Highpass",
+  83: "Harp Effects Dry Mix",
+  84: "Harp Effects Delay Mix",
+  85: "Harp Effects Reverb Level",
+  86: "Harp Effects Crunch Level",
+  87: "Harp Effects Crunch Type",
+  88: "Harp Output Filter Frequency",
+  89: "Harp Output Filter Resonance",
+  90: "Harp Output Filter Lowpass",
+  91: "Harp Output Filter Bandpass",
+  92: "Harp Output Filter Highpass",
+  93: "Harp Output Filter LFO Waveform",
+  94: "Harp Output Filter LFO Frequency",
+  95: "Harp Output Filter LFO Amplitude",
+  96: "Harp Output Filter Filter LFO Sensitivity",
+  97: "Harp Output Filter Output Amplifier",
+  98: "Harp Chromatic Mode",
+  99: "Harp Octave Change",
+  100: "Harp Transient Waveform",
+  101: "Harp Transient Amplitude",
+  102: "Harp Transient Attack",
+  103: "Harp Transient Hold",
+  104: "Harp Transient Decay",
+  105: "Harp Transient Note Level",
+  120: "Chord Chord Shuffling",
+  121: "Chord Oscillator Amplitude 1",
+  122: "Chord Oscillator Waveform 1",
+  123: "Chord Oscillator Frequency Multiplier 1",
+  124: "Chord Oscillator Amplitude 2",
+  125: "Chord Oscillator Waveform 2",
+  126: "Chord Oscillator Frequency Multiplier 2",
+  127: "Chord Oscillator Amplitude 3",
+  128: "Chord Oscillator Waveform 3",
+  129: "Chord Oscillator Frequency Multiplier 3",
+  130: "Chord Oscillator Noise",
+  131: "Chord Oscillator First Note",
+  132: "Chord Oscillator Second Note",
+  133: "Chord Oscillator Third Note",
+  134: "Chord Oscillator Fourth Note",
+  135: "Chord Oscillator Inter-Note Delay",
+  136: "Chord Oscillator Random Note Delay",
+  137: "Chord Envelope Attack",
+  138: "Chord Envelope Hold",
+  139: "Chord Envelope Decay",
+  140: "Chord Envelope Sustain",
+  141: "Chord Envelope Release",
+  142: "Chord Envelope Retrigger Release",
+  143: "Chord Low Pass Filter Base Frequency",
+  144: "Chord Low Pass Filter Keytrack Value",
+  145: "Chord Low Pass Filter Resonance",
+  146: "Chord Low Pass Filter Attack",
+  147: "Chord Low Pass Filter Hold",
+  148: "Chord Low Pass Filter Decay",
+  149: "Chord Low Pass Filter Sustain",
+  150: "Chord Low Pass Filter Release",
+  151: "Chord Low Pass Filter Retrigger Release",
+  152: "Chord Low Pass Filter LFO Waveform",
+  153: "Chord Low Pass Filter LFO Frequency",
+  154: "Chord Low Pass Filter LFO Amplitude",
+  155: "Chord Low Pass Filter Filter Sensitivity",
+  156: "Chord Tremolo Waveform",
+  157: "Chord Tremolo Frequency",
+  158: "Chord Tremolo Keytrack Value",
+  159: "Chord Tremolo Amplitude",
+  160: "Chord Vibrato Waveform",
+  161: "Chord Vibrato Frequency",
+  162: "Chord Vibrato Keytrack Value",
+  163: "Chord Vibrato Amplitude",
+  164: "Chord Vibrato Attack",
+  165: "Chord Vibrato Hold",
+  166: "Chord Vibrato Decay",
+  167: "Chord Vibrato Sustain",
+  168: "Chord Vibrato Release",
+  169: "Chord Vibrato Retrigger Release",
+  170: "Chord Vibrato Pitch Bend",
+  171: "Chord Vibrato Attack Bend",
+  172: "Chord Vibrato Hold Bend",
+  173: "Chord Vibrato Decay Bend",
+  174: "Chord Vibrato Retrigger Release Bend",
+  175: "Chord Vibrato Intensity",
+  176: "Chord Effects Delay Length",
+  177: "Chord Effects Delay Filter Frequency",
+  178: "Chord Effects Delay Filter Resonance",
+  179: "Chord Effects Delay Lowpass",
+  180: "Chord Effects Delay Bandpass",
+  181: "Chord Effects Delay Highpass",
+  182: "Chord Effects Dry Mix",
+  183: "Chord Effects Delay Mix",
+  184: "Chord Effects Reverb Level",
+  185: "Chord Effects Crunch Level",
+  186: "Chord Effects Crunch Type",
+  187: "Chord Rythm Default BPM",
+  188: "Chord Rythm Cycle Length",
+  189: "Chord Rythm Measure Update",
+  190: "Chord Rythm Shuffle Value",
+  191: "Chord Rythm Note Pushed Duration",
+  192: "Chord Output Filter Frequency",
+  193: "Chord Output Filter Resonance",
+  194: "Chord Output Filter Lowpass",
+  195: "Chord Output Filter Bandpass",
+  196: "Chord Output Filter Highpass",
+  197: "Chord Output Filter Output Amplifier",
+  198: "Chord Octave Change"
+};
+
+
 const waveformMap = {
     0: "Sine",
     1: "Sawtooth",
@@ -72,6 +243,16 @@ function updatePresetButtons() {
     console.log(`Updated preset buttons: currentPreset=${currentPreset}`);
 }
 
+function updateAmbientBacklight(color) {
+    const backlight = document.getElementById("ambient-backlight");
+    if (!backlight) {
+        console.warn("Ambient backlight element not found");
+        return;
+    }
+
+    backlight.style.background = `radial-gradient(circle at center, ${color} 0%, transparent 70%)`;
+}
+
 function updateLEDBankColor() {
     const bankColor = currentValues[20] !== undefined ? currentValues[20] : defaultValues[20] !== undefined ? defaultValues[20] : 120;
     const floatMultiplier = 1;
@@ -121,6 +302,7 @@ function updateLEDBankColor() {
     led.style.display = 'none';
     led.offsetHeight;
     led.style.display = '';
+    updateAmbientBacklight(colorMap[colorIndex]);
     
     console.log(`Applied class: color-${colorIndex}, fill: ${colorMap[colorIndex]}`);
 }
@@ -331,23 +513,43 @@ async function generateSettingsForm(paramGroup) {
                     input = document.createElement("select");
                     input.id = `param-${param.sysex_adress}`;
                     input.name = param.name;
-                    const isWaveform = param.name.toLowerCase().includes("waveform");
-                    for (let i = param.min_value; i <= param.max_value; i++) {
-                        if (isWaveform && i > 11) continue;
-                        const option = document.createElement("option");
-                        option.value = isWaveform ? waveformMap[i] : i;
-                        option.textContent = isWaveform ? waveformMap[i] || i : param.name.toLowerCase().includes("octave") ? `Octave ${i}` : i;
-                        input.appendChild(option);
+                    const isAlternateControl = [10, 12, 16].includes(param.sysex_adress);
+                    if (isAlternateControl) {
+                        // Populate with sysexNameMap for alternate control parameters
+                        for (let i = param.min_value; i <= param.max_value; i++) {
+                            if (sysexNameMap[i]) {
+                                const option = document.createElement("option");
+                                option.value = i;
+                                option.textContent = sysexNameMap[i];
+                                input.appendChild(option);
+                            }
+                        }
+                        input.value = currentValue;
+                        input.addEventListener("change", (e) => {
+                            const value = parseInt(e.target.value);
+                            tempValues[param.sysex_adress] = value;
+                            console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}, display=${sysexNameMap[value] || value}`);
+                            controller.sendParameter(parseInt(param.sysex_adress), value);
+                        });
+                    } else {
+                        const isWaveform = param.name.toLowerCase().includes("waveform");
+                        for (let i = param.min_value; i <= param.max_value; i++) {
+                            if (isWaveform && i > 11) continue;
+                            const option = document.createElement("option");
+                            option.value = i;
+                            option.textContent = isWaveform ? waveformMap[i] || i : param.name.toLowerCase().includes("octave") ? `Octave ${i}` : i;
+                            input.appendChild(option);
+                        }
+                        input.value = isWaveform ? waveformMap[currentValue] || currentValue : currentValue;
+                        input.addEventListener("change", (e) => {
+                            const value = isWaveform 
+                                ? parseInt(Object.keys(waveformMap).find(key => waveformMap[key] === e.target.value) || e.target.value)
+                                : parseInt(e.target.value);
+                            tempValues[param.sysex_adress] = value;
+                            console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}${isWaveform ? `, waveform=${waveformMap[value]}` : ''}`);
+                            controller.sendParameter(parseInt(param.sysex_adress), value);
+                        });
                     }
-                    input.value = isWaveform ? waveformMap[currentValue] || currentValue : currentValue;
-                    input.addEventListener("change", (e) => {
-                        const value = isWaveform 
-                            ? parseInt(Object.keys(waveformMap).find(key => waveformMap[key] === e.target.value) || e.target.value)
-                            : parseInt(e.target.value);
-                        tempValues[param.sysex_adress] = value;
-                        console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}${isWaveform ? `, waveform=${waveformMap[value]}` : ''}`);
-                        controller.sendParameter(parseInt(param.sysex_adress), value);
-                    });
                 }
                 container.appendChild(label);
                 container.appendChild(input);

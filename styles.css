@@ -59,10 +59,12 @@ svg {
     stroke-width: 2;
     cursor: pointer;
     transition: fill 0.2s;
+    pointer-events: auto;
+
 }
 
 .harp-plate:hover {
-    fill: #95a5a6;
+    fill: #6c7070;
 }
 
 .pot {
@@ -89,11 +91,6 @@ svg {
     fill: #27ae60;
 }
 
-.preset-button.active {
-    fill: #27ae60;
-    stroke: #000;
-    stroke-width: 3;
-}
 
 .led {
     transition: fill 0.2s;
@@ -174,7 +171,7 @@ svg {
 .global-settings input[type="checkbox"], #settings-form input[type="checkbox"] {
     transform: scale(1.2);
     margin-left: 5px;
-    vertical-align: middle;
+    vertical-align: super;
     cursor: pointer;
 }
 
@@ -231,6 +228,10 @@ svg {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+}
+
+.parameter-row input[type="checkbox"] {
+  flex-shrink: 0;
 }
 
 #settings-form div {
@@ -421,3 +422,16 @@ svg {
     height: 16px;
     margin: 0;
 }
+
+#ambient-backlight {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background: red;
+  opacity: 1;
+  pointer-events: none;
+}
+
