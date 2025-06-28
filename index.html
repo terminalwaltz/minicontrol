@@ -7,81 +7,81 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div id="control">
-  <div id="header">
-    <div class="section">
-      <h5 class="active">saving:</h5>
+  <div class="status-header">
+    <h1>minicontrol</h1>
+    <div id="connection-status" class="connection-status disconnected">
+      <span id="dot">●</span>
     </div>
-    <div class="controls">
-      <div class="button_div">
-        <div class="select_container">
-          <span class="label active small">target bank:</span>
-          <select id="bank_number_selection" class="active small">
-            <option value="0">1</option>
-            <option value="1">2</option>
-            <option value="2">3</option>
-            <option value="3">4</option>
-            <option value="4">5</option>
-            <option value="5">6</option>
-            <option value="6">7</option>
-            <option value="7">8</option>
-            <option value="8">9</option>
-            <option value="9">10</option>
-            <option value="10">11</option>
-            <option value="11">12</option>
-          </select>
+  </div>
+  <div id="control">
+    <div id="header">
+      <div class="section">
+        <h5 class="active">saving:</h5>
+      </div>
+      <div class="controls">
+        <div class="button_div">
+          <div class="select_container">
+            <span class="label active small">target bank:</span>
+            <select id="bank_number_selection" class="active small">
+              <option value="0">1</option>
+              <option value="1">2</option>
+              <option value="2">3</option>
+              <option value="3">4</option>
+              <option value="4">5</option>
+              <option value="5">6</option>
+              <option value="6">7</option>
+              <option value="7">8</option>
+              <option value="8">9</option>
+              <option value="9">10</option>
+              <option value="10">11</option>
+              <option value="11">12</option>
+            </select>
+          </div>
+        </div>
+        <div class="button_div">
+          <button id="save-to-bank-btn" class="active">save to bank</button>
         </div>
       </div>
-      <div class="button_div">
-        <button class="active">save to bank</button>
+      <div class="section">
+        <h5 class="active">sharing:</h5>
+      </div>
+      <div class="controls">
+        <div class="button_div">
+          <button id="export-settings-btn" class="active">export settings</button>
+        </div>
+        <div class="button_div">
+          <button id="load-settings-btn" class="active">load settings</button>
+        </div>
+      </div>
+      <div class="section">
+        <h5 class="active">resetting:</h5>
+      </div>
+      <div class="controls">
+        <div class="button_div">
+          <button id="reset-bank-btn" class="active">reset bank</button>
+        </div>
+        <div class="button_div">
+          <button id="reset-all-banks-btn" class="active">reset all banks</button>
+        </div>
       </div>
     </div>
-    <div class="section">
-      <h5 class="active">sharing:</h5>
-    </div>
-    <div class="controls">
-      <div class="button_div">
-        <button class="active">export settings</button>
+    <details>
+      <summary><b>Connection instruction</b></summary>
+      <ul class="instruction_steps">
+        <li>provide the system authorization for MIDI control</li>
+        <li>use a recent version of Chrome</li>
+        <li>connect the minichord with a USB cable and make sure it is on.</li>
+      </ul>
+      <div tabindex="1" id="information_zone">
+        <strong id="information_text"></strong>
       </div>
-      <div class="button_div">
-        <button class="active">load settings</button>
-      </div>
-    </div>
-    <div class="section">
-      <h5 class="active">resetting:</h5>
-    </div>
-    <div class="controls">
-      <div class="button_div">
-        <button class="active">reset bank</button>
-      </div>
-      <div class="button_div">
-        <button class="active">reset all banks</button>
-      </div>
+    </details>
+    <div id="instruction_zone">
+      For instruction on how to use this tool, please refer to the 
+      <a href="../user_manual/#custom-presets">minichord documentation.</a>
     </div>
   </div>
-  <details>
-    <summary><b>Connection instruction</b></summary>
-    <ul class="instruction_steps">
-      <li>provide the system authorization for MIDI control</li>
-      <li>use a recent version of Chrome</li>
-      <li>connect the minichord with a USB cable and make sure it is on.</li>
-    </ul>
-    <div tabindex="1" id="information_zone">
-      <strong id="information_text"></strong>
-    </div>
-  </details>
-  <div id="instruction_zone">
-    For instruction on how to use this tool, please refer to the 
-    <a href="../user_manual/#custom-presets">minichord documentation.</a>
-  </div>
-</div>
-<div id="ambient-backlight"></div>
-<div class="status-header">
-  <h1>minicontrol</h1>
-  <div id="connection-status" class="connection-status disconnected">
-    <span id="dot">●</span>
-  </div>
-</div>
+  <div id="ambient-backlight"></div>
   <div class="container">
     <svg viewBox="0 0 700 400">
       <path
@@ -127,23 +127,24 @@
       <!-- Power LED -->
       <circle class="led" id="power_led" cx="450" cy="275" r="10" fill="red" />
     </svg>
-       <div class="global-settings" id="global-settings">
+    <div class="global-settings" id="global-settings">
       <h2>Global Settings</h2>
       <div id="global-settings-form"></div>
+      <div id="output_zone" style="margin-top: 10px; font-size: 0.8em; color: #666;"></div> <!-- Added output zone -->
     </div>
     <!-- Settings Modal -->
     <div id="settings-modal" class="settings-modal">
-    <div class="settings-content">
+      <div class="settings-content">
         <div class="settings-buttons">
-            <button id="save-btn" class="save-btn">Save</button>
-            <button id="cancel-btn" class="cancel-btn">Cancel</button>
+          <button id="save-btn" class="save-btn">Save</button>
+          <button id="cancel-btn" class="cancel-btn">Cancel</button>
         </div>
         <h2 id="settings-title"></h2>
         <div id="settings-form"></div>
+      </div>
     </div>
-</div>
   </div>
-    <script src="minichordcontroller.js"></script>
-    <script src="index.js"></script>
+  <script src="minichordcontroller.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>

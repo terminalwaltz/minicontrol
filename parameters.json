@@ -2648,7 +2648,7 @@
   }
 ]
   ],
-"chord_potentiometer": [
+  "chord_potentiometer": [
     {
       "name": "Chord Volume",
       "group": "Chord Potentiometer",

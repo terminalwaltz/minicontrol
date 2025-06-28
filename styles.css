@@ -6,22 +6,52 @@ body {
     height: 100vh;
     margin: 0;
     background-color: #f0f0f0;
+    position: relative;
 }
 
 .container {
     display: flex;
     width: 1000px;
     height: 400px;
-    margin-left: 220px; /* Adjusted for #control width */
-    margin-top: 50px; /* Space for status-header and potential overlap */
+    margin-left: 220px;
+    margin-top: 50px;
+    flex-direction: row;
+    align-items: flex-start;
 }
 
 svg {
-    width: 100%;
+    width: auto;
     height: 100%;
+    flex: 1;
     background-color: transparent;
     box-shadow: none;
     border-radius: 0;
+}
+
+.global-settings {
+    width: 350px;
+    height: 400px; /* Match SVG height */
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-left: 10px;
+    overflow-y: auto; /* Enable vertical scrolling */
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+.global-settings #output_zone {
+    margin-top: 10px;
+    font-size: 0.8em;
+    color: #666;
+    word-wrap: break-word; /* Ensure long base64 strings wrap */
+    padding: 5px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    max-height: 100px; /* Limit height to avoid overwhelming the panel */
+    overflow-y: auto; /* Scroll if content exceeds max-height */
 }
 
 .outline {
@@ -98,40 +128,30 @@ svg {
     transition: fill 0.2s;
 }
 
-.led.color-0 { fill: hsl(0, 70%, 50%) !important; }    /* Red */
-.led.color-1 { fill: hsl(15, 70%, 50%) !important; }   /* Red-Orange */
-.led.color-2 { fill: hsl(30, 70%, 50%) !important; }   /* Orange-Red */
-.led.color-3 { fill: hsl(45, 70%, 50%) !important; }   /* Orange */
-.led.color-4 { fill: hsl(60, 70%, 50%) !important; }   /* Yellow-Orange */
-.led.color-5 { fill: hsl(75, 70%, 50%) !important; }   /* Yellow */
-.led.color-6 { fill: hsl(90, 70%, 50%) !important; }   /* Yellow-Green */
-.led.color-7 { fill: hsl(105, 70%, 50%) !important; }  /* Lime */
-.led.color-8 { fill: hsl(120, 70%, 50%) !important; }  /* Green */
-.led.color-9 { fill: hsl(135, 70%, 50%) !important; }  /* Green-Cyan */
-.led.color-10 { fill: hsl(150, 70%, 50%) !important; } /* Cyan-Green */
-.led.color-11 { fill: hsl(165, 70%, 50%) !important; } /* Cyan */
-.led.color-12 { fill: hsl(180, 70%, 50%) !important; } /* Cyan-Blue */
-.led.color-13 { fill: hsl(195, 70%, 50%) !important; } /* Light Blue */
-.led.color-14 { fill: hsl(210, 70%, 50%) !important; } /* Blue-Cyan */
-.led.color-15 { fill: hsl(225, 70%, 50%) !important; } /* Blue */
-.led.color-16 { fill: hsl(240, 70%, 50%) !important; } /* Blue-Purple */
-.led.color-17 { fill: hsl(255, 70%, 50%) !important; } /* Indigo */
-.led.color-18 { fill: hsl(270, 70%, 50%) !important; } /* Purple */
-.led.color-19 { fill: hsl(285, 70%, 50%) !important; } /* Purple-Magenta */
-.led.color-20 { fill: hsl(300, 70%, 50%) !important; } /* Magenta */
-.led.color-21 { fill: hsl(315, 70%, 50%) !important; } /* Magenta-Red */
-.led.color-22 { fill: hsl(330, 70%, 50%) !important; } /* Pink */
-.led.color-23 { fill: hsl(345, 70%, 50%) !important; } /* Red-Pink */
-
-.global-settings {
-    width: 350px;
-    background-color: #fff;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    margin-left: 10px;
-    overflow-y: auto;
-}
+.led.color-0 { fill: hsl(0, 70%, 50%) !important; }
+.led.color-1 { fill: hsl(15, 70%, 50%) !important; }
+.led.color-2 { fill: hsl(30, 70%, 50%) !important; }
+.led.color-3 { fill: hsl(45, 70%, 50%) !important; }
+.led.color-4 { fill: hsl(60, 70%, 50%) !important; }
+.led.color-5 { fill: hsl(75, 70%, 50%) !important; }
+.led.color-6 { fill: hsl(90, 70%, 50%) !important; }
+.led.color-7 { fill: hsl(105, 70%, 50%) !important; }
+.led.color-8 { fill: hsl(120, 70%, 50%) !important; }
+.led.color-9 { fill: hsl(135, 70%, 50%) !important; }
+.led.color-10 { fill: hsl(150, 70%, 50%) !important; }
+.led.color-11 { fill: hsl(165, 70%, 50%) !important; }
+.led.color-12 { fill: hsl(180, 70%, 50%) !important; }
+.led.color-13 { fill: hsl(195, 70%, 50%) !important; }
+.led.color-14 { fill: hsl(210, 70%, 50%) !important; }
+.led.color-15 { fill: hsl(225, 70%, 50%) !important; }
+.led.color-16 { fill: hsl(240, 70%, 50%) !important; }
+.led.color-17 { fill: hsl(255, 70%, 50%) !important; }
+.led.color-18 { fill: hsl(270, 70%, 50%) !important; }
+.led.color-19 { fill: hsl(285, 70%, 50%) !important; }
+.led.color-20 { fill: hsl(300, 70%, 50%) !important; }
+.led.color-21 { fill: hsl(315, 70%, 50%) !important; }
+.led.color-22 { fill: hsl(330, 70%, 50%) !important; }
+.led.color-23 { fill: hsl(345, 70%, 50%) !important; }
 
 .global-settings h2,
 .settings-content h2 {
@@ -205,6 +225,7 @@ svg {
     box-sizing: border-box;
 }
 
+/* Centered Popup for Specific Settings Modals */
 .settings-modal {
     display: none;
     position: fixed;
@@ -308,12 +329,26 @@ svg {
         flex-direction: column;
         width: 90%;
         height: auto;
+        margin-left: 0;
+        margin-top: 60px; /* Adjust for status header */
     }
 
     .global-settings {
         width: 100%;
+        height: auto; /* Allow full width on small screens */
         margin-left: 0;
         margin-top: 10px;
+    }
+
+    #control {
+        position: absolute;
+        top: 10px; /* Move above container on small screens */
+        left: 10px;
+        width: 180px; /* Slightly narrower for mobile */
+    }
+
+    .settings-modal {
+        width: 100%;
     }
 
     .settings-content {
@@ -343,7 +378,7 @@ svg {
     align-items: center;
     gap: 10px;
     margin: 0;
-    z-index: 10;
+    z-index: 20; /* Above control and container */
 }
 
 .status-header h1 {
@@ -373,8 +408,8 @@ svg {
 }
 
 #connection-status.disconnected {
-    border-color: orange;
-    background-color: rgba(255, 166, 0, 0.486);
+    border-color: red;
+    background-color: lightcoral;
 }
 
 #connection-status.disconnected::after {
@@ -391,21 +426,22 @@ svg {
 }
 
 #connection-status.disconnected #dot {
-    color: orange;
+    color: red;
 }
 
 /* Control Container */
 #control {
     position: absolute;
-    top: 5vh;
+    top: 25vh;
     left: 10px;
     padding: 10px;
     width: 200px;
     z-index: 10;
     font-family: sans-serif;
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
+    background-color: rgba(255, 255, 255, 0.9); /* Slight opacity for readability */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     line-height: 1.25em;
 }
 
@@ -426,19 +462,20 @@ h5.active {
 
 .controls {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 5px; /* Space between button groups */
 }
 
 .button_div {
-    margin: 0 0.5em;
-    flex: 1;
+    margin: 0;
+    width: 100%; /* Full width for buttons */
 }
 
 .label.active {
     font-size: 1em;
     color: #333;
     margin-right: 0.5em;
+    display: block; /* Ensure label takes full width */
 }
 
 select.active {
@@ -452,23 +489,26 @@ select.active {
     -moz-appearance: none;
     appearance: none;
     font-family: monospace;
+    width: 100%; /* Full width */
+    box-sizing: border-box;
 }
 
 button.active {
-    padding: 0.1em;
+    padding: 0.3em; /* Slightly larger padding */
     border: 1px solid black;
-    border-radius: 0;
+    border-radius: 3px; /* Rounded corners */
     background-color: white;
     font-size: 1em;
     cursor: pointer;
-    width: 100%;
+    width: 100%; /* Full width */
     box-sizing: border-box;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, background-color 0.2s; /* Add background transition */
 }
 
 button.active:hover,
 button.active:focus {
     opacity: 0.75;
+    background-color: #f0f0f0; /* Light gray on hover */
 }
 
 details {
@@ -489,6 +529,23 @@ details {
 
 #instruction_zone a:hover {
     text-decoration: underline;
+}
+
+/* Current Bank Indicator */
+#current-bank-indicator {
+    position: absolute;
+    top: calc(25vh + 250px);
+    left: 10px;
+    padding: 5px 10px;
+    font-size: 1em;
+    color: #333;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 5px;
+    z-index: 10;
+}
+
+#current-bank-value {
+    font-weight: bold;
 }
 
 .control_full {
@@ -520,7 +577,7 @@ details {
     width: 100vw;
     height: 100vh;
     z-index: -1;
-    background: red;
+    background: radial-gradient(circle at center, transparent 70%, rgba(255, 0, 0, 0.5) 100%); /* Default red gradient */
     opacity: 0.5;
     pointer-events: none;
 }
