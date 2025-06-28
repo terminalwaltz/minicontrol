@@ -319,7 +319,7 @@ async function generateGlobalSettingsForm() {
 
     const groupParams = (params.global_parameter || []).filter(param => param.group !== "hidden");
     if (groupParams.length === 0) {
-        form.innerHTML = "<p>No parameters available.</p>";
+        formBody.innerHTML = "<p>No parameters available.</p>";
         return;
     }
 
@@ -329,12 +329,15 @@ async function generateGlobalSettingsForm() {
             return;
         }
         const container = document.createElement("div");
+        container.className = "parameter-row"; // Match styling from other modals
         const label = document.createElement("label");
         label.textContent = param.name;
         label.setAttribute("for", `global-param-${param.sysex_adress}`);
         let input;
         const floatMultiplier = param.sysex_adress === 20 ? 1 : (controller.float_multiplier || 1);
-        const currentValue = currentValues[param.sysex_adress] !== undefined 
+        const currentValue = tempValues[param.sysex_adress] !== undefined 
+            ? tempValues[param.sysex_adress] 
+            : currentValues[param.sysex_adress] !== undefined 
             ? currentValues[param.sysex_adress] 
             : (param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value);
         if (param.ui_type === "button" || param.ui_type === "switch") {
@@ -345,8 +348,7 @@ async function generateGlobalSettingsForm() {
             input.checked = currentValue === 1;
             input.addEventListener("change", (e) => {
                 const value = e.target.checked ? 1 : 0;
-                currentValues[param.sysex_adress] = value;
-                bankSettings[currentPreset] = { ...currentValues };
+                tempValues[param.sysex_adress] = value;
                 console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
                 controller.sendParameter(parseInt(param.sysex_adress), value);
             });
@@ -361,8 +363,7 @@ async function generateGlobalSettingsForm() {
             input.step = param.data_type === "float" ? 0.01 : 1;
             input.addEventListener("input", (e) => {
                 const value = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
-                currentValues[param.sysex_adress] = value;
-                bankSettings[currentPreset] = { ...currentValues };
+                tempValues[param.sysex_adress] = value;
                 console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
                 controller.sendParameter(parseInt(param.sysex_adress), value);
                 if (param.sysex_adress === 20) {
@@ -385,8 +386,7 @@ async function generateGlobalSettingsForm() {
             input.value = currentValue;
             input.addEventListener("change", (e) => {
                 const value = parseInt(e.target.value);
-                currentValues[param.sysex_adress] = value;
-                bankSettings[currentPreset] = { ...currentValues };
+                tempValues[param.sysex_adress] = value;
                 console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}${isWaveform ? `, waveform=${waveformMap[value]}` : ''}`);
                 controller.sendParameter(parseInt(param.sysex_adress), value);
                 if (param.sysex_adress === 20) {
@@ -399,6 +399,35 @@ async function generateGlobalSettingsForm() {
         container.appendChild(input);
         formBody.appendChild(container);
     });
+
+    // Add Save and Cancel buttons
+    if (!form.querySelector(".settings-buttons")) {
+        const buttonsContainer = document.createElement("div");
+        buttonsContainer.className = "settings-buttons";
+        const saveBtn = document.createElement("button");
+        saveBtn.id = "global-save-btn";
+        saveBtn.className = "save-btn";
+        saveBtn.textContent = "Save";
+        const cancelBtn = document.createElement("button");
+        cancelBtn.id = "global-cancel-btn";
+        cancelBtn.className = "cancel-btn";
+        cancelBtn.textContent = "Cancel";
+        buttonsContainer.appendChild(saveBtn);
+        buttonsContainer.appendChild(cancelBtn); // Fixed typo: cButtons -> cancelBtn
+        form.prepend(buttonsContainer);
+
+        saveBtn.addEventListener("click", () => {
+            saveSettings(currentPreset, "global_parameter");
+            document.getElementById("settings-modal").style.display = "none";
+            openParamGroup = null;
+        });
+
+        cancelBtn.addEventListener("click", () => {
+            cancelSettings(currentPreset, "global_parameter");
+            document.getElementById("settings-modal").style.display = "none";
+            openParamGroup = null;
+        });
+    }
 }
 
 async function generateSettingsForm(paramGroup) {
@@ -674,15 +703,15 @@ async function openModal(paramGroup) {
     openParamGroup = paramGroup;
     const modal = document.getElementById("settings-modal");
 
+    originalPresetValues = { ...currentValues, ...(bankSettings[currentPreset] || {}) };
+    tempValues = { ...originalPresetValues };
+    console.log(`openModal: paramGroup=${paramGroup}, originalPresetValues=`, JSON.stringify(originalPresetValues));
+
     if (paramGroup === "global_parameter") {
         modal.style.display = "block";
         await generateGlobalSettingsForm();
         return;
     }
-
-    originalPresetValues = { ...currentValues, ...(bankSettings[currentPreset] || {}) };
-    tempValues = { ...originalPresetValues };
-    console.log(`openModal: paramGroup=${paramGroup}, originalPresetValues=`, JSON.stringify(originalPresetValues));
 
     await generateSettingsForm(paramGroup);
 

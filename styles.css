@@ -12,14 +12,13 @@ body {
     display: flex;
     width: 1000px;
     height: 400px;
+    margin-left: 220px; /* Adjusted for #control width */
+    margin-top: 50px; /* Space for status-header and potential overlap */
 }
 
 svg {
     width: 100%;
     height: 100%;
-    /* background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
     background-color: transparent;
     box-shadow: none;
     border-radius: 0;
@@ -44,7 +43,8 @@ svg {
     fill: #357abd;
 }
 
-.sharp-button, .rhythm-button {
+.sharp-button,
+.rhythm-button {
     fill: #e94e77;
     stroke: #333;
     stroke-width: 2;
@@ -52,7 +52,8 @@ svg {
     transition: fill 0.2s;
 }
 
-.sharp-button:hover, .rhythm-button:hover {
+.sharp-button:hover,
+.rhythm-button:hover {
     fill: #c0392b;
 }
 
@@ -63,7 +64,6 @@ svg {
     cursor: pointer;
     transition: fill 0.2s;
     pointer-events: auto;
-
 }
 
 .harp-plate:hover {
@@ -93,7 +93,6 @@ svg {
 .preset-button:hover {
     fill: #27ae60;
 }
-
 
 .led {
     transition: fill 0.2s;
@@ -134,21 +133,24 @@ svg {
     overflow-y: auto;
 }
 
-.global-settings h2, .settings-content h2 {
+.global-settings h2,
+.settings-content h2 {
     margin: 0 0 10px 0;
     font-size: 1.2em;
     color: #333;
     text-align: center;
 }
 
-.global-settings h3, .settings-content h3 {
+.global-settings h3,
+.settings-content h3 {
     margin: 10px 0 5px;
     font-size: 1em;
     color: #333;
     font-weight: bold;
 }
 
-.global-settings label, #settings-form label {
+.global-settings label,
+#settings-form label {
     display: block;
     margin: 8px 0 4px;
     color: #333;
@@ -159,7 +161,10 @@ svg {
     text-overflow: ellipsis;
 }
 
-.global-settings input, .global-settings select, #settings-form input, #settings-form select {
+.global-settings input,
+.global-settings select,
+#settings-form input,
+#settings-form select {
     width: 100%;
     max-width: 200px;
     padding: 6px;
@@ -171,18 +176,21 @@ svg {
     box-sizing: border-box;
 }
 
-.global-settings input[type="checkbox"], #settings-form input[type="checkbox"] {
+.global-settings input[type="checkbox"],
+#settings-form input[type="checkbox"] {
     transform: scale(1.2);
     margin-left: 5px;
     vertical-align: super;
     cursor: pointer;
 }
 
-.global-settings input[type="range"], #settings-form input[type="range"] {
+.global-settings input[type="range"],
+#settings-form input[type="range"] {
     padding: 0;
 }
 
-.global-settings select, #settings-form select {
+.global-settings select,
+#settings-form select {
     padding: 5px;
 }
 
@@ -234,7 +242,7 @@ svg {
 }
 
 .parameter-row input[type="checkbox"] {
-  flex-shrink: 0;
+    flex-shrink: 0;
 }
 
 #settings-form div {
@@ -256,11 +264,12 @@ svg {
 }
 
 .settings-content button {
-    padding: 10px;
-    margin: 5px;
+    padding: 10px 20px;
+    margin: 0 5px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 0.9em;
     transition: background-color 0.2s;
 }
 
@@ -313,8 +322,6 @@ svg {
     }
 }
 
-/* ... (keep all existing styles) */
-
 /* Container for save/cancel buttons */
 .settings-buttons {
     position: sticky;
@@ -327,44 +334,16 @@ svg {
     border-bottom: 1px solid #ccc;
 }
 
-/* Buttons */
-.settings-content button {
-    padding: 10px 20px;
-    margin: 0 5px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.2s;
-}
-
-.save-btn {
-    background-color: #2ecc71;
-    color: #fff;
-}
-
-.save-btn:hover {
-    background-color: #27ae60;
-}
-
-.cancel-btn {
-    background-color: #e94e77;
-    color: #fff;
-}
-
-.cancel-btn:hover {
-    background-color: #c0392b;
-}
-
+/* Status Header */
 .status-header {
-    position: absolute; /* Position it relative to the nearest positioned ancestor or body */
-    top: 10px; /* Small offset from the top */
-    left: 10px; /* Small offset from the left */
+    position: absolute;
+    top: 10px;
+    left: 10px;
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 0; /* Remove bottom margin to avoid affecting layout */
-    z-index: 10; /* Ensure it’s above other elements like SVG */
+    margin: 0;
+    z-index: 10;
 }
 
 .status-header h1 {
@@ -372,40 +351,148 @@ svg {
     margin: 0;
 }
 
-.connection-status {
+#connection-status {
     border-style: solid;
     border-radius: 1em;
     border-width: 2px;
     padding: 5px 10px;
     font-size: 14px;
     color: black;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-.connection-status.connected {
+#connection-status.connected {
     border-color: green;
     background-color: lightgreen;
 }
 
-.connection-status.connected::after {
+#connection-status.connected::after {
     content: "minichord connected";
 }
 
-.connection-status.disconnected {
+#connection-status.disconnected {
     border-color: orange;
     background-color: rgba(255, 166, 0, 0.486);
 }
 
-.connection-status.disconnected::after {
+#connection-status.disconnected::after {
     content: "minichord disconnected";
+}
+
+#dot {
+    font-size: 1.2em;
+    transition: color 0.3s ease;
+}
+
+#connection-status.connected #dot {
+    color: green;
+}
+
+#connection-status.disconnected #dot {
+    color: orange;
+}
+
+/* Control Container */
+#control {
+    position: absolute;
+    top: 5vh;
+    left: 10px;
+    padding: 10px;
+    width: 200px;
+    z-index: 10;
+    font-family: sans-serif;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    line-height: 1.25em;
+}
+
+#header {
+    margin-bottom: 10px;
+}
+
+.section {
+    margin-bottom: 5px;
+}
+
+h5.active {
+    margin: 0;
+    font-size: 1.6em;
+    font-weight: bold;
+    color: #333;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.button_div {
+    margin: 0 0.5em;
+    flex: 1;
+}
+
+.label.active {
+    font-size: 1em;
+    color: #333;
+    margin-right: 0.5em;
+}
+
+select.active {
+    padding: 0.2em;
+    border: 1px solid black;
+    border-radius: 0;
+    background-color: white;
+    font-size: 1em;
+    text-align: right;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-family: monospace;
+}
+
+button.active {
+    padding: 0.1em;
+    border: 1px solid black;
+    border-radius: 0;
+    background-color: white;
+    font-size: 1em;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    transition: opacity 0.2s;
+}
+
+button.active:hover,
+button.active:focus {
+    opacity: 0.75;
+}
+
+details {
+    margin-top: 2em;
+    font-size: 0.55em;
+    color: #333;
+}
+
+#instruction_zone {
+    font-size: 0.55em;
+    color: #333;
+}
+
+#instruction_zone a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+#instruction_zone a:hover {
+    text-decoration: underline;
 }
 
 .control_full {
     overflow: hidden;
-}
-
-/* Ensure the main container doesn’t overlap with the header */
-.container {
-    margin-top: 50px; /* Add space below the header to prevent overlap */
 }
 
 .parameter-column div {
@@ -416,7 +503,7 @@ svg {
 }
 
 .parameter-column label {
-    font-size: 14px; /* Slightly smaller for snug fit */
+    font-size: 14px;
     margin: 0;
 }
 
@@ -427,48 +514,13 @@ svg {
 }
 
 #ambient-backlight {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-  background: red;
-  opacity: 0.5;
-  pointer-events: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background: red;
+    opacity: 0.5;
+    pointer-events: none;
 }
-
-#bank-indicator {
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    color: #333; /* Adjust to match your UI (e.g., white for dark themes) */
-    margin-top: 8px;
-    text-align: center;
-    opacity: 0.8; /* Subtle transparency */
-}
-.preset-controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-}
-.preset-button {
-    padding: 8px 16px;
-    font-size: 14px;
-    background: #f0f0f0; /* Adjust to match your UI */
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
-}
-.preset-button:hover {
-    background: #e0e0e0;
-}
-#preset-up, #preset-down {
-    padding: 8px;
-    font-size: 12px;
-    background: #ddd;
-    border: 1px solid #bbb;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
