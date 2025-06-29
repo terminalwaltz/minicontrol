@@ -29,7 +29,7 @@ svg {
 }
 
 .global-settings {
-    width: 350px;
+    width: 375px;
     height: 400px; /* Match SVG height */
     background-color: #fff;
     padding: 10px;
@@ -113,45 +113,45 @@ svg {
 }
 
 .preset-button {
-    fill: #2ecc71;
+    fill: #000000;
     stroke: #333;
     stroke-width: 2;
     cursor: pointer;
     transition: fill 0.2s;
 }
 
-.preset-button:hover {
-    fill: #27ae60;
-}
+/* .preset-button:hover {
+    fill: #000000;
+} */
 
 .led {
     transition: fill 0.2s;
 }
 
-.led.color-0 { fill: hsl(0, 70%, 50%) !important; }
-.led.color-1 { fill: hsl(15, 70%, 50%) !important; }
-.led.color-2 { fill: hsl(30, 70%, 50%) !important; }
-.led.color-3 { fill: hsl(45, 70%, 50%) !important; }
-.led.color-4 { fill: hsl(60, 70%, 50%) !important; }
-.led.color-5 { fill: hsl(75, 70%, 50%) !important; }
-.led.color-6 { fill: hsl(90, 70%, 50%) !important; }
-.led.color-7 { fill: hsl(105, 70%, 50%) !important; }
-.led.color-8 { fill: hsl(120, 70%, 50%) !important; }
-.led.color-9 { fill: hsl(135, 70%, 50%) !important; }
-.led.color-10 { fill: hsl(150, 70%, 50%) !important; }
-.led.color-11 { fill: hsl(165, 70%, 50%) !important; }
-.led.color-12 { fill: hsl(180, 70%, 50%) !important; }
-.led.color-13 { fill: hsl(195, 70%, 50%) !important; }
-.led.color-14 { fill: hsl(210, 70%, 50%) !important; }
-.led.color-15 { fill: hsl(225, 70%, 50%) !important; }
-.led.color-16 { fill: hsl(240, 70%, 50%) !important; }
-.led.color-17 { fill: hsl(255, 70%, 50%) !important; }
-.led.color-18 { fill: hsl(270, 70%, 50%) !important; }
-.led.color-19 { fill: hsl(285, 70%, 50%) !important; }
-.led.color-20 { fill: hsl(300, 70%, 50%) !important; }
-.led.color-21 { fill: hsl(315, 70%, 50%) !important; }
-.led.color-22 { fill: hsl(330, 70%, 50%) !important; }
-.led.color-23 { fill: hsl(345, 70%, 50%) !important; }
+.led.color-0 { fill: hsl(0, 70%, 50%) ; }
+.led.color-1 { fill: hsl(15, 70%, 50%) ; }
+.led.color-2 { fill: hsl(30, 70%, 50%) ; }
+.led.color-3 { fill: hsl(45, 70%, 50%) ; }
+.led.color-4 { fill: hsl(60, 70%, 50%) ; }
+.led.color-5 { fill: hsl(75, 70%, 50%) ; }
+.led.color-6 { fill: hsl(90, 70%, 50%) ; }
+.led.color-7 { fill: hsl(105, 70%, 50%) ; }
+.led.color-8 { fill: hsl(120, 70%, 50%) ; }
+.led.color-9 { fill: hsl(135, 70%, 50%) ; }
+.led.color-10 { fill: hsl(150, 70%, 50%) ; }
+.led.color-11 { fill: hsl(165, 70%, 50%) ; }
+.led.color-12 { fill: hsl(180, 70%, 50%) ; }
+.led.color-13 { fill: hsl(195, 70%, 50%) ; }
+.led.color-14 { fill: hsl(210, 70%, 50%) ; }
+.led.color-15 { fill: hsl(225, 70%, 50%) ; }
+.led.color-16 { fill: hsl(240, 70%, 50%) ; }
+.led.color-17 { fill: hsl(255, 70%, 50%) ; }
+.led.color-18 { fill: hsl(270, 70%, 50%) ; }
+.led.color-19 { fill: hsl(285, 70%, 50%) ; }
+.led.color-20 { fill: hsl(300, 70%, 50%) ; }
+.led.color-21 { fill: hsl(315, 70%, 50%) ; }
+.led.color-22 { fill: hsl(330, 70%, 50%) ; }
+.led.color-23 { fill: hsl(345, 70%, 50%) ; }
 
 .global-settings h2,
 .settings-content h2 {
@@ -169,18 +169,6 @@ svg {
     font-weight: bold;
 }
 
-.global-settings label,
-#settings-form label {
-    display: block;
-    margin: 8px 0 4px;
-    color: #333;
-    font-weight: bold;
-    font-size: 0.9em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 .global-settings input,
 .global-settings select,
 #settings-form input,
@@ -194,14 +182,7 @@ svg {
     background-color: #f9f9f9;
     font-size: 0.85em;
     box-sizing: border-box;
-}
-
-.global-settings input[type="checkbox"],
-#settings-form input[type="checkbox"] {
-    transform: scale(1.2);
-    margin-left: 5px;
-    vertical-align: super;
-    cursor: pointer;
+    order: 2;
 }
 
 .global-settings input[type="range"],
@@ -212,17 +193,6 @@ svg {
 .global-settings select,
 #settings-form select {
     padding: 5px;
-}
-
-.global-settings .preset-name-input {
-    width: 100%;
-    padding: 6px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    font-size: 0.85em;
-    box-sizing: border-box;
 }
 
 /* Centered Popup for Specific Settings Modals */
@@ -254,16 +224,6 @@ svg {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
-}
-
-.parameter-column {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.parameter-row input[type="checkbox"] {
-    flex-shrink: 0;
 }
 
 #settings-form div {
@@ -391,7 +351,7 @@ svg {
     border-radius: 1em;
     border-width: 2px;
     padding: 5px 10px;
-    font-size: 14px;
+    font-size: 20px;
     color: black;
     display: flex;
     align-items: center;
@@ -403,26 +363,15 @@ svg {
     background-color: lightgreen;
 }
 
-#connection-status.connected::after {
-    content: "minichord connected";
-}
 
 #connection-status.disconnected {
     border-color: red;
     background-color: lightcoral;
 }
 
-#connection-status.disconnected::after {
-    content: "minichord disconnected";
-}
-
-#dot {
-    font-size: 1.2em;
-    transition: color 0.3s ease;
-}
 
 #connection-status.connected #dot {
-    color: green;
+    color: green; 
 }
 
 #connection-status.disconnected #dot {
@@ -438,10 +387,10 @@ svg {
     width: 200px;
     z-index: 10;
     font-family: sans-serif;
-    background-color: rgba(255, 255, 255, 0.9); /* Slight opacity for readability */
-    border: 1px solid #ccc;
+    background-color: transparent; /* Slight opacity for readability */
+    border: transparent;
     border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
     line-height: 1.25em;
 }
 
@@ -580,4 +529,124 @@ details {
     background: radial-gradient(circle at center, transparent 70%, rgba(255, 0, 0, 0.5) 100%); /* Default red gradient */
     opacity: 0.5;
     pointer-events: none;
+}
+
+/* Target global settings and modal forms specifically */
+.global-settings .slider-container,
+#settings-modal .slider-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-direction: row; /* Ensure horizontal layout */
+    justify-content: flex-start; /* Align items from start */
+    order: 2;
+}
+
+.global-settings .slider,
+#settings-modal .slider {
+    width: 100%;
+    max-width: 200px;
+    order: 2; /* Slider first */
+}
+
+.global-settings .value-input,
+#settings-modal .value-input {
+    width: 45px; /* Smaller width */
+    padding: 2px;
+    font-size: 0.75em; /* Smaller font */
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: #f9f9f9;
+    text-align: center;
+    order: 3; /* Input box second, on the right */
+}
+
+.global-settings .parameter-row,
+#settings-modal .parameter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Align toggle to the right */
+    gap: 10px; /* Space between label and toggle */
+    padding-right: 10px; /* Padding for right alignment */
+    margin: 8px 0; /* Consistent with existing margins */
+}
+
+.global-settings label,
+#settings-modal label {
+    margin: 0;
+    flex: 1;
+    color: #333;
+    font-weight: bold;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    order: 1;
+}
+
+/* Toggle Switch Styles */
+.toggle-switch {
+    position: relative;
+    width: 50px; /* Matches compact input boxes */
+    height: 24px; /* Matches input height */
+    order: 2; /* Aligns with .parameter-row flex order */
+}
+
+.toggle-switch input[type="checkbox"] {
+    opacity: 0; /* Hide checkbox */
+    width: 0;
+    height: 0;
+    position: absolute; /* Remove from layout */
+}
+
+.toggle-switch .toggle-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc; /* Matches input background */
+    border: 1px solid #ccc; /* Matches .value-input border */
+    border-radius: 12px; /* Consistent with inputs */
+    cursor: pointer;
+    transition: background-color 0.2s; /* Smooth transition */
+}
+
+.toggle-switch .toggle-label::before {
+    content: "";
+    position: absolute;
+    height: 18px; /* Smaller knob for compact look */
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #fff; /* Matches input background */
+    border-radius: 50%;
+    transition: transform 0.2s; /* Smooth knob movement */
+}
+
+.toggle-switch .toggle-label::after {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.75em; /* Matches .value-input font size */
+    color: #fff; /* White text for contrast */
+    font-family: Arial, sans-serif; /* Matches body font */
+}
+
+.toggle-switch input[type="switch"]:checked + .toggle-label {
+    background-color: #2ecc71; /* Matches .save-btn and .preset-button */
+}
+
+.toggle-switch input[type="switch"]:checked + .toggle-label::before {
+    transform: translateX(26px); /* Move knob to right */
+}
+
+.toggle-switch input[type="switch"]:checked + .toggle-label::after {
+    content: attr(data-flat); /* Display "Flat" when checked */
+    left: 6px; /* Position text */
+}
+
+.toggle-switch input[type="switch"]:not(:checked) + .toggle-label::after {
+    content: attr(data-sharp); /* Display "Sharp" when not checked */
+    right: 6px; /* Position text */
 }

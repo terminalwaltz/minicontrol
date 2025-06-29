@@ -3,7 +3,7 @@ var currentValues = {};
 var controller = new MiniChordController();
 var tempValues = {};
 var bankSettings = {};
-var currentPreset = 0;
+let currentBankNumber = -1;
 var presetNames = JSON.parse(localStorage.getItem('presetNames')) || {};
 const bankNames = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"];
 let defaultValues = {};
@@ -219,20 +219,6 @@ async function initializeDefaultValues() {
   console.log('Default values initialized:', defaultValues);
 }
 
-function updatePresetButtons() {
-  const presetButtons = document.querySelectorAll(".preset-button");
-  if (presetButtons.length === 0) {
-    console.warn("No preset buttons found: .preset-button");
-    return;
-  }
-  presetButtons.forEach((button, index) => {
-    button.classList.remove("active");
-    if (index === currentPreset) {
-      button.classList.add("active");
-    }
-  });
-  console.log(`Updated preset buttons: currentPreset=${currentPreset}`);
-}
 
 function updateAmbientBacklight(color) {
   const backlight = document.getElementById("ambient-backlight");
@@ -249,7 +235,7 @@ function updateLEDBankColor() {
   const normalizedColor = bankColor / floatMultiplier;
   const colorIndex = Math.min(23, Math.floor(normalizedColor / 15));
   
-  console.log(`updateLEDBankColor: bankColor=${bankColor}, floatMultiplier=${floatMultiplier}, normalizedColor=${normalizedColor}, colorIndex=${colorIndex}, currentPreset=${currentPreset}`);
+  console.log(`updateLEDBankColor: bankColor=${bankColor}, floatMultiplier=${floatMultiplier}, normalizedColor=${normalizedColor}, colorIndex=${colorIndex}, currentBankNumber=${currentBankNumber}`);
   
   const led = document.getElementById("power_led");
   if (!led) {
@@ -330,37 +316,111 @@ async function generateGlobalSettingsForm() {
       : currentValues[param.sysex_adress] !== undefined 
       ? currentValues[param.sysex_adress] 
       : (param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value);
+
     if (param.ui_type === "button" || param.ui_type === "switch") {
-      input = document.createElement("input");
-      input.type = "checkbox";
-      input.id = `global-param-${param.sysex_adress}`;
-      input.name = param.name;
-      input.checked = currentValue === 1;
-      input.addEventListener("change", (e) => {
-        const value = e.target.checked ? 1 : 0;
-        tempValues[param.sysex_adress] = value;
-        console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
-        controller.sendParameter(parseInt(param.sysex_adress), value);
-      });
+      if (param.sysex_adress === 31) {
+        // Custom toggle switch for Sharp Function
+        const toggleContainer = document.createElement("div");
+        toggleContainer.className = "toggle-switch";
+        input = document.createElement("input");
+        input.type = "checkbox";
+        input.id = `global-param-${param.sysex_adress}`;
+        input.name = param.name;
+        input.checked = currentValue === 1; // true (1) = Flat, false (0) = Sharp
+        const toggleLabel = document.createElement("label");
+        toggleLabel.className = "toggle-label";
+        toggleLabel.htmlFor = input.id; // Link to input
+        toggleLabel.dataset.flat = "Flat";
+        toggleLabel.dataset.sharp = "Sharp";
+        toggleContainer.appendChild(input);
+        toggleContainer.appendChild(toggleLabel);
+
+        input.addEventListener("change", (e) => {
+          const value = e.target.checked ? 1 : 0; // true (checked) = Flat (1), false = Sharp (0)
+          tempValues[param.sysex_adress] = value;
+          currentValues[param.sysex_adress] = value; // Immediate UI sync
+          console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}, state=${value === 1 ? 'Flat' : 'Sharp'}`);
+          if (controller.isConnected()) {
+            const success = controller.sendParameter(parseInt(param.sysex_adress), value);
+            if (success) {
+              bankSettings[currentBankNumber] = { ...currentValues };
+              const sharpButton = document.getElementById("sharp-button");
+              if (sharpButton) {
+                sharpButton.classList.toggle("active", value === 1);
+              }
+            } else {
+              console.error(`[GLOBAL] Failed to send sysex=${param.sysex_adress}, value=${value}`);
+              e.target.checked = currentValue === 1; // Revert on failure
+            }
+          } else {
+            console.warn("[GLOBAL] Device not connected, cannot send sysex");
+            e.target.checked = currentValue === 1; // Revert on disconnect
+          }
+        });
+
+        container.appendChild(label);
+        container.appendChild(toggleContainer);
+      } else {
+        input = document.createElement("input");
+        input.type = "checkbox";
+        input.id = `global-param-${param.sysex_adress}`;
+        input.name = param.name;
+        input.checked = currentValue === 1;
+        input.addEventListener("change", (e) => {
+          const value = e.target.checked ? 1 : 0;
+          tempValues[param.sysex_adress] = value;
+          console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
+          controller.sendParameter(parseInt(param.sysex_adress), value);
+        });
+        container.appendChild(label);
+        container.appendChild(input);
+      }
     } else if (param.ui_type === "slider") {
+      const sliderContainer = document.createElement("div");
+      sliderContainer.className = "slider-container";
       input = document.createElement("input");
       input.type = "range";
       input.id = `global-param-${param.sysex_adress}`;
       input.name = param.name;
+      input.className = "slider";
       input.min = param.min_value;
       input.max = param.max_value;
       input.value = currentValue / (param.data_type === "float" ? floatMultiplier : 1);
       input.step = param.data_type === "float" ? 0.01 : 1;
+      const valueInput = document.createElement("input");
+      valueInput.type = "number";
+      valueInput.id = `value-${param.sysex_adress}`;
+      valueInput.min = param.min_value;
+      valueInput.max = param.max_value;
+      valueInput.step = param.data_type === "float" ? 0.01 : 1;
+      valueInput.value = param.data_type === "float" ? (currentValue / floatMultiplier).toFixed(2) : currentValue;
+      valueInput.className = "value-input";
+
       input.addEventListener("input", (e) => {
         const value = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
         tempValues[param.sysex_adress] = value;
+        valueInput.value = param.data_type === "float" ? (value / floatMultiplier).toFixed(2) : value;
         console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
         controller.sendParameter(parseInt(param.sysex_adress), value);
-        if (param.sysex_adress === 20) {
-          console.log(`Global slider changed: sysex=20, value=${value}`);
-          updateLEDBankColor();
-        }
+        if (param.sysex_adress === 20) updateLEDBankColor();
       });
+
+      valueInput.addEventListener("change", (e) => {
+        let value = parseFloat(e.target.value) || 0;
+        value = Math.max(param.min_value, Math.min(param.max_value, value));
+        if (param.data_type === "float") value *= floatMultiplier;
+        tempValues[param.sysex_adress] = value;
+        input.value = param.data_type === "float" ? (value / floatMultiplier) : value;
+        valueInput.value = param.data_type === "float" ? (value / floatMultiplier).toFixed(2) : value;
+        console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
+        controller.sendParameter(parseInt(param.sysex_adress), value);
+        if (param.sysex_adress === 20) updateLEDBankColor();
+      });
+
+      sliderContainer.appendChild(valueInput);
+      sliderContainer.appendChild(input);
+      container.appendChild(label);
+      container.appendChild(sliderContainer);
     } else if (param.ui_type === "select") {
       input = document.createElement("select");
       input.id = `global-param-${param.sysex_adress}`;
@@ -379,14 +439,11 @@ async function generateGlobalSettingsForm() {
         tempValues[param.sysex_adress] = value;
         console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}${isWaveform ? `, waveform=${waveformMap[value]}` : ''}`);
         controller.sendParameter(parseInt(param.sysex_adress), value);
-        if (param.sysex_adress === 20) {
-          console.log(`Global select changed: sysex=20, value=${value}`);
-          updateLEDBankColor();
-        }
+        if (param.sysex_adress === 20) updateLEDBankColor();
       });
+      container.appendChild(label);
+      container.appendChild(input);
     }
-    container.appendChild(label);
-    container.appendChild(input);
     formBody.appendChild(container);
   });
 
@@ -407,13 +464,13 @@ async function generateGlobalSettingsForm() {
     form.prepend(buttonsContainer);
 
     saveBtn.addEventListener("click", () => {
-      saveSettings(currentPreset, "global_parameter");
+      saveSettings(currentBankNumber, "global_parameter");
       document.getElementById("settings-modal").style.display = "none";
       openParamGroup = null;
     });
 
     cancelBtn.addEventListener("click", () => {
-      cancelSettings(currentPreset, "global_parameter");
+      cancelSettings(currentBankNumber, "global_parameter");
       document.getElementById("settings-modal").style.display = "none";
       openParamGroup = null;
     });
@@ -463,10 +520,13 @@ async function generateSettingsForm(paramGroup) {
         const label = document.createElement("label");
         label.textContent = param.name.replace("rhythm pattern step ", "Step ");
         label.setAttribute("for", `param-${param.sysex_adress}`);
+        const sliderContainer = document.createElement("div");
+        sliderContainer.className = "slider-container";
         const input = document.createElement("input");
         input.type = "range";
         input.id = `param-${param.sysex_adress}`;
         input.name = param.name;
+        input.className = "slider";
         input.min = param.min_value;
         input.max = param.max_value;
         const floatMultiplier = param.data_type === "float" ? (controller.float_multiplier || 1) : 1;
@@ -475,14 +535,38 @@ async function generateSettingsForm(paramGroup) {
           : (param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value);
         input.value = currentValue / floatMultiplier;
         input.step = param.data_type === "float" ? 0.01 : 1;
+        const valueInput = document.createElement("input");
+        valueInput.type = "number";
+        valueInput.id = `value-${param.sysex_adress}`;
+        valueInput.min = param.min_value;
+        valueInput.max = param.max_value;
+        valueInput.step = param.data_type === "float" ? 0.01 : 1;
+        valueInput.value = param.data_type === "float" ? (currentValue / floatMultiplier).toFixed(2) : currentValue;
+        valueInput.className = "value-input";
+
         input.addEventListener("input", (e) => {
           const value = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
           tempValues[param.sysex_adress] = value;
+          valueInput.value = param.data_type === "float" ? (value / floatMultiplier).toFixed(2) : value;
           console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
           controller.sendParameter(parseInt(param.sysex_adress), value);
         });
+
+        valueInput.addEventListener("change", (e) => {
+          let value = parseFloat(e.target.value) || 0;
+          value = Math.max(param.min_value, Math.min(param.max_value, value));
+          if (param.data_type === "float") value *= floatMultiplier;
+          tempValues[param.sysex_adress] = value;
+          input.value = param.data_type === "float" ? (value / floatMultiplier) : value;
+          valueInput.value = param.data_type === "float" ? (value / floatMultiplier).toFixed(2) : value;
+          console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
+          controller.sendParameter(parseInt(param.sysex_adress), value);
+        });
+
+        sliderContainer.appendChild(valueInput);
+        sliderContainer.appendChild(input);
         container.appendChild(label);
-        container.appendChild(input);
+        container.appendChild(sliderContainer);
         rhythmContainer.appendChild(container);
       });
       column.appendChild(rhythmContainer);
@@ -514,20 +598,49 @@ async function generateSettingsForm(paramGroup) {
             controller.sendParameter(parseInt(param.sysex_adress), value);
           });
         } else if (param.ui_type === "slider") {
-          input = document.createElement("input");
+          const sliderContainer = document.createElement("div");
+          sliderContainer.className = "slider-container";
+          const input = document.createElement("input");
           input.type = "range";
           input.id = `param-${param.sysex_adress}`;
           input.name = param.name;
+          input.className = "slider";
           input.min = param.min_value;
           input.max = param.max_value;
           input.value = currentValue / floatMultiplier;
           input.step = param.data_type === "float" ? 0.01 : 1;
+          const valueInput = document.createElement("input");
+          valueInput.type = "number";
+          valueInput.id = `value-${param.sysex_adress}`;
+          valueInput.min = param.min_value;
+          valueInput.max = param.max_value;
+          valueInput.step = param.data_type === "float" ? 0.01 : 1;
+          valueInput.value = param.data_type === "float" ? (currentValue / floatMultiplier).toFixed(2) : currentValue;
+          valueInput.className = "value-input";
+
           input.addEventListener("input", (e) => {
             const value = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
             tempValues[param.sysex_adress] = value;
+            valueInput.value = param.data_type === "float" ? (value / floatMultiplier).toFixed(2) : value;
             console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
             controller.sendParameter(parseInt(param.sysex_adress), value);
           });
+
+          valueInput.addEventListener("change", (e) => {
+            let value = parseFloat(e.target.value) || 0;
+            value = Math.max(param.min_value, Math.min(param.max_value, value));
+            if (param.data_type === "float") value *= floatMultiplier;
+            tempValues[param.sysex_adress] = value;
+            input.value = param.data_type === "float" ? (value / floatMultiplier) : value;
+            valueInput.value = param.data_type === "float" ? (value / floatMultiplier).toFixed(2) : value;
+            console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
+            controller.sendParameter(parseInt(param.sysex_adress), value);
+          });
+
+          sliderContainer.appendChild(input);
+          sliderContainer.appendChild(valueInput);
+          container.appendChild(label);
+          container.appendChild(sliderContainer);
         } else if (param.ui_type === "select") {
           input = document.createElement("select");
           input.id = `param-${param.sysex_adress}`;
@@ -570,7 +683,7 @@ async function generateSettingsForm(paramGroup) {
           }
         }
         container.appendChild(label);
-        container.appendChild(input);
+        if (input) container.appendChild(input);
         column.appendChild(container);
       });
     }
@@ -580,10 +693,10 @@ async function generateSettingsForm(paramGroup) {
 
 async function loadBankSettings(bankIndex) {
   if (isLoadingPreset) {
-    console.log(`loadBankSettings: skipped, already loading preset ${currentPreset}, count=${++loadBankSettingsCount}, time=${new Date().toISOString()}`);
+    console.log(`loadBankSettings: skipped, already loading preset ${currentBankNumber}, count=${++loadBankSettingsCount}, time=${new Date().toISOString()}`);
     return;
   }
-  if (bankIndex === currentPreset && !isInitializing && bankIndex === controller.active_bank_number) {
+  if (bankIndex === currentBankNumber && !isInitializing && bankIndex === controller.active_bank_number) {
     console.log(`loadBankSettings: skipped, already on preset ${bankIndex}, active_bank_number=${controller.active_bank_number}, count=${++loadBankSettingsCount}, time=${new Date().toISOString()}`);
     return;
   }
@@ -591,7 +704,7 @@ async function loadBankSettings(bankIndex) {
   isLoadingPreset = true;
   console.log(`loadBankSettings: starting for bankIndex=${bankIndex}, count=${++loadBankSettingsCount}, active_bank_number=${controller.active_bank_number}, time=${new Date().toISOString()}`);
   
-  currentPreset = bankIndex;
+  currentBankNumber = bankIndex;
   const prevValues = { ...currentValues };
   currentValues = { ...defaultValues, ...(bankSettings[bankIndex] || {}) };
 
@@ -614,13 +727,12 @@ async function loadBankSettings(bankIndex) {
   const modal = document.getElementById("settings-modal");
   updateBankIndicator();
   updateLEDBankColor();
-  updatePresetButtons();
 
   if (modal && modal.style.display === "block" && openParamGroup && openParamGroup !== "global_parameter") {
     originalPresetValues = { ...currentValues };
     tempValues = { ...originalPresetValues };
     await generateSettingsForm(openParamGroup);
-    console.log(`loadBankSettings: refreshed modal UI for paramGroup=${openParamGroup}, currentPreset=${currentPreset}`);
+    console.log(`loadBankSettings: refreshed modal UI for paramGroup=${openParamGroup}, currentBankNumber=${currentBankNumber}`);
   }
 
   isLoadingPreset = false;
@@ -640,11 +752,11 @@ async function processMidiQueue() {
         if (value !== undefined) bankSettings[bankNumber][index] = value;
       });
     }
-    if (bankNumber !== currentPreset && bankNumber !== controller.active_bank_number && !isLoadingPreset) {
-      console.log(`processMidiQueue: triggering loadBankSettings for bank ${bankNumber}, currentPreset=${currentPreset}`);
+    if (bankNumber !== currentBankNumber && bankNumber !== controller.active_bank_number && !isLoadingPreset) {
+      console.log(`processMidiQueue: triggering loadBankSettings for bank ${bankNumber}, currentBankNumber=${currentBankNumber}`);
       await loadBankSettings(bankNumber);
     } else {
-      console.log(`processMidiQueue: skipped loadBankSettings: bankNumber=${bankNumber}, currentPreset=${currentPreset}, active_bank_number=${controller.active_bank_number}, isLoadingPreset=${isLoadingPreset}`);
+      console.log(`processMidiQueue: skipped loadBankSettings: bankNumber=${bankNumber}, currentBankNumber=${currentBankNumber}, active_bank_number=${controller.active_bank_number}, isLoadingPreset=${isLoadingPreset}`);
     }
   }
 }
@@ -674,6 +786,8 @@ function updateConnectionStatus(connected, message) {
     statusElement.className = "connection-status connected";
     body.classList.remove("control_full");
     console.log(`updateConnectionStatus: connected, message=${message}`);
+    const bankText = currentBankNumber >= 0 ? ` | Bank ${currentBankNumber + 1}` : '';
+    statusElement.textContent = `minichord connected${bankText}`;
   } else {
     statusElement.className = "connection-status disconnected";
     body.classList.add("control_full");
@@ -691,7 +805,7 @@ async function openModal(paramGroup) {
   openParamGroup = paramGroup;
   const modal = document.getElementById("settings-modal");
 
-  originalPresetValues = { ...currentValues, ...(bankSettings[currentPreset] || {}) };
+  originalPresetValues = { ...currentValues, ...(bankSettings[currentBankNumber] || {}) };
   tempValues = { ...originalPresetValues };
   console.log(`openModal: paramGroup=${paramGroup}, originalPresetValues=`, JSON.stringify(originalPresetValues));
 
@@ -712,13 +826,13 @@ async function openModal(paramGroup) {
   cancelBtn.removeEventListener("click", cancelSettings);
 
   saveBtn.addEventListener("click", () => {
-    saveSettings(currentPreset, paramGroup);
+    saveSettings(currentBankNumber, paramGroup);
     modal.style.display = "none";
     openParamGroup = null;
   });
 
   cancelBtn.addEventListener("click", () => {
-    cancelSettings(currentPreset, paramGroup);
+    cancelSettings(currentBankNumber, paramGroup);
     modal.style.display = "none";
     openParamGroup = null;
   });
@@ -730,6 +844,13 @@ function saveSettings(presetId, paramGroup) {
   bankSettings[presetId] = { ...currentValues };
   controller.saveCurrentSettings(presetId);
   localStorage.setItem('presetNames', JSON.stringify(presetNames));
+
+  if (paramGroup === "global_parameter") {
+    generateGlobalSettingsForm();
+  } else if (document.getElementById("settings-modal").style.display === "block") {
+    generateSettingsForm(paramGroup);
+  }
+
   document.getElementById("settings-modal").style.display = "none";
   tempValues = {};
   console.log(`saveSettings: after save, preset=${presetId}, currentValues=`, JSON.stringify(currentValues));
@@ -745,6 +866,7 @@ function cancelSettings(presetId, paramGroup) {
   const params = parameters[paramGroup] || [];
   params.forEach(param => {
     const input = document.getElementById(`param-${param.sysex_adress}`);
+    const valueInput = document.getElementById(`value-${param.sysex_adress}`);
     if (input) {
       const floatMultiplier = param.data_type === "float" ? (controller.float_multiplier || 1) : 1;
       const isWaveform = param.name.toLowerCase().includes("waveform");
@@ -754,7 +876,8 @@ function cancelSettings(presetId, paramGroup) {
       if (param.ui_type === "button" || param.ui_type === "switch") {
         input.checked = presetValue === 1;
       } else if (param.ui_type === "slider") {
-        input.value = presetValue / floatMultiplier;
+        input.value = param.data_type === "float" ? (presetValue / floatMultiplier) : presetValue;
+        if (valueInput) valueInput.value = param.data_type === "float" ? (presetValue / floatMultiplier).toFixed(2) : presetValue;
       } else if (param.ui_type === "select") {
         input.value = isWaveform ? waveformMap[presetValue] || presetValue : presetValue;
       }
@@ -772,7 +895,7 @@ function cancelSettings(presetId, paramGroup) {
 function updateBankIndicator() {
   const bankValue = document.getElementById('current-bank-value');
   if (bankValue) {
-    bankValue.textContent = (currentPreset + 1).toString();
+    bankValue.textContent = (currentBankNumber + 1).toString();
   }
 }
 
@@ -792,7 +915,7 @@ function reset_memory() {
 function save_current_settings() {
   if (controller.isConnected()) {
     var e = document.getElementById("bank_number_selection");
-    var bank_number = e ? e.value : currentPreset;
+    var bank_number = e ? e.value : currentBankNumber;
     console.log(bank_number);
     return controller.saveCurrentSettings(bank_number);
   } else {
@@ -811,53 +934,6 @@ function reset_current_bank() {
   }
 }
 
-function generate_settings() {
-  if (!controller.isConnected()) {
-    document.getElementById("information_zone")?.focus();
-  } else {
-    var sysex_array = Array(controller.parameter_size || 199).fill(0); // Assuming parameter_size is defined in controller
-    for (let address = 0; address < sysex_array.length; address++) {
-      const value = currentValues[address] !== undefined ? currentValues[address] : defaultValues[address] || 0;
-      if (parameters.global_parameter.some(param => param.sysex_adress == address) || 
-          parameters.harp_parameter.some(param => param.sysex_adress == address) || 
-          parameters.chord_parameter.some(param => param.sysex_adress == address)) {
-        sysex_array[address] = value;
-      }
-    }
-    let output_base64 = "";
-    for (let i = 0; i < sysex_array.length - 1; i++) {
-      output_base64 += sysex_array[i] + ";";
-    }
-    output_base64 += sysex_array[sysex_array.length - 1];
-    const encoded = btoa(output_base64);
-    console.log(encoded);
-    navigator.clipboard.writeText(encoded);
-    alert("Preset code copied to clipboard");
-    console.log(atob(encoded));
-    document.getElementById("output_zone") && (document.getElementById("output_zone").innerHTML = `{${sysex_array.join(",")}},`);
-  }
-}
-
-function load_settings() {
-  if (!controller.isConnected()) {
-    document.getElementById("information_zone")?.focus();
-  } else {
-    let preset_code = prompt('Paste preset code');
-    if (preset_code != null) {
-      const parameters = atob(preset_code).split(";");
-      if (parameters.length != (controller.parameter_size || 199)) {
-        alert("malformed preset code");
-      } else {
-        let adress_index = 2; // Skip command and bank number
-        for (adress_index; adress_index < parameters.length; adress_index++) {
-          controller.sendParameter(adress_index, parseInt(parameters[adress_index]));
-        }
-        controller.sendParameter(0, 0); // Ask minichord to update interface
-      }
-    }
-  }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   controller.onDataReceived = async (processedData) => {
     const bankNumber = processedData.bankNumber;
@@ -873,19 +949,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    currentPreset = bankNumber;
+    currentBankNumber = bankNumber;
     currentValues = { ...defaultValues, ...bankSettings[bankNumber] };
 
     await generateGlobalSettingsForm();
     updateLEDBankColor();
-    updatePresetButtons();
+    updateConnectionStatus(true);
 
     const modal = document.getElementById("settings-modal");
     if (modal && modal.style.display === "block" && openParamGroup && openParamGroup !== "global_parameter") {
       originalPresetValues = { ...currentValues };
       tempValues = { ...originalPresetValues };
       await generateSettingsForm(openParamGroup);
-      console.log(`onDataReceived: refreshed modal UI for paramGroup=${openParamGroup}, currentPreset=${currentPreset}`);
+      console.log(`onDataReceived: refreshed modal UI for paramGroup=${openParamGroup}, currentBankNumber=${currentBankNumber}`);
     }
 
     console.log(">> UI updated to reflect new bank:", bankNumber);
@@ -905,20 +981,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById("settings-modal");
   window.addEventListener("click", (e) => {
     if (e.target === modal) {
-      cancelSettings(currentPreset, openParamGroup || document.getElementById("settings-title").textContent.toLowerCase().replace(/ /g, "_"));
+      cancelSettings(currentBankNumber, openParamGroup || document.getElementById("settings-title").textContent.toLowerCase().replace(/ /g, "_"));
       modal.style.display = "none";
       tempValues = {};
       openParamGroup = null;
     }
   });
 
-  // SVG Element Event Listeners
-  document.querySelectorAll(".preset-button").forEach((button, index) => {
+/*   document.querySelectorAll(".preset-button").forEach((button, index) => {
     button.addEventListener("click", () => {
       console.log(`Preset button clicked: index=${index}`);
       loadBankSettings(index);
     });
-  });
+  }); */
 
   document.querySelectorAll(".chord-button").forEach(button => {
     button.addEventListener("click", () => openModal("chord_parameter"));
@@ -938,14 +1013,14 @@ document.addEventListener('DOMContentLoaded', () => {
     pot.addEventListener("click", () => openModal(potMappings[pot.id].paramGroup));
   });
 
-  document.getElementById("preset-up").addEventListener("click", () => {
-    currentPreset = (currentPreset + 1) % 12;
-    loadBankSettings(currentPreset);
+/*   document.getElementById("preset-up").addEventListener("click", () => {
+    currentBankNumber = (currentBankNumber + 1) % 12;
+    loadBankSettings(currentBankNumber);
   });
   document.getElementById("preset-down").addEventListener("click", () => {
-    currentPreset = (currentPreset - 1 + 12) % 12;
-    loadBankSettings(currentPreset);
-  });
+    currentBankNumber = (currentBankNumber - 1 + 12) % 12;
+    loadBankSettings(currentBankNumber);
+  }); */
 
   const sharpButton = document.getElementById("sharp-button");
   if (sharpButton) {
@@ -955,12 +1030,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const currentState = currentValues[31] || 0;
-      const newState = currentState === 0 ? 1 : 0;
+      const newState = currentState === 0 ? 1 : 0; // Toggle: 0 (Sharp) to 1 (Flat)
       if (controller.sendParameter(31, newState)) {
         currentValues[31] = newState;
-        bankSettings[currentPreset] = { ...currentValues };
+        bankSettings[currentBankNumber] = { ...currentValues };
         sharpButton.classList.toggle("active", newState === 1);
-        console.log(`Sharp button: sent sysex=31, value=${newState}`);
+        const toggleInput = document.getElementById("global-param-31");
+        if (toggleInput) {
+          toggleInput.checked = newState === 1;
+          console.log(`Sharp button: synced toggle switch to state=${newState === 1 ? 'Flat' : 'Sharp'}`);
+        }
+        console.log(`Sharp button: sent sysex=31, value=${newState}, state=${newState === 1 ? 'Flat' : 'Sharp'}`);
       } else {
         console.error("Sharp button: failed to send parameter");
       }
@@ -981,7 +1061,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Side Button Functionality
   const bankSelect = document.getElementById('bank_number_selection');
   if (bankSelect) {
-    bankSelect.value = currentPreset;
+    bankSelect.value = currentBankNumber;
     // Removed change event listener to prevent immediate switch
   }
 
@@ -990,28 +1070,71 @@ document.addEventListener('DOMContentLoaded', () => {
     saveToBankBtn.addEventListener('click', () => {
       const targetBank = parseInt(document.getElementById('bank_number_selection').value);
       console.log(`Saving to target bank ${targetBank + 1}`);
-      save_current_settings(targetBank); // Use legacy function
-      loadBankSettings(targetBank); // Switch to the target bank after saving
+      save_current_settings(targetBank);
+      loadBankSettings(targetBank);
       console.log(`Switched to bank ${targetBank + 1}`);
     });
   }
 
   const exportSettingsBtn = document.getElementById('export-settings-btn');
   if (exportSettingsBtn) {
-    exportSettingsBtn.addEventListener('click', generate_settings); // Use legacy function
+    exportSettingsBtn.addEventListener('click', () => {
+      if (controller.isConnected()) {
+        var sysex_array = Array(controller.parameter_size || 199).fill(0);
+        for (let address = 0; address < sysex_array.length; address++) {
+          const value = currentValues[address] !== undefined ? currentValues[address] : defaultValues[address] || 0;
+          if (parameters.global_parameter.some(param => param.sysex_adress == address) || 
+              parameters.harp_parameter.some(param => param.sysex_adress == address) || 
+              parameters.chord_parameter.some(param => param.sysex_adress == address)) {
+            sysex_array[address] = value;
+          }
+        }
+        let output_base64 = "";
+        for (let i = 0; i < sysex_array.length - 1; i++) {
+          output_base64 += sysex_array[i] + ";";
+        }
+        output_base64 += sysex_array[sysex_array.length - 1];
+        const encoded = btoa(output_base64);
+        console.log(encoded);
+        navigator.clipboard.writeText(encoded);
+        alert("Preset code copied to clipboard");
+        console.log(atob(encoded));
+        document.getElementById("output_zone") && (document.getElementById("output_zone").innerHTML = `{${sysex_array.join(",")}},`);
+      } else {
+        document.getElementById("information_zone")?.focus();
+      }
+    });
   }
 
   const loadSettingsBtn = document.getElementById('load-settings-btn');
   if (loadSettingsBtn) {
-    loadSettingsBtn.addEventListener('click', load_settings); // Use legacy function
+    loadSettingsBtn.addEventListener('click', () => {
+      if (controller.isConnected()) {
+        let preset_code = prompt('Paste preset code');
+        if (preset_code != null) {
+          const parameters = atob(preset_code).split(";");
+          if (parameters.length != (controller.parameter_size || 199)) {
+            alert("malformed preset code");
+          } else {
+            let adress_index = 2; // Skip command and bank number
+            for (adress_index; adress_index < parameters.length; adress_index++) {
+              controller.sendParameter(adress_index, parseInt(parameters[adress_index]));
+            }
+            controller.sendParameter(0, 0); // Ask minichord to update interface
+          }
+        }
+      } else {
+        document.getElementById("information_zone")?.focus();
+      }
+    });
   }
 
   const resetBankBtn = document.getElementById('reset-bank-btn');
   if (resetBankBtn) {
     resetBankBtn.addEventListener('click', () => {
       const targetBank = parseInt(document.getElementById('bank_number_selection').value);
-      reset_current_bank(targetBank); // Use legacy function
-      if (targetBank === currentPreset) {
+      reset_current_bank(targetBank);
+      if (targetBank === currentBankNumber) {
         currentValues = { ...defaultValues };
         generateGlobalSettingsForm();
       }
@@ -1022,7 +1145,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const resetAllBanksBtn = document.getElementById('reset-all-banks-btn');
   if (resetAllBanksBtn) {
     resetAllBanksBtn.addEventListener('click', () => {
-      reset_memory(); // Use legacy function
+      reset_memory();
       bankSettings = {};
       currentValues = { ...defaultValues };
       for (let i = 0; i < 12; i++) {
