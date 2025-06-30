@@ -1065,6 +1065,7 @@ function showModal(section) {
 
 // Updated onDataReceived to ensure rhythm data capture
 controller.onDataReceived = async (processedData) => {
+  console.log('onDataReceived triggered:', processedData, 'currentBankNumber:', currentBankNumber);
   const { bankNumber, parameters, rhythmData } = processedData;
   console.log(`onDataReceived: Bank ${bankNumber}, rhythmData=`, rhythmData, 
     `parameters[220-235]=`, parameters.slice(220, 236));
@@ -1181,18 +1182,32 @@ function reset_memory() {
   }
 }
 
-function save_current_settings() {
-  if (controller.isConnected()) {
-    var e = document.getElementById("bank_number_selection");
-    var bank_number = e ? parseInt(e.value) : currentBankNumber;
-    console.log(`save_current_settings: bank=${bank_number}`);
-    showNotification(`Saving to bank ${bank_number + 1}`, "success");
-    return controller.saveCurrentSettings(bank_number);
-  } else {
-    showNotification("Device not connected", "error");
-    document.getElementById("information_zone")?.focus();
-    return false;
+async function save_current_settings(bank) {
+  console.log(`Saving to bank ${bank + 1}`);
+  // Switch to the specified bank
+  await controller.sendParameter(0, bank);
+  // Send valid parameters
+  const validParams = [
+    ...parameters.global_parameter,
+    ...parameters.harp_parameter,
+    ...parameters.chord_parameter,
+    ...parameters.rhythm_button_parameters
+  ].map(param => param.sysex_adress);
+  for (let address of validParams) {
+    let value = currentValues[address];
+    // Skip NaN or undefined values, use default or 0
+    if (value === undefined || isNaN(value)) {
+      value = defaultValues[address] !== undefined ? defaultValues[address] : 0;
+      console.warn(`Invalid value for parameter ${address} in bank ${bank + 1}, using ${value}`);
+    }
+    await controller.sendParameter(address, value);
+    console.log(`Sent parameter ${address}=${value} to bank ${bank + 1}`);
   }
+  // Placeholder sysex to save bank (adjust based on device protocol)
+  // await controller.sendSysex([0xF0, 0x7D, 0x01, bank, 0xF7]);
+  // Delay to ensure device processes
+  await new Promise(resolve => setTimeout(resolve, 50));
+  console.log(`Saved settings to bank ${bank + 1}:`, currentValues);
 }
 
 function reset_current_bank() {
@@ -1409,10 +1424,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add any existing LED event listeners if applicable
   }
 
-  const bankSelect = document.getElementById('bank_number_selection');
-  if (bankSelect) {
-    bankSelect.value = currentBankNumber;
-  }
+const bankSelect = document.getElementById('bank_number_selection');
+if (bankSelect) {
+  bankSelect.addEventListener('change', async () => {
+    const newBank = parseInt(bankSelect.value);
+    console.log(`Switching to bank ${newBank + 1}`);
+    currentBankNumber = newBank;
+    await loadBankSettings(newBank);
+    await controller.sendParameter(0, newBank);
+    for (let i = 2; i < controller.parameter_size || 199; i++) {
+      if (bankSettings[newBank][i] !== undefined) {
+        await controller.sendParameter(i, bankSettings[newBank][i]);
+      }
+    }
+    await generateGlobalSettingsForm();
+    updateLEDBankColor();
+    console.log(`Switched to bank ${newBank + 1}, currentValues:`, currentValues);
+  });
+}
 
   const saveToBankBtn = document.getElementById('save-to-bank-btn');
   if (saveToBankBtn) {
@@ -1489,6 +1518,170 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+    // New bulk export button
+const bulkExportBtn = document.getElementById('bulk-export-btn');
+if (bulkExportBtn) {
+  bulkExportBtn.addEventListener('click', () => {
+    if (controller.isConnected()) {
+      const validParams = [
+        ...parameters.global_parameter,
+        ...parameters.harp_parameter,
+        ...parameters.chord_parameter,
+        ...parameters.rhythm_button_parameters
+      ].map(param => param.sysex_adress);
+      const allBanksData = [];
+      for (let bank = 0; bank < 12; bank++) {
+        const sysex_array = Array(controller.parameter_size || 199).fill(0);
+        const bankSettingsData = bankSettings[bank] || {};
+        for (let address of validParams) {
+          sysex_array[address] = bankSettingsData[address] !== undefined ? bankSettingsData[address] : defaultValues[address] || 0;
+        }
+        allBanksData.push(sysex_array);
+        console.log(`Exported bank ${bank + 1}:`, sysex_array);
+      }
+      const output = allBanksData.map(bank => bank.join(",")).join("|");
+      const encoded = btoa(output);
+      console.log("Bulk export (12 banks):", encoded);
+      navigator.clipboard.writeText(encoded);
+      showNotification("All banks exported to clipboard", "success");
+      document.getElementById("output_zone") && (document.getElementById("output_zone").innerHTML = `Bulk: {${allBanksData.map(bank => `{${bank.join(",")}}`).join(",")}}`);
+    } else {
+      showNotification("Device not connected", "error");
+      document.getElementById("information_zone")?.focus();
+    }
+  });
+}
+
+  // New bulk import button
+const bulkImportBtn = document.getElementById('bulk-import-btn');
+if (bulkImportBtn) {
+  bulkImportBtn.addEventListener('click', async () => {
+    if (controller.isConnected()) {
+      let bulk_code = prompt('Paste bulk preset code for all 12 banks');
+      if (bulk_code != null) {
+        try {
+          const allBanksData = atob(bulk_code).split("|").map(bank => bank.split(",").map(Number));
+          if (allBanksData.length !== 12 || allBanksData.some(bank => bank.length !== (controller.parameter_size || 199))) {
+            showNotification("Malformed bulk preset code", "error");
+            return;
+          }
+
+          const validParams = [
+            ...parameters.global_parameter,
+            ...parameters.harp_parameter,
+            ...parameters.chord_parameter,
+            ...parameters.rhythm_button_parameters
+          ].map(param => param.sysex_adress);
+
+          const originalBankNumber = currentBankNumber;
+          console.log(`Starting bulk import, current bank: ${originalBankNumber + 1}`);
+
+          // Store and disable onDataReceived
+          const originalOnDataReceived = controller.onDataReceived || (() => {});
+          controller.onDataReceived = () => {
+            console.log('Ignoring device data during bulk import');
+          };
+
+          // Hide rhythm-modal and other modals
+          const rhythmModal = document.getElementById('rhythm-modal');
+          if (rhythmModal) {
+            rhythmModal.style.display = 'none';
+          }
+          const modal = document.getElementById('settings-modal');
+          if (modal) {
+            modal.style.display = 'none';
+          }
+
+          // Clear bankSettings like resetAllBanksBtn
+          bankSettings = {};
+
+          for (let bank = 0; bank < 12; bank++) {
+            console.log(`Importing bank ${bank + 1}`);
+            const parameters = allBanksData[bank];
+            // Initialize bankSettings with defaultValues
+            bankSettings[bank] = { ...defaultValues };
+            // Apply imported parameters, ensure no NaN
+            validParams.forEach(address => {
+              let value = parameters[address] !== undefined ? parameters[address] : defaultValues[address] || 0;
+              if (isNaN(value)) {
+                value = defaultValues[address] || 0;
+                console.warn(`Invalid import value for parameter ${address} in bank ${bank + 1}, using ${value}`);
+              }
+              bankSettings[bank][address] = value;
+            });
+
+            // Update rhythmPattern
+            for (let i = BASE_ADDRESS_RHYTHM; i < BASE_ADDRESS_RHYTHM + 16; i++) {
+              if (validParams.includes(i)) {
+                rhythmPattern[i - BASE_ADDRESS_RHYTHM] = bankSettings[bank][i];
+              }
+            }
+
+            // Set currentValues and save
+            currentValues = { ...bankSettings[bank] };
+            await controller.sendParameter(0, bank);
+            await save_current_settings(bank);
+            console.log(`Bank ${bank + 1} saved to device:`, bankSettings[bank]);
+            console.log(`Bank ${bank + 1} rhythm data:`, rhythmPattern);
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+
+          // Restore current bank
+          currentBankNumber = originalBankNumber;
+          currentValues = { ...bankSettings[currentBankNumber] };
+          for (let i = BASE_ADDRESS_RHYTHM; i < BASE_ADDRESS_RHYTHM + 16; i++) {
+            if (validParams.includes(i)) {
+              rhythmPattern[i - BASE_ADDRESS_RHYTHM] = bankSettings[currentBankNumber][i];
+            }
+          }
+          // Reapply current bank settings (three attempts)
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            console.log(`Reapplying bank ${currentBankNumber + 1}, attempt ${attempt}`);
+            await controller.sendParameter(0, currentBankNumber);
+            for (let i = 2; i < (controller.parameter_size || 199); i++) {
+              if (validParams.includes(i)) {
+                let value = bankSettings[currentBankNumber][i];
+                if (isNaN(value)) {
+                  value = defaultValues[i] || 0;
+                  console.warn(`Invalid value for parameter ${i} in bank ${currentBankNumber + 1}, using ${value}`);
+                }
+                await controller.sendParameter(i, value);
+              }
+            }
+            await save_current_settings(currentBankNumber);
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+
+          // Restore onDataReceived after delay
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          controller.onDataReceived = originalOnDataReceived;
+
+          // Update UI
+          const bankSelect = document.getElementById('bank_number_selection');
+          if (bankSelect) {
+            bankSelect.value = currentBankNumber;
+          }
+          await loadBankSettings(currentBankNumber);
+          await generateGlobalSettingsForm();
+          updateLEDBankColor();
+          showNotification("All banks imported and saved successfully", "success");
+          console.log("Final bankSettings:", bankSettings);
+          console.log("Restored current bank:", currentBankNumber + 1);
+          console.log("Current values:", currentValues);
+          console.log("Current rhythmPattern:", rhythmPattern);
+        } catch (error) {
+          controller.onDataReceived = originalOnDataReceived;
+          console.error('Error loading bulk preset:', error);
+          showNotification("Error loading bulk preset", "error");
+        }
+      }
+    } else {
+      showNotification("Device not connected", "error");
+      document.getElementById("information_zone")?.focus();
+    }
+  });
+}
 
   const resetBankBtn = document.getElementById('reset-bank-btn');
   if (resetBankBtn) {
