@@ -1,3 +1,4 @@
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     display: flex;
@@ -30,13 +31,13 @@ svg {
 
 .global-settings {
     width: 375px;
-    height: 400px; /* Match SVG height */
+    height: 400px;
     background-color: #fff;
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     margin-left: 10px;
-    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-y: auto;
     z-index: 10;
     flex-shrink: 0;
 }
@@ -45,13 +46,13 @@ svg {
     margin-top: 10px;
     font-size: 0.8em;
     color: #666;
-    word-wrap: break-word; /* Ensure long base64 strings wrap */
+    word-wrap: break-word;
     padding: 5px;
     background-color: #f9f9f9;
     border: 1px solid #ccc;
     border-radius: 5px;
-    max-height: 100px; /* Limit height to avoid overwhelming the panel */
-    overflow-y: auto; /* Scroll if content exceeds max-height */
+    max-height: 100px;
+    overflow-y: auto;
 }
 
 .outline {
@@ -120,10 +121,6 @@ svg {
     transition: fill 0.2s;
 }
 
-/* .preset-button:hover {
-    fill: #000000;
-} */
-
 .led {
     transition: fill 0.2s;
 }
@@ -154,9 +151,10 @@ svg {
 .led.color-23 { fill: hsl(345, 70%, 50%) ; }
 
 .global-settings h2,
-.settings-content h2 {
+.settings-content h2,
+#rhythm-modal h2 {
     margin: 0 0 10px 0;
-    font-size: 1.2em;
+    font-size: 1.5em;
     color: #333;
     text-align: center;
 }
@@ -164,7 +162,7 @@ svg {
 .global-settings h3,
 .settings-content h3 {
     margin: 10px 0 5px;
-    font-size: 1em;
+    font-size: 1.5em;
     color: #333;
     font-weight: bold;
 }
@@ -195,8 +193,8 @@ svg {
     padding: 5px;
 }
 
-/* Centered Popup for Specific Settings Modals */
-.settings-modal {
+.settings-modal,
+#rhythm-modal {
     display: none;
     position: fixed;
     top: 0;
@@ -209,39 +207,90 @@ svg {
     z-index: 1000;
 }
 
-.settings-content {
+.settings-content,
+#rhythm-modal .modal-content {
     background-color: #fff;
     padding: 20px;
     border-radius: 10px;
     width: 90%;
-    max-width: 1200px;
+    max-width: 95vh;
     max-height: 80vh;
     overflow-y: auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-#settings-form {
+#rhythm-modal .rhythm-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-
-#settings-form div {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 10px;
-}
-
-#settings-form .rhythm-grid {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: 100px repeat(16, 40px);
     gap: 5px;
     margin-top: 10px;
 }
 
-#settings-form .rhythm-grid input[type="range"] {
-    width: 50px;
+#rhythm-modal .rhythm-row {
+    display: contents;
+}
+
+#rhythm-modal .rhythm-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#rhythm-modal .rhythm-cell input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin: 5px auto;
+    cursor: pointer;
+    accent-color: #2ecc71;
+}
+
+#rhythm-modal .modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#rhythm-modal .modal-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+#rhythm-modal .modal-buttons button.save-btn {
+    background-color: #2ecc71;
+    color: #fff;
+}
+
+#rhythm-modal .modal-buttons button.save-btn:hover {
+    background-color: #27ae60;
+}
+
+#rhythm-modal .modal-buttons button.cancel-btn {
+    background-color: #e94e77;
+    color: #fff;
+}
+
+#rhythm-modal .modal-buttons button.cancel-btn:hover {
+    background-color: #c0392b;
+}
+
+#rhythm-modal .close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.2s;
+}
+
+#rhythm-modal .close-button:hover {
+    color: #c0392b;
 }
 
 .settings-content button {
@@ -278,46 +327,67 @@ svg {
     }
 }
 
-@media (max-width: 500px) {
-    #settings-form {
-        grid-template-columns: 1fr;
-    }
-}
-
 @media (max-width: 600px) {
     .container {
         flex-direction: column;
         width: 90%;
         height: auto;
         margin-left: 0;
-        margin-top: 60px; /* Adjust for status header */
+        margin-top: 60px;
     }
 
     .global-settings {
         width: 100%;
-        height: auto; /* Allow full width on small screens */
+        height: auto;
         margin-left: 0;
         margin-top: 10px;
     }
 
     #control {
         position: absolute;
-        top: 10px; /* Move above container on small screens */
+        top: 10px;
         left: 10px;
-        width: 180px; /* Slightly narrower for mobile */
+        width: 180px;
     }
 
-    .settings-modal {
+    .settings-modal,
+    #rhythm-modal {
         width: 100%;
     }
 
-    .settings-content {
+    .settings-content,
+    #rhythm-modal .modal-content {
         width: 90%;
         padding: 15px;
     }
+
+    #rhythm-modal .rhythm-grid {
+        grid-template-columns: 80px repeat(16, 30px);
+        gap: 3px;
+    }
+
+    #rhythm-modal .rhythm-cell input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
 }
 
-/* Container for save/cancel buttons */
+@media (max-width: 500px) {
+    #settings-form {
+        grid-template-columns: 1fr;
+    }
+
+    #rhythm-modal .rhythm-grid {
+        grid-template-columns: 60px repeat(16, 25px);
+        gap: 2px;
+    }
+
+    #rhythm-modal .rhythm-cell input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+}
+
 .settings-buttons {
     position: sticky;
     top: 0;
@@ -329,7 +399,6 @@ svg {
     border-bottom: 1px solid #ccc;
 }
 
-/* Status Header */
 .status-header {
     position: absolute;
     top: 10px;
@@ -338,7 +407,7 @@ svg {
     align-items: center;
     gap: 10px;
     margin: 0;
-    z-index: 20; /* Above control and container */
+    z-index: 20;
 }
 
 .status-header h1 {
@@ -363,22 +432,19 @@ svg {
     background-color: lightgreen;
 }
 
-
 #connection-status.disconnected {
     border-color: red;
     background-color: lightcoral;
 }
 
-
 #connection-status.connected #dot {
-    color: green; 
+    color: green;
 }
 
 #connection-status.disconnected #dot {
     color: red;
 }
 
-/* Control Container */
 #control {
     position: absolute;
     top: 25vh;
@@ -387,7 +453,7 @@ svg {
     width: 200px;
     z-index: 10;
     font-family: sans-serif;
-    background-color: transparent; /* Slight opacity for readability */
+    background-color: transparent;
     border: transparent;
     border-radius: 5px;
     box-shadow: none;
@@ -411,20 +477,20 @@ h5.active {
 
 .controls {
     display: flex;
-    flex-direction: column; /* Stack buttons vertically */
-    gap: 5px; /* Space between button groups */
+    flex-direction: column;
+    gap: 5px;
 }
 
 .button_div {
     margin: 0;
-    width: 100%; /* Full width for buttons */
+    width: 100%;
 }
 
 .label.active {
     font-size: 1em;
     color: #333;
     margin-right: 0.5em;
-    display: block; /* Ensure label takes full width */
+    display: block;
 }
 
 select.active {
@@ -438,36 +504,36 @@ select.active {
     -moz-appearance: none;
     appearance: none;
     font-family: monospace;
-    width: 100%; /* Full width */
+    width: 100%;
     box-sizing: border-box;
 }
 
 button.active {
-    padding: 0.3em; /* Slightly larger padding */
+    padding: 0.3em;
     border: 1px solid black;
-    border-radius: 3px; /* Rounded corners */
+    border-radius: 3px;
     background-color: white;
     font-size: 1em;
     cursor: pointer;
-    width: 100%; /* Full width */
+    width: 100%;
     box-sizing: border-box;
-    transition: opacity 0.2s, background-color 0.2s; /* Add background transition */
+    transition: opacity 0.2s, background-color 0.2s;
 }
 
 button.active:hover,
 button.active:focus {
     opacity: 0.75;
-    background-color: #f0f0f0; /* Light gray on hover */
+    background-color: #f0f0f0;
 }
 
 details {
     margin-top: 2em;
-    font-size: 0.55em;
+    font-size: 0.65em;
     color: #333;
 }
 
 #instruction_zone {
-    font-size: 0.55em;
+    font-size: 0.6em;
     color: #333;
 }
 
@@ -480,7 +546,6 @@ details {
     text-decoration: underline;
 }
 
-/* Current Bank Indicator */
 #current-bank-indicator {
     position: absolute;
     top: calc(25vh + 250px);
@@ -526,19 +591,18 @@ details {
     width: 100vw;
     height: 100vh;
     z-index: -1;
-    background: radial-gradient(circle at center, transparent 70%, rgba(255, 0, 0, 0.5) 100%); /* Default red gradient */
+    background: radial-gradient(circle at center, transparent 70%, rgba(255, 0, 0, 0.5) 100%);
     opacity: 0.5;
     pointer-events: none;
 }
 
-/* Target global settings and modal forms specifically */
 .global-settings .slider-container,
 #settings-modal .slider-container {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-direction: row; /* Ensure horizontal layout */
-    justify-content: flex-start; /* Align items from start */
+    flex-direction: row;
+    justify-content: flex-start;
     order: 2;
 }
 
@@ -546,29 +610,29 @@ details {
 #settings-modal .slider {
     width: 100%;
     max-width: 200px;
-    order: 2; /* Slider first */
+    order: 2;
 }
 
 .global-settings .value-input,
 #settings-modal .value-input {
-    width: 45px; /* Smaller width */
+    width: 45px;
     padding: 2px;
-    font-size: 0.75em; /* Smaller font */
+    font-size: 0.75em;
     border: 1px solid #ccc;
     border-radius: 3px;
     background-color: #f9f9f9;
     text-align: center;
-    order: 3; /* Input box second, on the right */
+    order: 3;
 }
 
 .global-settings .parameter-row,
 #settings-modal .parameter-row {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Align toggle to the right */
-    gap: 10px; /* Space between label and toggle */
-    padding-right: 10px; /* Padding for right alignment */
-    margin: 8px 0; /* Consistent with existing margins */
+    justify-content: space-between;
+    gap: 10px;
+    padding-right: 10px;
+    margin: 8px 0;
 }
 
 .global-settings label,
@@ -577,26 +641,28 @@ details {
     flex: 1;
     color: #333;
     font-weight: bold;
-    font-size: 0.9em;
+    font-size: 0.8em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     order: 1;
 }
 
-/* Toggle Switch Styles */
 .toggle-switch {
     position: relative;
-    width: 50px; /* Matches compact input boxes */
-    height: 24px; /* Matches input height */
-    order: 2; /* Aligns with .parameter-row flex order */
+    width: 50px;
+    height: 24px;
+    order: 2;
+    margin-left: auto;
 }
 
 .toggle-switch input[type="checkbox"] {
-    opacity: 0; /* Hide checkbox */
+    opacity: 0;
     width: 0;
     height: 0;
-    position: absolute; /* Remove from layout */
+    position: absolute;
+    z-index: -1;
+    pointer-events: auto;
 }
 
 .toggle-switch .toggle-label {
@@ -605,48 +671,48 @@ details {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc; /* Matches input background */
-    border: 1px solid #ccc; /* Matches .value-input border */
-    border-radius: 12px; /* Consistent with inputs */
+    background-color: #ccc;
+    border: 1px solid #ccc;
+    border-radius: 12px;
     cursor: pointer;
-    transition: background-color 0.2s; /* Smooth transition */
+    transition: background-color 0.2s;
 }
 
 .toggle-switch .toggle-label::before {
     content: "";
     position: absolute;
-    height: 18px; /* Smaller knob for compact look */
+    height: 18px;
     width: 18px;
     left: 3px;
     bottom: 3px;
-    background-color: #fff; /* Matches input background */
+    background-color: #fff;
     border-radius: 50%;
-    transition: transform 0.2s; /* Smooth knob movement */
+    transition: transform 0.2s;
 }
 
 .toggle-switch .toggle-label::after {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 0.75em; /* Matches .value-input font size */
-    color: #fff; /* White text for contrast */
-    font-family: Arial, sans-serif; /* Matches body font */
+    font-size: 0.75em;
+    color: #fff;
+    font-family: Arial, sans-serif;
 }
 
-.toggle-switch input[type="switch"]:checked + .toggle-label {
-    background-color: #2ecc71; /* Matches .save-btn and .preset-button */
+.toggle-switch input[type="checkbox"]:checked + .toggle-label {
+    background-color: #2ecc71;
 }
 
-.toggle-switch input[type="switch"]:checked + .toggle-label::before {
-    transform: translateX(26px); /* Move knob to right */
+.toggle-switch input[type="checkbox"]:checked + .toggle-label::before {
+    transform: translateX(26px);
 }
 
-.toggle-switch input[type="switch"]:checked + .toggle-label::after {
-    content: attr(data-flat); /* Display "Flat" when checked */
-    left: 6px; /* Position text */
+.toggle-switch input[type="checkbox"]:checked + .toggle-label::after {
+    content: attr(data-flat);
+    left: 6px;
 }
 
-.toggle-switch input[type="switch"]:not(:checked) + .toggle-label::after {
-    content: attr(data-sharp); /* Display "Sharp" when not checked */
-    right: 6px; /* Position text */
+.toggle-switch input[type="checkbox"]:not(:checked) + .toggle-label::after {
+    content: attr(data-sharp);
+    right: 6px;
 }
