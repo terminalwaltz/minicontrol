@@ -29,7 +29,7 @@ svg {
     border-radius: 0;
 }
 
-.global-settings {
+#global-settings {
     width: 375px;
     height: 400px;
     background-color: #fff;
@@ -42,7 +42,7 @@ svg {
     flex-shrink: 0;
 }
 
-.global-settings #output_zone {
+#global-settings #output_zone {
     margin-top: 10px;
     font-size: 0.8em;
     color: #666;
@@ -150,7 +150,7 @@ svg {
 .led.color-22 { fill: hsl(330, 70%, 50%) ; }
 .led.color-23 { fill: hsl(345, 70%, 50%) ; }
 
-.global-settings h2,
+#global-settings h2,
 .settings-content h2,
 #rhythm-modal h2 {
     margin: 0 0 10px 0;
@@ -159,7 +159,7 @@ svg {
     text-align: center;
 }
 
-.global-settings h3,
+#global-settings h3,
 .settings-content h3 {
     margin: 10px 0 5px;
     font-size: 1.5em;
@@ -167,8 +167,8 @@ svg {
     font-weight: bold;
 }
 
-.global-settings input,
-.global-settings select,
+#global-settings input,
+#global-settings select,
 #settings-form input,
 #settings-form select {
     width: 100%;
@@ -183,12 +183,12 @@ svg {
     order: 2;
 }
 
-.global-settings input[type="range"],
+#global-settings input[type="range"],
 #settings-form input[type="range"] {
     padding: 0;
 }
 
-.global-settings select,
+#global-settings select,
 #settings-form select {
     padding: 5px;
 }
@@ -336,7 +336,7 @@ svg {
         margin-top: 60px;
     }
 
-    .global-settings {
+    #global-settings {
         width: 100%;
         height: auto;
         margin-left: 0;
@@ -386,6 +386,45 @@ svg {
         width: 16px;
         height: 16px;
     }
+}
+
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]:hover:after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  white-space: nowrap;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+[data-tooltip]:hover:after {
+  opacity: 1;
+}
+
+
+#settings-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.parameter-column {
+  flex: 1;
+  min-width: 250px;
 }
 
 .settings-buttons {
@@ -596,7 +635,7 @@ details {
     pointer-events: none;
 }
 
-.global-settings .slider-container,
+#global-settings .slider-container,
 #settings-modal .slider-container {
     display: flex;
     align-items: center;
@@ -606,14 +645,14 @@ details {
     order: 2;
 }
 
-.global-settings .slider,
+#global-settings .slider,
 #settings-modal .slider {
     width: 100%;
     max-width: 200px;
     order: 2;
 }
 
-.global-settings .value-input,
+#global-settings .value-input,
 #settings-modal .value-input {
     width: 45px;
     padding: 2px;
@@ -625,17 +664,17 @@ details {
     order: 3;
 }
 
-.global-settings .parameter-row,
+#global-settings .parameter-row,
 #settings-modal .parameter-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    padding-right: 10px;
+    gap: 8px;
+    padding-right: 5px;
     margin: 8px 0;
 }
 
-.global-settings label,
+#global-settings label,
 #settings-modal label {
     margin: 0;
     flex: 1;
