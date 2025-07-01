@@ -135,7 +135,7 @@ svg {
 
 #control h5.active {
   margin: 0;
-  font-size: 1.6em;
+  font-size: 1em;
   font-weight: bold;
   color: #333;
 }
@@ -144,16 +144,19 @@ svg {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  background-color: transparent;
 }
 
 #control .button_div {
   width: 100%;
   margin: 0;
+  background-color: transparent;
+  border: transparent;
 }
 
 #control .label.active {
   display: block;
-  margin-right: 0.5em;
+  margin-left: 0.5em;
   font-size: 1em;
   color: #333;
 }
@@ -199,12 +202,12 @@ svg {
    -------------------------------------------------------------------------- */
 
 #control select.active {
-  width: 100%;
+  width: 80%;
   padding: 0.2em;
-  font-size: 1em;
+  font-size: 1.8em;
   font-family: monospace;
-  text-align: right;
-  border: 1px solid black;
+  text-align: center;
+  border: transparent;
   border-radius: 0;
   background-color: white;
   box-sizing: border-box;
@@ -215,11 +218,12 @@ svg {
 
 .settings-button,
 #control button.active {
-  width: 100%;
-  padding: 0.3em;
+  width: 80%;
+  padding: 0.1em;
   font-size: 1em;
-  border: 1px solid black;
+  border-style: 2px;
   border-radius: 3px;
+  border-color: black;
   background-color: white;
   cursor: pointer;
   box-sizing: border-box;

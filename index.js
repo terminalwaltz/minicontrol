@@ -4,7 +4,6 @@ var controller = new MiniChordController();
 var tempValues = {};
 var bankSettings = {};
 let currentBankNumber = -1;
-var presetNames = JSON.parse(localStorage.getItem('presetNames')) || {};
 const bankNames = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"];
 let defaultValues = {};
 let originalPresetValues = {};
@@ -604,31 +603,40 @@ async function generateGlobalSettingsForm() {
       container.appendChild(label);
       container.appendChild(sliderContainer);
     } else if (param.ui_type === "select") {
-      input = document.createElement("select");
-      input.id = `global-param-${param.sysex_adress}`;
-      input.name = param.name;
-      input.title = param.tooltip || param.name; // Add tooltip
-      const isWaveform = param.name.toLowerCase().includes("waveform");
-      for (let i = param.min_value; i <= param.max_value; i++) {
-        if (isWaveform && i > 11) continue;
-        const option = document.createElement("option");
-        option.value = i;
-        option.textContent = isWaveform ? waveformMap[i] || i : param.name.toLowerCase().includes("octave") ? `Octave ${i}` : i;
-        input.appendChild(option);
+        input = document.createElement("select");
+        input.id = `global-param-${param.sysex_adress}`;
+        input.name = param.name;
+        input.title = param.tooltip || param.name;
+        const isWaveform = param.name.toLowerCase().includes("waveform");
+        for (let i = param.min_value; i <= param.max_value; i++) {
+          if (isWaveform && i > 11) continue;
+          const option = document.createElement("option");
+          option.value = String(i);
+          option.textContent = isWaveform ? waveformMap[i] || i : param.name.toLowerCase().includes("octave") ? `Octave ${i}` : i;
+          input.appendChild(option);
+        }
+        console.log(`Setting ${param.name} to value: ${currentValue}, type: ${typeof currentValue}`);
+        input.value = String(currentValue);
+        // Send sysex on initialization
+        if (isWaveform) {
+          const value = parseInt(currentValue);
+          tempValues[param.sysex_adress] = value;
+          currentValues[param.sysex_adress] = value;
+          console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}, waveform=${waveformMap[value]}`);
+          controller.sendParameter(parseInt(param.sysex_adress), value);
+        }
+        input.addEventListener("change", (e) => {
+          const value = parseInt(e.target.value);
+          tempValues[param.sysex_adress] = value;
+          currentValues[param.sysex_adress] = value;
+          console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}${isWaveform ? `, waveform=${waveformMap[value]}` : ''}`);
+          controller.sendParameter(parseInt(param.sysex_adress), value);
+          if (param.sysex_adress === 20) updateLEDBankColor();
+        });
+        container.appendChild(label);
+        container.appendChild(input);
       }
-      input.value = currentValue;
-      input.addEventListener("change", (e) => {
-        const value = parseInt(e.target.value);
-        tempValues[param.sysex_adress] = value;
-        currentValues[param.sysex_adress] = value;
-        console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}${isWaveform ? `, waveform=${waveformMap[value]}` : ''}`);
-        controller.sendParameter(parseInt(param.sysex_adress), value);
-        if (param.sysex_adress === 20) updateLEDBankColor();
-      });
-      container.appendChild(label);
-      container.appendChild(input);
-    }
-    formBody.appendChild(container);
+      formBody.appendChild(container);
   });
 
   if (!form.querySelector(".settings-buttons")) {
@@ -681,6 +689,9 @@ async function generateSettingsForm(paramGroup) {
     return;
   }
 
+  // Log parameters for debugging
+  console.log(`[DEBUG] Parameters for ${paramGroup}:`, groupParams);
+
   const groupedParams = {};
   groupParams.forEach(param => {
     const groupName = param.group || "Other";
@@ -696,7 +707,7 @@ async function generateSettingsForm(paramGroup) {
     column.appendChild(header);
 
     groupedParams[groupName].forEach(param => {
-      if (!param.ui_type || !["button", "switch", "slider", "select"].includes(param.ui_type)) {
+      if (!param.ui_type || !["button", "switch ostensiblyswitch", "slider", "select"].includes(param.ui_type)) {
         console.warn(`Invalid ui_type for parameter: ${param.name || 'unnamed'} (sysex_adress: ${param.sysex_adress})`);
         return;
       }
@@ -705,7 +716,7 @@ async function generateSettingsForm(paramGroup) {
       const label = document.createElement("label");
       label.textContent = param.name;
       label.setAttribute("for", `param-${param.sysex_adress}`);
-      label.title = param.tooltip || param.name; // Add tooltip
+      label.title = param.tooltip || param.name;
       let input;
       const floatMultiplier = param.data_type === "float" ? (controller.float_multiplier || 100.0) : 1;
       const currentValue = tempValues[param.sysex_adress] !== undefined 
@@ -717,7 +728,7 @@ async function generateSettingsForm(paramGroup) {
         input.id = `param-${param.sysex_adress}`;
         input.name = param.name;
         input.checked = currentValue === 1;
-        input.title = param.tooltip || param.name; // Add tooltip
+        input.title = param.tooltip || param.name;
         input.addEventListener("change", (e) => {
           const value = e.target.checked ? 1 : 0;
           tempValues[param.sysex_adress] = value;
@@ -736,7 +747,7 @@ async function generateSettingsForm(paramGroup) {
         input.max = param.max_value;
         input.value = Number((currentValue / floatMultiplier).toFixed(2));
         input.step = param.data_type === "float" ? 0.01 : 1;
-        input.title = param.tooltip || param.name; // Add tooltip
+        input.title = param.tooltip || param.name;
         const valueInput = document.createElement("input");
         valueInput.type = "number";
         valueInput.id = `value-${param.sysex_adress}`;
@@ -744,7 +755,7 @@ async function generateSettingsForm(paramGroup) {
         valueInput.max = param.max_value;
         valueInput.step = param.data_type === "float" ? 0.01 : 1;
         valueInput.value = param.data_type === "float" ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
-        valueInput.title = param.tooltip || param.name; // Add tooltip
+        valueInput.title = param.tooltip || param.name;
         console.log(`[SLIDER] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, floatMultiplier=${floatMultiplier}, input.value=${input.value}`);
         valueInput.className = "value-input";
 
@@ -775,7 +786,7 @@ async function generateSettingsForm(paramGroup) {
         input = document.createElement("select");
         input.id = `param-${param.sysex_adress}`;
         input.name = param.name;
-        input.title = param.tooltip || param.name; // Add tooltip
+        input.title = param.tooltip || param.name;
         const isAlternateControl = [10, 12, 16].includes(param.sysex_adress);
         if (isAlternateControl) {
           for (let i = param.min_value; i <= param.max_value; i++) {
@@ -786,7 +797,7 @@ async function generateSettingsForm(paramGroup) {
               input.appendChild(option);
             }
           }
-          input.value = currentValue;
+          input.value = String(currentValue);
           input.addEventListener("change", (e) => {
             const value = parseInt(e.target.value);
             tempValues[param.sysex_adress] = value;
@@ -798,19 +809,21 @@ async function generateSettingsForm(paramGroup) {
           for (let i = param.min_value; i <= param.max_value; i++) {
             if (isWaveform && i > 11) continue;
             const option = document.createElement("option");
-            option.value = i;
+            option.value = String(i);
             option.textContent = isWaveform ? waveformMap[i] || i : param.name.toLowerCase().includes("octave") ? `Octave ${i}` : i;
             input.appendChild(option);
           }
-          input.value = isWaveform ? waveformMap[currentValue] || currentValue : currentValue;
+          console.log(`[SELECT] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, input.value=${String(currentValue)}`);
+          input.value = String(currentValue);
+          console.log(`Selected option text: ${input.options[input.selectedIndex]?.textContent || 'None'}`);
           input.addEventListener("change", (e) => {
-            const value = isWaveform 
-              ? parseInt(Object.keys(waveformMap).find(key => waveformMap[key] === e.target.value) || e.target.value)
-              : parseInt(e.target.value);
+            const value = parseInt(e.target.value);
             tempValues[param.sysex_adress] = value;
             console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}${isWaveform ? `, waveform=${waveformMap[value]}` : ''}`);
             controller.sendParameter(parseInt(param.sysex_adress), value);
           });
+          // Send initial value
+          controller.sendParameter(parseInt(param.sysex_adress), currentValue);
         }
         container.appendChild(label);
         if (input) container.appendChild(input);
@@ -820,7 +833,6 @@ async function generateSettingsForm(paramGroup) {
     form.appendChild(column);
   });
 }
-
 /**
  * Updates the UI elements based on the current state.
  * @param {number} bankIndex - The index of the currently loaded bank.
@@ -958,14 +970,25 @@ let modalEventListenersAdded = false; // Flag to prevent multiple event listener
 async function openModal(paramGroup) {
   openParamGroup = paramGroup;
   const modal = document.getElementById("settings-modal");
+  if (!modal) {
+    console.error("Settings modal element not found: #settings-modal");
+    showNotification("Settings modal not found", "error");
+    return;
+  }
 
   originalPresetValues = { ...currentValues, ...(bankSettings[currentBankNumber] || {}) };
   tempValues = { ...originalPresetValues };
   console.log(`openModal: paramGroup=${paramGroup}, originalPresetValues=`, JSON.stringify(originalPresetValues));
 
   if (paramGroup === "global_parameter") {
-    modal.style.display = "block";
     await generateGlobalSettingsForm();
+    modal.style.display = "block";
+    // Ensure sysex=42 is sent for waveform
+    if (originalPresetValues["42"] !== undefined) {
+      const value = parseInt(originalPresetValues["42"]);
+      console.log(`[MODAL] Sending sysex=42, value=${value}, name=waveform, waveform=${waveformMap[value] || value}`);
+      controller.sendParameter(42, value);
+    }
     return;
   }
 
@@ -992,6 +1015,12 @@ async function openModal(paramGroup) {
   const saveBtn = document.getElementById("save-btn");
   const cancelBtn = document.getElementById("cancel-btn");
 
+  if (!saveBtn || !cancelBtn) {
+    console.error("Save or cancel button not found");
+    showNotification("Modal buttons not found", "error");
+    return;
+  }
+
   // Add event listeners only once
   if (!modalEventListenersAdded) {
     saveBtn.addEventListener("click", () => {
@@ -1016,7 +1045,6 @@ function saveSettings(presetId, paramGroup) {
   
   setTimeout(() => {
     controller.saveCurrentSettings(presetId);
-    localStorage.setItem('presetNames', JSON.stringify(presetNames));
     tempValues = {};
     console.log(`saveSettings: after save, preset=${presetId}, currentValues=`, JSON.stringify(currentValues));
     
