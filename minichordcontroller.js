@@ -20,34 +20,60 @@ class MiniChordController {
   async initialize() {
     try {
       const midiAccess = await navigator.requestMIDIAccess(this.MIDI_request_option);
-      this.handleMIDIAccess(midiAccess);
-      midiAccess.onstatechange = (e) => this.handleStateChange(e);
-      return true;
+      return this.handleMIDIAccess(midiAccess); // Return the promise from handleMIDIAccess
     } catch (err) {
       console.error("MIDI init failed:", err);
-      return false;
+      if (this.onConnectionChange) {
+        this.onConnectionChange(false, "MIDI init failed: " + err.message); // Provide error message
+      }
+      return false; // Indicate failure
     }
   }
 
-  handleMIDIAccess(midiAccess) {
-    for (const entry of midiAccess.outputs) {
-      const output = entry[1];
+  async handleMIDIAccess(midiAccess) { // Make handleMIDIAccess async
+    let foundOutput = false;
+    let foundInput = false;
+
+    for (const output of midiAccess.outputs.values()) {
       if (output.name.toLowerCase().includes("minichord")) {
         this.device = output;
-        this.device.send([0xF0, 0, 0, 0, 0, 0xF7]);
+        try {
+          this.device.send([0xF0, 0, 0, 0, 0, 0xF7]); // Send initial message
+          foundOutput = true;
+        } catch (sendError) {
+          console.error("Error sending initial SysEx:", sendError);
+          this.device = false; // Reset device if send fails
+          if (this.onConnectionChange) {
+            this.onConnectionChange(false, "Error sending initial SysEx: " + sendError.message);
+          }
+          return false; // Indicate failure
+        }
+        break; // Stop searching after finding the first output
       }
     }
 
-    for (const entry of midiAccess.inputs) {
-      const input = entry[1];
+    for (const input of midiAccess.inputs.values()) {
       if (input.name.toLowerCase().includes("minichord")) {
         input.onmidimessage = (msg) => this.processCurrentData(msg);
+        foundInput = true;
+        break; // Stop searching after finding the first input
       }
     }
 
-    if (!this.device && this.onConnectionChange) {
-      this.onConnectionChange(false, "minichord not found.");
+    if (!foundOutput || !foundInput) {
+      this.device = false; // Ensure device is reset if not found
+      if (this.onConnectionChange) {
+        this.onConnectionChange(false, "Minichord not found.");
+      }
+      return false; // Indicate failure
     }
+
+    midiAccess.onstatechange = (e) => this.handleStateChange(e);
+
+    if (this.onConnectionChange) {
+      this.onConnectionChange(true, "Minichord connected"); // Notify connection
+    }
+    return true; // Indicate success
   }
 
   handleStateChange(event) {
@@ -55,71 +81,71 @@ class MiniChordController {
     if (event.port.state === "disconnected" && name.includes("minichord")) {
       this.device = false;
       if (this.onConnectionChange) {
-        this.onConnectionChange(false, "minichord disconnected");
+        this.onConnectionChange(false, "Minichord disconnected");
       }
     }
 
     if (event.port.state === "connected" && !this.device && name.includes("minichord")) {
-      this.handleMIDIAccess(event.target);
+      this.initialize(); // Re-initialize on connect
     }
   }
 
-processCurrentData(midiMessage) {
-  const data = midiMessage.data.slice(1);
-  const expectedLength = this.parameter_size * 2 + 1;
+  processCurrentData(midiMessage) {
+    const data = midiMessage.data.slice(1);
+    const expectedLength = this.parameter_size * 2 + 1;
 
-  if (data.length !== expectedLength) {
-    console.warn(`processCurrentData: Insufficient data length for parameters, got ${data.length}, expected ${expectedLength}`);
-    this.isProcessingData = false;
-    return;
-  }
+    if (data.length !== expectedLength) {
+      console.warn(`processCurrentData: Insufficient data length for parameters, got ${data.length}, expected ${expectedLength}`);
+      this.isProcessingData = false;
+      return;
+    }
 
-  const processedData = {
-    parameters: [],
-    rhythmData: [],
-    bankNumber: data[2 * 1],
-    firmwareVersion: 0
-  };
+    const processedData = {
+      parameters: [],
+      rhythmData: [],
+      bankNumber: data[2 * 1],
+      firmwareVersion: 0
+    };
 
-  for (let i = 2; i < this.parameter_size; i++) {
-    const sysex_value = data[2 * i] + 128 * data[2 * i + 1];
+    for (let i = 2; i < this.parameter_size; i++) {
+      const sysex_value = data[2 * i] + 128 * data[2 * i + 1];
 
-    if (i === this.firmware_adress) {
-      processedData.firmwareVersion = sysex_value;
-      if (processedData.firmwareVersion < this.min_firmware_accepted) {
-        alert("Please update the minichord firmware");
+      if (i === this.firmware_adress) {
+        processedData.firmwareVersion = sysex_value;
+        if (processedData.firmwareVersion < this.min_firmware_accepted) {
+          alert("Please update the minichord firmware");
+        }
+      } else if (i >= this.base_adress_rythm && i < this.base_adress_rythm + 16) {
+        // Rhythm data: unpack to boolean array
+        const j = i - this.base_adress_rythm;
+        const rhythmBits = [];
+        for (let k = 0; k < 7; k++) {
+          rhythmBits[k] = !!(sysex_value & (1 << k));
+        }
+        processedData.rhythmData[j] = rhythmBits;
+        processedData.parameters[i] = sysex_value;
+      } else {
+        processedData.parameters[i] = sysex_value;
       }
-    } else if (i >= this.base_adress_rythm && i < this.base_adress_rythm + 16) {
-      // Rhythm data: unpack to boolean array
-      const j = i - this.base_adress_rythm;
-      const rhythmBits = [];
-      for (let k = 0; k < 7; k++) {
-        rhythmBits[k] = !!(sysex_value & (1 << k));
-      }
-      processedData.rhythmData[j] = rhythmBits;
-      processedData.parameters[i] = sysex_value;
-    } else {
-      processedData.parameters[i] = sysex_value;
+    }
+
+    // Override potentiometer and volume values for safety
+    for (const i of this.potentiometer_memory_adress) {
+      this.sendParameter(i, 512);
+      processedData.parameters[i] = 512;
+    }
+
+    for (const i of this.volume_memory_adress) {
+      this.sendParameter(i, 0.5 * this.float_multiplier);
+      processedData.parameters[i] = 0.5 * this.float_multiplier;
+    }
+
+    this.active_bank_number = processedData.bankNumber;
+
+    if (this.onDataReceived) {
+      this.onDataReceived(processedData);
     }
   }
-
-  // Override potentiometer and volume values for safety
-  for (const i of this.potentiometer_memory_adress) {
-    this.sendParameter(i, 512);
-    processedData.parameters[i] = 512;
-  }
-
-  for (const i of this.volume_memory_adress) {
-    this.sendParameter(i, 0.5 * this.float_multiplier);
-    processedData.parameters[i] = 0.5 * this.float_multiplier;
-  }
-
-  this.active_bank_number = processedData.bankNumber;
-
-  if (this.onDataReceived) {
-    this.onDataReceived(processedData);
-  }
-}
 
 
   sendSysEx(bytes) {
@@ -131,23 +157,23 @@ processCurrentData(midiMessage) {
     }
     this.device.send([0xF0, ...bytes, 0xF7]);
   }
-sendParameter(address, value) {
-  if (!this.device) {
-    console.warn(`sendParameter: no device connected, address=${address}, value=${value}`);
-    return false;
+  sendParameter(address, value) {
+    if (!this.device) {
+      console.warn(`sendParameter: no device connected, address=${address}, value=${value}`);
+      return false;
+    }
+    const loVal = value % 128;
+    const hiVal = Math.floor(value / 128);
+    const loAddr = address % 128;
+    const hiAddr = Math.floor(address / 128);
+    try {
+      this.sendSysEx([loAddr, hiAddr, loVal, hiVal]);
+      return true;
+    } catch (error) {
+      console.error(`sendParameter: failed, address=${address}, value=${value}, error=`, error);
+      return false;
+    }
   }
-  const loVal = value % 128;
-  const hiVal = Math.floor(value / 128);
-  const loAddr = address % 128;
-  const hiAddr = Math.floor(address / 128);
-  try {
-    this.sendSysEx([loAddr, hiAddr, loVal, hiVal]);
-    return true;
-  } catch (error) {
-    console.error(`sendParameter: failed, address=${address}, value=${value}, error=`, error);
-    return false;
-  }
-}
 
   saveCurrentSettings(bankNumber) {
     if (!this.device) return;
@@ -173,7 +199,7 @@ sendParameter(address, value) {
       activeBankNumber: this.active_bank_number,
       parameterSize: this.parameter_size,
       colorHueAddress: this.color_hue_sysex_adress,
-      baseAddressRhythm: this.base_adress_rythm,
+      baseAddressRhythm: this.baseAddressRhythm,
       floatMultiplier: this.float_multiplier
     };
   }
@@ -186,7 +212,7 @@ sendParameter(address, value) {
     this.device.send(sysex_message);
     console.log('requestRhythmData: Sent SysEx rhythm data request [F0, 0,0,0,0, 01, F7]');
   }
-  
+
   getButtonState(name) {
     // Optional stub you can implement later for state tracking
     return 0;

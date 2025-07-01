@@ -488,7 +488,7 @@ async function generateGlobalSettingsForm() {
         const toggleContainer = document.createElement("div");
         toggleContainer.className = "toggle-switch";
         input = document.createElement("input");
-        input.type = "checkbox";
+        input.type = "switch";
         input.id = `global-param-${param.sysex_adress}`;
         input.name = param.name;
         input.checked = currentValue === 1;
@@ -821,42 +821,23 @@ async function generateSettingsForm(paramGroup) {
   });
 }
 
-
-async function loadBankSettings(bankIndex) {
-  if (isLoadingPreset) {
-    console.log(`loadBankSettings: Skipped, already loading preset ${currentBankNumber}`);
-    return;
-  }
-
-  isLoadingPreset = true;
-  console.log(`loadBankSettings: Loading bank ${bankIndex}`);
-  currentBankNumber = bankIndex;
-  currentValues = { ...defaultValues, ...(bankSettings[bankIndex] || {}) };
-
-  // Initialize rhythm data
-  for (let step = 0; step < 16; step++) {
-    const sysexAddress = BASE_ADDRESS_RHYTHM + step;
-    if (!(sysexAddress in currentValues)) {
-      currentValues[sysexAddress] = 0;
-      rhythmPattern[step] = 0;
-    }
-  }
-
-  if (bankIndex !== controller.active_bank_number) {
-    controller.sendParameter(0, bankIndex);
-    console.log(`loadBankSettings: Sent bank select sysex=0, value=${bankIndex}`);
-  }
-
+/**
+ * Updates the UI elements based on the current state.
+ * @param {number} bankIndex - The index of the currently loaded bank.
+ */
+async function updateUI(bankIndex) {
   await generateGlobalSettingsForm();
   updateLEDBankColor();
   updateBankIndicator();
 
   const modal = document.getElementById("settings-modal");
   const rhythmModal = document.getElementById("rhythm-modal");
+
   if (modal && modal.style.display === "block" && openParamGroup && openParamGroup !== "global_parameter") {
     tempValues = { ...currentValues };
     await generateSettingsForm(openParamGroup);
   }
+
   if (rhythmModal && rhythmModal.style.display === "block") {
     tempValues = { ...currentValues };
     await refreshRhythmGrid();
@@ -864,11 +845,40 @@ async function loadBankSettings(bankIndex) {
 
   const bankSelect = document.getElementById('bank_number_selection');
   if (bankSelect) bankSelect.value = bankIndex;
-
-  isLoadingPreset = false;
-  console.log(`loadBankSettings: Completed for bank ${bankIndex}, currentValues[220-235]=`, 
-    Object.fromEntries(Object.entries(currentValues).filter(([k]) => k >= 220 && k <= 235)));
 }
+
+
+async function loadBankSettings(bankIndex) {
+      if (isLoadingPreset) {
+        console.log(`loadBankSettings: Skipped, already loading preset ${currentBankNumber}`);
+        return;
+      }
+
+      isLoadingPreset = true;
+      console.log(`loadBankSettings: Loading bank ${bankIndex}`);
+      currentBankNumber = bankIndex;
+      currentValues = { ...defaultValues, ...(bankSettings[bankIndex] || {}) };
+
+      // Initialize rhythm data
+      for (let step = 0; step < 16; step++) {
+        const sysexAddress = BASE_ADDRESS_RHYTHM + step;
+        if (!(sysexAddress in currentValues)) {
+          currentValues[sysexAddress] = 0;
+          rhythmPattern[step] = 0;
+        }
+      }
+
+      if (bankIndex !== controller.active_bank_number && controller.isConnected()) {
+        controller.sendParameter(0, bankIndex);
+        console.log(`loadBankSettings: Sent bank select sysex=0, value=${bankIndex}`);
+      }
+
+      await updateUI(bankIndex);
+
+      isLoadingPreset = false;
+      console.log(`loadBankSettings: Completed for bank ${bankIndex}, currentValues[220-235]=`, 
+        Object.fromEntries(Object.entries(currentValues).filter(([k]) => k >= 220 && k <= 235)));
+    }
 
 
 
@@ -895,20 +905,28 @@ async function processMidiQueue() {
 async function init() {
   isInitializing = true;
   console.log('init: starting, time=', new Date().toISOString());
-  await initializeDefaultValues();
-  controller.initialize();
-  midiResponseQueue = [];
-  console.log('init: cleared midiResponseQueue');
-  if (controller.isConnected()) {
-    console.log('init: minichord is connected, updating status');
-    updateConnectionStatus(true, 'initial check');
-  } else {
-    console.log('init: minichord not connected');
-    updateConnectionStatus(false, 'initial check: not connected');
+
+  // Show loading indicator (example - implement your own showNotification function)
+  showNotification("Connecting...", "info");
+
+  try {
+    await initializeDefaultValues();
+    controller.initialize();
+    midiResponseQueue = [];
+    console.log('init: cleared midiResponseQueue');
+
+    await loadBankSettings(0); // Load bank 0 on initialization
+
+    // The delayed check in DOMContentLoaded handles the connection status
+    // No need to duplicate it here
+
+  } catch (error) {
+    console.error("Error during initialization:", error);
+    showNotification("Initialization failed.  Check console for details.", "error");
+  } finally {
+    isInitializing = false;
+    console.log('init: completed, time=', new Date().toISOString());
   }
-  await loadBankSettings(0);
-  isInitializing = false;
-  console.log('init: completed, time=', new Date().toISOString());
 }
 
 function updateConnectionStatus(connected, message) {
@@ -934,6 +952,8 @@ function updateConnectionStatus(connected, message) {
     window.scrollTo(0, 0);
   }
 }
+
+let modalEventListenersAdded = false; // Flag to prevent multiple event listeners
 
 async function openModal(paramGroup) {
   openParamGroup = paramGroup;
@@ -972,20 +992,21 @@ async function openModal(paramGroup) {
   const saveBtn = document.getElementById("save-btn");
   const cancelBtn = document.getElementById("cancel-btn");
 
-  saveBtn.removeEventListener("click", saveSettings);
-  cancelBtn.removeEventListener("click", cancelSettings);
+  // Add event listeners only once
+  if (!modalEventListenersAdded) {
+    saveBtn.addEventListener("click", () => {
+      saveSettings(currentBankNumber, paramGroup);
+      modal.style.display = "none";
+      openParamGroup = null;
+    });
 
-  saveBtn.addEventListener("click", () => {
-    saveSettings(currentBankNumber, paramGroup);
-    modal.style.display = "none";
-    openParamGroup = null;
-  });
-
-  cancelBtn.addEventListener("click", () => {
-    cancelSettings(currentBankNumber, paramGroup);
-    modal.style.display = "none";
-    openParamGroup = null;
-  });
+    cancelBtn.addEventListener("click", () => {
+      cancelSettings(currentBankNumber, paramGroup);
+      modal.style.display = "none";
+      openParamGroup = null;
+    });
+    modalEventListenersAdded = true;
+  }
 }
 
 function saveSettings(presetId, paramGroup) {
@@ -1062,55 +1083,6 @@ function showModal(section) {
     generateSettingsForm(section);
   }
 }
-
-// Updated onDataReceived to ensure rhythm data capture
-controller.onDataReceived = async (processedData) => {
-  const { bankNumber, parameters, rhythmData } = processedData;
-  console.log(`onDataReceived: Bank ${bankNumber}, rhythmData=`, rhythmData, 
-    `parameters[220-235]=`, parameters.slice(220, 236));
-
-  if (!bankSettings[bankNumber]) bankSettings[bankNumber] = {};
-
-  // Update all parameters, including rhythm
-  parameters.forEach((value, index) => {
-    if (value !== undefined) {
-      bankSettings[bankNumber][index] = value;
-      currentValues[index] = value;
-      if (index >= BASE_ADDRESS_RHYTHM && index < BASE_ADDRESS_RHYTHM + 16) {
-        rhythmPattern[index - BASE_ADDRESS_RHYTHM] = value;
-      }
-    }
-  });
-
-  if (bankNumber !== currentBankNumber) {
-    currentBankNumber = bankNumber;
-    const bankSelect = document.getElementById('bank_number_selection');
-    if (bankSelect) bankSelect.value = bankNumber;
-  }
-
-  await generateGlobalSettingsForm();
-  updateLEDBankColor();
-  updateConnectionStatus(true);
-
-  const sharpButton = document.getElementById("sharp-button");
-  if (sharpButton) {
-    sharpButton.classList.toggle("active", currentValues[31] === 1);
-  }
-
-  const modal = document.getElementById("settings-modal");
-  const rhythmModal = document.getElementById("rhythm-modal");
-  if (modal && modal.style.display === "block" && openParamGroup && openParamGroup !== "global_parameter") {
-    tempValues = { ...currentValues };
-    await generateSettingsForm(openParamGroup);
-  }
-  if (rhythmModal && rhythmModal.style.display === "block") {
-    tempValues = { ...currentValues };
-    await refreshRhythmGrid();
-  }
-
-  console.log(`onDataReceived: UI updated for bank ${bankNumber}, currentValues[220-235]=`, 
-    Object.fromEntries(Object.entries(currentValues).filter(([k]) => k >= 220 && k <= 235)));
-};
 
 function hideModal(section) {
   const modalMap = {
@@ -1235,53 +1207,50 @@ document.addEventListener('DOMContentLoaded', () => {
     element.appendChild(title);
   }
 
-  controller.onDataReceived = async (processedData) => {
-    const { bankNumber, parameters, rhythmData } = processedData;
-    console.log(`onDataReceived: Bank ${bankNumber}, rhythmData=`, rhythmData, 
-      `parameters[220-235]=`, parameters.slice(220, 236));
+  // Define onDataReceived here, inside the DOMContentLoaded event listener
+  let lastUpdate = 0;
+    const updateInterval = 50; // milliseconds
 
-    if (!bankSettings[bankNumber]) bankSettings[bankNumber] = {};
+    controller.onDataReceived = async (processedData) => {
+      const now = Date.now();
+      if (now - lastUpdate > updateInterval) {
+        lastUpdate = now;
+        const { bankNumber, parameters, rhythmData } = processedData;
+        console.log(`onDataReceived: Bank ${bankNumber}, rhythmData=`, rhythmData, 
+          `parameters[220-235]=`, parameters.slice(220, 236));
 
-    // Update all parameters, including rhythm
-    parameters.forEach((value, index) => {
-      if (value !== undefined) {
-        bankSettings[bankNumber][index] = value;
-        currentValues[index] = value;
-        if (index >= BASE_ADDRESS_RHYTHM && index < BASE_ADDRESS_RHYTHM + 16) {
-          rhythmPattern[index - BASE_ADDRESS_RHYTHM] = value;
+        if (!bankSettings[bankNumber]) bankSettings[bankNumber] = {};
+
+        // Update all parameters, including rhythm
+        parameters.forEach((value, index) => {
+          if (value !== undefined) {
+            bankSettings[bankNumber][index] = value;
+            currentValues[index] = value;
+            if (index >= BASE_ADDRESS_RHYTHM && index < BASE_ADDRESS_RHYTHM + 16) {
+              rhythmPattern[index - BASE_ADDRESS_RHYTHM] = value;
+            }
+          }
+        });
+
+        if (bankNumber !== currentBankNumber) {
+          currentBankNumber = bankNumber;
+          const bankSelect = document.getElementById('bank_number_selection');
+          if (bankSelect) bankSelect.value = bankNumber;
         }
+
+        await updateUI(bankNumber);
+        updateConnectionStatus(true);
+
+        const sharpButton = document.getElementById("sharp-button");
+        if (sharpButton) {
+          sharpButton.classList.toggle("active", currentValues[31] === 1);
+        }
+        console.log(`onDataReceived: UI updated for bank ${bankNumber}, currentValues[220-235]=`, 
+          Object.fromEntries(Object.entries(currentValues).filter(([k]) => k >= 220 && k <= 235)));
+      } else {
+        console.log("onDataReceived: throttled");
       }
-    });
-
-    if (bankNumber !== currentBankNumber) {
-      currentBankNumber = bankNumber;
-      const bankSelect = document.getElementById('bank_number_selection');
-      if (bankSelect) bankSelect.value = bankNumber;
-    }
-
-    await generateGlobalSettingsForm();
-    updateLEDBankColor();
-    updateConnectionStatus(true);
-
-    const sharpButton = document.getElementById("sharp-button");
-    if (sharpButton) {
-      sharpButton.classList.toggle("active", currentValues[31] === 1);
-    }
-
-    const modal = document.getElementById("settings-modal");
-    const rhythmModal = document.getElementById("rhythm-modal");
-    if (modal && modal.style.display === "block" && openParamGroup && openParamGroup !== "global_parameter") {
-      tempValues = { ...currentValues };
-      await generateSettingsForm(openParamGroup);
-    }
-    if (rhythmModal && rhythmModal.style.display === "block") {
-      tempValues = { ...currentValues };
-      await refreshRhythmGrid();
-    }
-
-    console.log(`onDataReceived: UI updated for bank ${bankNumber}, currentValues[220-235]=`, 
-      Object.fromEntries(Object.entries(currentValues).filter(([k]) => k >= 220 && k <= 235)));
-  };
+    };
 
   controller.onConnectionChange = function(connected, message) {
     console.log(`onConnectionChange: connected=${connected}, message=${message}, isConnected=${controller.isConnected()}`);
@@ -1473,7 +1442,7 @@ document.addEventListener('DOMContentLoaded', () => {
               controller.sendParameter(i, parameters[i]);
             }
             controller.sendParameter(0, 0);
-            currentValues = { ...defaultValues, ...parameters.reduce((acc, val, idx) => ({ ...acc, [idx]: val }), {}) };
+                        currentValues = { ...defaultValues, ...parameters.reduce((acc, val, idx) => ({ ...acc, [idx]: val }), {}) };
             bankSettings[currentBankNumber] = { ...currentValues };
             generateGlobalSettingsForm();
             updateLEDBankColor();
