@@ -86,6 +86,7 @@ svg {
   color: black;
   border: 2px solid;
   border-radius: 1em;
+  position: relative;
 }
 
 #connection-status.connected {
@@ -98,12 +99,16 @@ svg {
   background-color: lightcoral;
 }
 
-#connection-status.connected #dot {
+#connection-status.connected::before {
+  content: '●';
   color: green;
+  font-size: 20px;
 }
 
-#connection-status.disconnected #dot {
+#connection-status.disconnected::before {
+  content: '●';
   color: red;
+  font-size: 20px;
 }
 
 /* --------------------------------------------------------------------------
