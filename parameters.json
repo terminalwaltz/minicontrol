@@ -31,47 +31,6 @@
             "ui_type": "slider"
         },
         {
-            "name": "retrigger chords",
-            "group": "Settings",
-            "default_value": false,
-            "data_type": "int",
-            "sysex_adress": 21,
-            "curve": "linear",
-            "tooltip": "defines whether the chords will be retriggered when playing a modulation of the current chord or in continuous chord mode",
-            "iterate": 1,
-            "method": "retrigger_chord=value;",
-            "introduction_version": 2,
-            "ui_type": "switch"
-        },
-        {
-            "name": "change held strings",
-            "group": "Settings",
-            "default_value": false,
-            "data_type": "int",
-            "sysex_adress": 22,
-            "curve": "linear",
-            "tooltip": "defines whether a held harp note will change when changing chord",
-            "iterate": 1,
-            "method": "change_held_strings=value;",
-            "introduction_version": 2,
-            "ui_type": "switch"
-        },
-        {
-            "name": "slash level",
-            "group": "Settings",
-            "default_value": 0,
-            "data_type": "int",
-            "sysex_adress": 23,
-            "curve": "linear",
-            "min_value": 0,
-            "max_value": 2,
-            "tooltip": "level of the scale which will be affected when using slash chords",
-            "iterate": 1,
-            "method": "note_slash_level=value;",
-            "introduction_version": 2,
-            "ui_type": "slider"
-        },
-        {
             "name": "transpose",
             "group": "Settings",
             "default_value": 0,
@@ -93,7 +52,7 @@
             "data_type": "int",
             "sysex_adress": 33,
             "curve": "linear",
-            "tooltip": "change major chords to major 6, the minor chords to minor 6, and the diminished chords to fully diminished. Recommanded to use the fourth harp shuffling array",
+            "tooltip": "change major chords to major 6, the minor chords to minor 6, and the diminished chords to fully diminished. Recommend Harp Shuffling array #5",
             "iterate": 1,
             "method": "barry_harris_mode=value;",
             "introduction_version": 4,
@@ -207,6 +166,34 @@
             "ui_type": "slider"
         },
         {
+            "name": "octave change",
+            "group": "General",
+            "default_value": 0,
+            "data_type": "int",
+            "sysex_adress": 198,
+            "curve": "linear",
+            "min_value": 0,
+            "max_value": 4,
+            "tooltip": "changes the octave of the chord section up or down",
+            "iterate": 4,
+            "method": "chord_octave_change=value; current_chord_notes[i]=calculate_note_chord(i,slash_chord,sharp_active);",
+            "introduction_version": 3,
+            "ui_type": "slider"
+        },
+        {
+            "name": "retrigger chords",
+            "group": "Settings",
+            "default_value": false,
+            "data_type": "int",
+            "sysex_adress": 21,
+            "curve": "linear",
+            "tooltip": "defines whether the chords will be retriggered when playing a modulation of the current chord or in continuous chord mode",
+            "iterate": 1,
+            "method": "retrigger_chord=value;",
+            "introduction_version": 2,
+            "ui_type": "switch"
+        },
+        {
             "name": "chord shuffling",
             "group": "General",
             "default_value": 0,
@@ -229,19 +216,24 @@
       ]
         },
         {
-            "name": "octave change",
-            "group": "General",
+            "name": "slash level",
+            "group": "Settings",
             "default_value": 0,
             "data_type": "int",
-            "sysex_adress": 198,
+            "sysex_adress": 23,
             "curve": "linear",
             "min_value": 0,
-            "max_value": 4,
-            "tooltip": "changes the octave of the chord section up or down",
-            "iterate": 4,
-            "method": "chord_octave_change=value; current_chord_notes[i]=calculate_note_chord(i,slash_chord,sharp_active);",
-            "introduction_version": 3,
-            "ui_type": "slider"
+            "max_value": 2,
+            "tooltip": "level of the scale which will be affected when using slash chords",
+            "iterate": 1,
+            "method": "note_slash_level=value;",
+            "introduction_version": 2,
+            "ui_type": "select",
+                        "options": [
+              { "value": 0, "label": "1" },
+              { "value": 1, "label": "2" },
+              { "value": 2, "label": "3" }
+      ]
         },
         {
             "name": "delay length",
@@ -1388,6 +1380,19 @@
             "iterate": 1,
             "method": "chromatic_harp_mode=value;",
             "introduction_version": 3,
+            "ui_type": "switch"
+        },
+                {
+            "name": "change held strings",
+            "group": "Settings",
+            "default_value": false,
+            "data_type": "int",
+            "sysex_adress": 22,
+            "curve": "linear",
+            "tooltip": "defines whether a held harp note will change when changing chord",
+            "iterate": 1,
+            "method": "change_held_strings=value;",
+            "introduction_version": 2,
             "ui_type": "switch"
         },
         {
