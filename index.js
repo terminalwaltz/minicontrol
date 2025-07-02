@@ -194,17 +194,16 @@ const waveformMap = {
 };
 
 async function loadParameters() {
-  if (!parameters) {
-    try {
-      const response = await fetch('parameters.json');
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      parameters = await response.json();
-    } catch (error) {
-      console.error('Error loading parameters.json:', error);
-      parameters = { global_parameter: [], harp_parameter: [], chord_parameter: [], potentiometer: [], rhythm_button_parameters: [] };
-    }
+  try {
+    const response = await fetch('parameters.json');
+    const params = await response.json();
+    console.log('[DEBUG] loadParameters: Loaded params=', params);
+    console.log('[DEBUG] loadParameters: harp_parameter sysex 98=', params.harp_parameter?.find(param => param.sysex_adress === 98));
+    return params;
+  } catch (error) {
+    console.error('Failed to load parameters:', error);
+    return {};
   }
-  return parameters;
 }
 
 async function initializeDefaultValues() {
@@ -292,6 +291,7 @@ function showNotification(message, type = 'info') {
 
   if (notificationTimeout) {
     clearTimeout(notificationTimeout);
+    notificationTimeout = null;
   }
 
   statusElement.textContent = message;
@@ -327,172 +327,197 @@ async function checkbox_array() {
     showNotification("Rhythm modal not found", "error");
     return;
   }
-  modal.innerHTML = ''; // Clear modal content
 
-  const modalContent = document.createElement('div');
-  modalContent.className = 'modal-content';
+  // Only clear modal if it's not already populated
+  if (!modal.querySelector('.modal-content')) {
+    modal.innerHTML = ''; // Clear modal content
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
 
-  const closeButton = document.createElement('span');
-  closeButton.className = 'close-button';
-  closeButton.textContent = '×';
-  closeButton.addEventListener('click', () => hideModal('rhythm_button_parameters'));
-  modalContent.appendChild(closeButton);
+    const closeButton = document.createElement('span');
+    closeButton.className = 'close-button';
+    closeButton.textContent = '×';
+    closeButton.addEventListener('click', () => hideModal('rhythm_button_parameters'));
+    modalContent.appendChild(closeButton);
 
-  const title = document.createElement('h2');
-  title.textContent = 'Rhythm Settings';
-  modalContent.appendChild(title);
+    const title = document.createElement('h2');
+    title.textContent = 'Rhythm Settings';
+    modalContent.appendChild(title);
 
-  // Checkbox grid for rhythm_button_parameters
-  const gridContainer = document.createElement('div');
-  gridContainer.className = 'rhythm-grid';
+    // Checkbox grid for rhythm_button_parameters
+    const gridContainer = document.createElement('div');
+    gridContainer.className = 'rhythm-grid';
 
-  const headerRow = document.createElement('div');
-  headerRow.className = 'rhythm-row header';
-  const emptyCell = document.createElement('div');
-  emptyCell.className = 'rhythm-cell';
-  headerRow.appendChild(emptyCell);
-  for (let step = 1; step <= 16; step++) {
-    const stepHeader = document.createElement('div');
-    stepHeader.className = 'rhythm-cell';
-    stepHeader.textContent = step;
-    headerRow.appendChild(stepHeader);
-  }
-  gridContainer.appendChild(headerRow);
-
-  for (let voice = 0; voice < 7; voice++) {
-    const row = document.createElement('div');
-    row.className = 'rhythm-row';
-    const rowLabel = document.createElement('div');
-    rowLabel.className = 'rhythm-cell';
-    rowLabel.textContent = `Voice ${voice + 1}`;
-    row.appendChild(rowLabel);
-
-    for (let step = 0; step < 16; step++) {
-      const cell = document.createElement('div');
-      cell.className = 'rhythm-cell';
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.id = `checkbox${voice}${step}`; // Match refreshRhythmGrid format
-      checkbox.dataset.voice = voice;
-      checkbox.dataset.step = step;
-      checkbox.addEventListener('change', () => sendRhythmData(step));
-      cell.appendChild(checkbox);
-      row.appendChild(cell);
+    const headerRow = document.createElement('div');
+    headerRow.className = 'rhythm-row header';
+    const emptyCell = document.createElement('div');
+    emptyCell.className = 'rhythm-cell';
+    headerRow.appendChild(emptyCell);
+    for (let step = 1; step <= 16; step++) {
+      const stepHeader = document.createElement('div');
+      stepHeader.className = 'rhythm-cell';
+      stepHeader.textContent = step;
+      headerRow.appendChild(stepHeader);
     }
-    gridContainer.appendChild(row);
-  }
-  modalContent.appendChild(gridContainer);
+    gridContainer.appendChild(headerRow);
 
-  // Sliders for rhythm_parameter
-  const params = await loadParameters();
-  console.log('checkbox_array: Loaded parameters=', params); // Debug log
-  const rhythmParams = (params.rhythm_parameter || []).filter(param => param.group !== "hidden");
-  console.log('checkbox_array: rhythmParams=', rhythmParams); // Debug log
-  if (rhythmParams.length > 0) {
-    const slidersContainer = document.createElement('div');
-    slidersContainer.className = 'parameter-column';
-    const slidersHeader = document.createElement('h3');
-    slidersHeader.textContent = 'Rhythm Parameters';
-    slidersContainer.appendChild(slidersHeader);
+    for (let voice = 0; voice < 7; voice++) {
+      const row = document.createElement('div');
+      row.className = 'rhythm-row';
+      const rowLabel = document.createElement('div');
+      rowLabel.className = 'rhythm-cell';
+      rowLabel.textContent = `Voice ${voice + 1}`;
+      row.appendChild(rowLabel);
 
-    rhythmParams.forEach(param => {
-      if (param.ui_type !== 'slider') {
-        console.warn(`Skipping non-slider parameter: ${param.name} (sysex_adress: ${param.sysex_adress})`);
-        return;
+      for (let step = 0; step < 16; step++) {
+        const cell = document.createElement('div');
+        cell.className = 'rhythm-cell';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `checkbox${voice}${step}`;
+        checkbox.dataset.voice = voice;
+        checkbox.dataset.step = step;
+        checkbox.addEventListener('change', () => sendRhythmData(step));
+        cell.appendChild(checkbox);
+        row.appendChild(cell);
       }
+      gridContainer.appendChild(row);
+    }
+    modalContent.appendChild(gridContainer);
 
-      const container = document.createElement('div');
-      container.className = 'parameter-row';
-      const label = document.createElement('label');
-      label.textContent = param.name;
-      label.setAttribute('for', `param-${param.sysex_adress}`);
-      label.title = param.tooltip || param.name;
+    // Sliders for rhythm_parameter
+    const params = await loadParameters();
+    console.log('checkbox_array: Loaded parameters=', params);
+    const rhythmParams = (params.rhythm_parameter || []).filter(param => param.group !== "hidden");
+    console.log('checkbox_array: rhythmParams=', rhythmParams);
+    if (rhythmParams.length > 0) {
+      const slidersContainer = document.createElement('div');
+      slidersContainer.className = 'parameter-column';
+      const slidersHeader = document.createElement('h3');
+      slidersHeader.textContent = 'Rhythm Parameters';
+      slidersContainer.appendChild(slidersHeader);
 
-      const sliderContainer = document.createElement('div');
-      sliderContainer.className = 'slider-container';
-      const input = document.createElement('input');
-      input.type = 'range';
-      input.id = `param-${param.sysex_adress}`;
-      input.name = param.name;
-      input.className = 'slider';
-      input.min = param.min_value;
-      input.max = param.max_value;
-      const floatMultiplier = param.data_type === 'float' ? (controller.float_multiplier || 100.0) : 1;
-      const currentValue = tempValues[param.sysex_adress] !== undefined
-        ? tempValues[param.sysex_adress]
-        : (param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value);
-      input.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
-      input.step = param.data_type === 'float' ? 0.01 : 1;
-      input.title = param.tooltip || param.name;
+      rhythmParams.forEach(param => {
+        if (param.ui_type !== 'slider') {
+          console.warn(`Skipping non-slider parameter: ${param.name} (sysex_adress: ${param.sysex_adress})`);
+          return;
+        }
 
-      const valueInput = document.createElement('input');
-      valueInput.type = 'number';
-      valueInput.id = `value-${param.sysex_adress}`;
-      valueInput.min = param.min_value;
-      valueInput.max = param.max_value;
-      valueInput.step = param.data_type === 'float' ? 0.01 : 1;
-      valueInput.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
-      valueInput.className = 'value-input';
-      valueInput.title = param.tooltip || param.name;
+        const container = document.createElement('div');
+        container.className = 'parameter-row';
+        const label = document.createElement('label');
+        label.textContent = param.name;
+        label.setAttribute('for', `param-${param.sysex_adress}`);
+        label.title = param.tooltip || param.name;
 
-      console.log(`[SLIDER] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, floatMultiplier=${floatMultiplier}, input.value=${input.value}`);
+        const sliderContainer = document.createElement('div');
+        sliderContainer.className = 'slider-container';
+        const input = document.createElement('input');
+        input.type = 'range';
+        input.id = `param-${param.sysex_adress}`;
+        input.name = param.name;
+        input.className = 'slider';
+        input.min = param.min_value;
+        input.max = param.max_value;
+        const floatMultiplier = param.data_type === 'float' ? (controller.float_multiplier || 100.0) : 1;
+        const currentValue = tempValues[param.sysex_adress] !== undefined
+          ? tempValues[param.sysex_adress]
+          : currentValues[param.sysex_adress] !== undefined
+            ? currentValues[param.sysex_adress]
+            : param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value;
+        input.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+        input.step = param.data_type === 'float' ? 0.01 : 1;
+        input.title = param.tooltip || param.name;
 
-      input.addEventListener('input', (e) => {
-        const value = param.data_type === 'float' ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
-        tempValues[param.sysex_adress] = value;
-        valueInput.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
-        console.log(`[RHYTHM] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
-        controller.sendParameter(parseInt(param.sysex_adress), value);
-        executeMethod(param.method, value);
+        const valueInput = document.createElement('input');
+        valueInput.type = 'number';
+        valueInput.id = `value-${param.sysex_adress}`;
+        valueInput.min = param.min_value;
+        valueInput.max = param.max_value;
+        valueInput.step = param.data_type === 'float' ? 0.01 : 1;
+        valueInput.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+        valueInput.className = 'value-input';
+        valueInput.title = param.tooltip || param.name;
+
+        console.log(`[SLIDER] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, floatMultiplier=${floatMultiplier}, input.value=${input.value}`);
+
+        input.addEventListener('input', (e) => {
+          const value = param.data_type === 'float' ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
+          tempValues[param.sysex_adress] = value;
+          valueInput.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
+          console.log(`[RHYTHM] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
+          controller.sendParameter(parseInt(param.sysex_adress), value);
+          executeMethod(param.method, value);
+        });
+
+        valueInput.addEventListener('change', (e) => {
+          let value = parseFloat(e.target.value) || 0;
+          value = Math.max(param.min_value, Math.min(param.max_value, value));
+          if (param.data_type === 'float') value *= floatMultiplier;
+          tempValues[param.sysex_adress] = value;
+          input.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
+          valueInput.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
+          console.log(`[RHYTHM] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
+          controller.sendParameter(parseInt(param.sysex_adress), value);
+          executeMethod(param.method, value);
+        });
+
+        sliderContainer.appendChild(input);
+        sliderContainer.appendChild(valueInput);
+        container.appendChild(label);
+        container.appendChild(sliderContainer);
+        slidersContainer.appendChild(container);
       });
 
-      valueInput.addEventListener('change', (e) => {
-        let value = parseFloat(e.target.value) || 0;
-        value = Math.max(param.min_value, Math.min(param.max_value, value));
-        if (param.data_type === 'float') value *= floatMultiplier;
-        tempValues[param.sysex_adress] = value;
-        input.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
-        valueInput.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
-        console.log(`[RHYTHM] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
-        controller.sendParameter(parseInt(param.sysex_adress), value);
-        executeMethod(param.method, value);
-      });
+      modalContent.appendChild(slidersContainer);
+    } else {
+      console.warn('No rhythm_parameter found in parameters.json');
+    }
 
-      sliderContainer.appendChild(input);
-      sliderContainer.appendChild(valueInput);
-      container.appendChild(label);
-      container.appendChild(sliderContainer);
-      slidersContainer.appendChild(container);
+    // Buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'modal-buttons';
+    const saveButton = document.createElement('button');
+    saveButton.className = 'save-btn';
+    saveButton.textContent = 'Save';
+    saveButton.addEventListener('click', () => {
+      saveSettings(currentBankNumber, 'rhythm_button_parameters');
+      saveSettings(currentBankNumber, 'rhythm_parameter');
+      hideModal('rhythm_button_parameters');
     });
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'cancel-btn';
+    cancelButton.textContent = 'Cancel';
+    cancelButton.addEventListener('click', () => {
+      tempValues = { ...currentValues };
+      hideModal('rhythm_button_parameters');
+    });
+    buttonContainer.appendChild(saveButton);
+    buttonContainer.appendChild(cancelButton);
+    modalContent.appendChild(buttonContainer);
 
-    modalContent.appendChild(slidersContainer);
+    modal.appendChild(modalContent);
   } else {
-    console.warn('No rhythm_parameter found in parameters.json');
+    // Update existing sliders
+    const params = await loadParameters();
+    const rhythmParams = (params.rhythm_parameter || []).filter(param => param.group !== "hidden");
+    rhythmParams.forEach(param => {
+      const input = document.getElementById(`param-${param.sysex_adress}`);
+      const valueInput = document.getElementById(`value-${param.sysex_adress}`);
+      if (input && valueInput) {
+        const floatMultiplier = param.data_type === 'float' ? (controller.float_multiplier || 100.0) : 1;
+        const currentValue = tempValues[param.sysex_adress] !== undefined
+          ? tempValues[param.sysex_adress]
+          : currentValues[param.sysex_adress] !== undefined
+            ? currentValues[param.sysex_adress]
+            : param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value;
+        input.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+        valueInput.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+        console.log(`[SLIDER UPDATE] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, input.value=${input.value}`);
+      }
+    });
   }
 
-  // Buttons
-  const buttonContainer = document.createElement('div');
-  buttonContainer.className = 'modal-buttons';
-  const saveButton = document.createElement('button');
-  saveButton.className = 'save-btn';
-  saveButton.textContent = 'Save';
-  saveButton.addEventListener('click', () => {
-    saveSettings(currentBankNumber, 'rhythm_button_parameters');
-    saveSettings(currentBankNumber, 'rhythm_parameter');
-    hideModal('rhythm_button_parameters');
-  });
-  const cancelButton = document.createElement('button');
-  cancelButton.className = 'cancel-btn';
-  cancelButton.textContent = 'Cancel';
-  cancelButton.addEventListener('click', () => {
-    tempValues = { ...currentValues }; // Restore values
-    hideModal('rhythm_button_parameters'); // Close modal
-  });
-  buttonContainer.appendChild(saveButton);
-  buttonContainer.appendChild(cancelButton);
-  modalContent.appendChild(buttonContainer);
-
-  modal.appendChild(modalContent);
   modal.style.display = 'block';
 
   // Initialize rhythm data
@@ -504,10 +529,9 @@ async function checkbox_array() {
     }
   }
 
-  // Ensure modal is in DOM before refreshing grid
   await new Promise(resolve => setTimeout(resolve, 0)); // Allow DOM update
   await refreshRhythmGrid();
-  console.log('checkbox_array: Generated rhythm grid and sliders, currentValues[187-191,220-235]=', 
+  console.log('checkbox_array: Generated/Updated rhythm grid and sliders, currentValues[187-191,220-235]=', 
     Object.fromEntries(Object.entries(currentValues).filter(([k]) => (k >= 187 && k <= 191) || (k >= 220 && k <= 235))));
 }
 
@@ -783,14 +807,15 @@ async function generateSettingsForm(paramGroup) {
   form.innerHTML = "";
   document.getElementById("settings-title").textContent = paramGroup.replace(/_/g, " ").toUpperCase();
 
+  console.log(`[DEBUG] Raw parameters for ${paramGroup}:`, params[paramGroup] || []);
   const groupParams = (params[paramGroup] || []).filter(param => param.group !== "hidden");
+  console.log(`[DEBUG] Filtered parameters for ${paramGroup} (excluding hidden):`, groupParams);
+  console.log(`[DEBUG] Sysex 98 present:`, groupParams.find(param => param.sysex_adress === 98));
+  console.log(`[DEBUG] Sysex 40 present:`, groupParams.find(param => param.sysex_adress === 40));
   if (groupParams.length === 0) {
     form.innerHTML = "<p>No parameters available for this group.</p>";
     return;
   }
-
-  // Log parameters for debugging
-  console.log(`[DEBUG] Parameters for ${paramGroup}:`, groupParams);
 
   const groupedParams = {};
   groupParams.forEach(param => {
@@ -807,7 +832,8 @@ async function generateSettingsForm(paramGroup) {
     column.appendChild(header);
 
     groupedParams[groupName].forEach(param => {
-      if (!param.ui_type || !["button", "switch ostensiblyswitch", "slider", "select"].includes(param.ui_type)) {
+      console.log(`[DEBUG] Processing param: sysex=${param.sysex_adress}, name=${param.name}, ui_type=${param.ui_type}, group=${param.group}`);
+      if (!param.ui_type || !["button", "switch", "slider", "select"].includes(param.ui_type)) {
         console.warn(`Invalid ui_type for parameter: ${param.name || 'unnamed'} (sysex_adress: ${param.sysex_adress})`);
         return;
       }
@@ -821,7 +847,10 @@ async function generateSettingsForm(paramGroup) {
       const floatMultiplier = param.data_type === "float" ? (controller.float_multiplier || 100.0) : 1;
       const currentValue = tempValues[param.sysex_adress] !== undefined 
         ? tempValues[param.sysex_adress] 
-        : (param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value);
+        : currentValues[param.sysex_adress] !== undefined 
+          ? currentValues[param.sysex_adress] 
+          : (param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value);
+      console.log(`[DEBUG] sysex=${param.sysex_adress}, name=${param.name}, data_type=${param.data_type}, currentValue=${currentValue}, tempValues=${tempValues[param.sysex_adress]}, currentValues=${currentValues[param.sysex_adress]}, default_value=${param.default_value}`);
       if (param.ui_type === "button" || param.ui_type === "switch") {
         input = document.createElement("input");
         input.type = "checkbox";
@@ -834,7 +863,10 @@ async function generateSettingsForm(paramGroup) {
           tempValues[param.sysex_adress] = value;
           console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
           controller.sendParameter(parseInt(param.sysex_adress), value);
+          if (param.method) executeMethod(param.method, value);
         });
+        container.appendChild(label);
+        container.appendChild(input);
       } else if (param.ui_type === "slider") {
         const sliderContainer = document.createElement("div");
         sliderContainer.className = "slider-container";
@@ -845,7 +877,10 @@ async function generateSettingsForm(paramGroup) {
         input.className = "slider";
         input.min = param.min_value;
         input.max = param.max_value;
-        input.value = Number((currentValue / floatMultiplier).toFixed(2));
+        const sliderValue = param.data_type === "float" 
+          ? Number((currentValue / floatMultiplier).toFixed(2)) 
+          : currentValue;
+        input.value = sliderValue;
         input.step = param.data_type === "float" ? 0.01 : 1;
         input.title = param.tooltip || param.name;
         const valueInput = document.createElement("input");
@@ -856,7 +891,7 @@ async function generateSettingsForm(paramGroup) {
         valueInput.step = param.data_type === "float" ? 0.01 : 1;
         valueInput.value = param.data_type === "float" ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
         valueInput.title = param.tooltip || param.name;
-        console.log(`[SLIDER] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, floatMultiplier=${floatMultiplier}, input.value=${input.value}`);
+        console.log(`[SLIDER] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, floatMultiplier=${floatMultiplier}, sliderValue=${sliderValue}, input.value=${input.value}, valueInput.value=${valueInput.value}`);
         valueInput.className = "value-input";
 
         input.addEventListener("input", (e) => {
@@ -865,6 +900,7 @@ async function generateSettingsForm(paramGroup) {
           valueInput.value = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)) : value;
           console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
           controller.sendParameter(parseInt(param.sysex_adress), value);
+          if (param.method) executeMethod(param.method, value);
         });
 
         valueInput.addEventListener("change", (e) => {
@@ -876,6 +912,7 @@ async function generateSettingsForm(paramGroup) {
           valueInput.value = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)) : value;
           console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
           controller.sendParameter(parseInt(param.sysex_adress), value);
+          if (param.method) executeMethod(param.method, value);
         });
 
         sliderContainer.appendChild(input);
@@ -887,46 +924,28 @@ async function generateSettingsForm(paramGroup) {
         input.id = `param-${param.sysex_adress}`;
         input.name = param.name;
         input.title = param.tooltip || param.name;
-        const isAlternateControl = [10, 12, 16].includes(param.sysex_adress);
-        if (isAlternateControl) {
-          for (let i = param.min_value; i <= param.max_value; i++) {
-            if (sysexNameMap[i]) {
-              const option = document.createElement("option");
-              option.value = i;
-              option.textContent = sysexNameMap[i];
-              input.appendChild(option);
-            }
-          }
-          input.value = String(currentValue);
-          input.addEventListener("change", (e) => {
-            const value = parseInt(e.target.value);
-            tempValues[param.sysex_adress] = value;
-            console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}, display=${sysexNameMap[value] || value}`);
-            controller.sendParameter(parseInt(param.sysex_adress), value);
-          });
-        } else {
-          const isWaveform = param.name.toLowerCase().includes("waveform");
-          for (let i = param.min_value; i <= param.max_value; i++) {
-            if (isWaveform && i > 11) continue;
-            const option = document.createElement("option");
-            option.value = String(i);
-            option.textContent = isWaveform ? waveformMap[i] || i : param.name.toLowerCase().includes("octave") ? `Octave ${i}` : i;
-            input.appendChild(option);
-          }
-          console.log(`[SELECT] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, input.value=${String(currentValue)}`);
-          input.value = String(currentValue);
-          console.log(`Selected option text: ${input.options[input.selectedIndex]?.textContent || 'None'}`);
-          input.addEventListener("change", (e) => {
-            const value = parseInt(e.target.value);
-            tempValues[param.sysex_adress] = value;
-            console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}${isWaveform ? `, waveform=${waveformMap[value]}` : ''}`);
-            controller.sendParameter(parseInt(param.sysex_adress), value);
-          });
-          // Send initial value
-          controller.sendParameter(parseInt(param.sysex_adress), currentValue);
+        const isWaveform = param.name.toLowerCase().includes("waveform");
+        const options = isWaveform ? Object.entries(waveformMap).map(([value, label]) => ({ value: parseInt(value), label })) : (param.options || []);
+        if (!options.length) {
+          console.warn(`No options provided for sysex=${param.sysex_adress}, name=${param.name}`);
+          return;
         }
+        options.forEach(option => {
+          const opt = document.createElement("option");
+          opt.value = option.value;
+          opt.text = option.label;
+          input.appendChild(opt);
+        });
+        input.value = String(currentValue);
+        input.addEventListener("change", (e) => {
+          const value = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
+          tempValues[param.sysex_adress] = value;
+          console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}${isWaveform ? `, waveform=${waveformMap[value]}` : ''}`);
+          controller.sendParameter(parseInt(param.sysex_adress), value);
+          if (param.method) executeMethod(param.method, value);
+        });
         container.appendChild(label);
-        if (input) container.appendChild(input);
+        container.appendChild(input);
       }
       column.appendChild(container);
     });
@@ -952,7 +971,7 @@ async function updateUI(bankIndex) {
 
   if (rhythmModal && rhythmModal.style.display === "block") {
     tempValues = { ...currentValues };
-    await refreshRhythmGrid();
+    await checkbox_array(); // Regenerate entire modal content, including sliders
   }
 
   const bankSelect = document.getElementById('bank_number_selection');
@@ -1042,9 +1061,14 @@ async function init() {
 }
 
 function updateConnectionStatus(connected, message) {
-  if (notificationTimeout) return;
   const statusElement = document.getElementById("connection-status");
   const body = document.body;
+  if (!statusElement) {
+    console.warn("Status element not found: #connection-status");
+    return;
+  }
+
+  // Always update when connection state changes
   if (connected) {
     statusElement.className = "connection-status connected";
     body.classList.remove("control_full");
@@ -1184,10 +1208,11 @@ function cancelSettings(bankNumber, paramGroup) {
 
 function showModal(section) {
   const modalMap = {
-    'rhythm_parameter': 'rhythm-modal',
+    'chord_parameter': 'settings-modal',
+    'harp_parameter': 'settings-modal',
     'global_parameter': 'global-settings-modal',
-    'harp_parameter': 'harp-settings-modal',
-    'chord_parameter': 'chord-settings-modal'
+    'rhythm_button_parameters': 'rhythm-modal',
+    'rhythm_parameter': 'rhythm-modal'
   };
   const modalId = modalMap[section];
   if (!modalId) return;
@@ -1381,6 +1406,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   controller.onConnectionChange = function(connected, message) {
     console.log(`onConnectionChange: connected=${connected}, message=${message}, isConnected=${controller.isConnected()}`);
+    // Force immediate update
+    if (notificationTimeout) {
+      clearTimeout(notificationTimeout);
+      notificationTimeout = null;
+    }
     updateConnectionStatus(connected, message);
   };
 
@@ -1388,20 +1418,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const isConnected = controller.isConnected();
     console.log(`Delayed check: minichord isConnected=${isConnected}`);
     updateConnectionStatus(isConnected, `delayed check: ${isConnected ? 'connected' : 'not connected'}`);
-  }, 500);
+  }, 1000);
 
   const modal = document.getElementById("settings-modal");
+  const rhythmModal = document.getElementById("rhythm-modal");
   window.addEventListener("click", (e) => {
-    if (e.target === modal) {
-      cancelSettings(currentBankNumber, openParamGroup || document.getElementById("settings-title").textContent.toLowerCase().replace(/ /g, "_"));
+    // Handle settings modal (global, harp, chord)
+    if (modal && e.target === modal) {
+      const paramGroup = openParamGroup || document.getElementById("settings-title")?.textContent.toLowerCase().replace(/ /g, "_") || "global_parameter";
+      cancelSettings(currentBankNumber, paramGroup);
       modal.style.display = "none";
       tempValues = {};
       openParamGroup = null;
-    } else if (e.target === document.getElementById("rhythm-modal")) {
+    }
+    // Handle rhythm modal
+    if (rhythmModal && e.target === rhythmModal && !e.target.closest('.modal-content')) {
       cancelSettings(currentBankNumber, "rhythm_button_parameters");
-      document.getElementById("rhythm-modal").style.display = "none";
+      rhythmModal.style.display = "none";
       tempValues = {};
       openParamGroup = null;
+      console.log("Closed rhythm modal via click outside");
     }
   });
 

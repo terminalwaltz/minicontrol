@@ -248,24 +248,22 @@ svg {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1000;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  justify-content: center;
-  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  z-index: 1000;
+  overflow: auto;
 }
 
 .settings-content,
 #rhythm-modal .modal-content {
-  width: 90%;
-  max-width: 95vh;
-  max-height: 80vh;
-  padding: 20px;
   background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  overflow-y: auto;
+  margin: 5% auto;
+  padding: 30px;
+  width: 90%;
+  max-width: 100%;
+  border-radius: 5px;
+  position: relative;
 }
 
 #rhythm-modal .rhythm-grid {
@@ -335,7 +333,6 @@ svg {
   font-size: 1.5em;
   color: #333;
   cursor: pointer;
-  transition: color 0.2s;
 }
 
 #rhythm-modal .close-button:hover {
@@ -600,8 +597,8 @@ svg {
 
 #global-settings .slider,
 #settings-modal .slider {
-  width: 100%;
-  max-width: 200px;
+  width: 80%;
+  max-width: 150px;
   order: 2;
 }
 
@@ -635,7 +632,7 @@ svg {
   font-weight: bold;
   color: #333;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: visible;
   text-overflow: ellipsis;
   order: 1;
 }

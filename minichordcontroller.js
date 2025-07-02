@@ -95,7 +95,7 @@ class MiniChordController {
     const expectedLength = this.parameter_size * 2 + 1;
 
     if (data.length !== expectedLength) {
-      console.warn(`processCurrentData: Insufficient data length for parameters, got ${data.length}, expected ${expectedLength}`);
+      //console.warn(`processCurrentData: Insufficient data length for parameters, got ${data.length}, expected ${expectedLength}`);
       this.isProcessingData = false;
       return;
     }
