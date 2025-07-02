@@ -398,7 +398,12 @@
             "iterate": 1,
             "method": "ws_sin_param=value;calculate_ws_array(); chord_waveshape.shape(wave_shape,257);",
             "introduction_version": 2,
-            "ui_type": "select"
+            "ui_type": "select",
+            "options": [
+              { "value": 0, "label": "1" },
+              { "value": 1, "label": "2" },
+              { "value": 2, "label": "3" }
+      ]
         },
         {
             "name": "amplitude 1",

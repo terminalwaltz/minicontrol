@@ -1108,7 +1108,7 @@ function updateConnectionStatus(connected, message) {
 let modalEventListenersAdded = false; // Flag to prevent multiple event listeners
 
 async function openModal(paramGroup) {
-  console.log(`Opening modal for paramGroup=${paramGroup}`);
+  console.log(`openModal: Opening modal for paramGroup=${paramGroup}`);
   openParamGroup = paramGroup;
   const modal = document.getElementById("settings-modal");
   if (!modal) {
@@ -1117,7 +1117,16 @@ async function openModal(paramGroup) {
     return;
   }
 
-  originalPresetValues = { ...currentValues, ...(bankSettings[currentBankNumber] || {}) };
+  // Initialize originalPresetValues for the specific paramGroup
+  const params = await loadParameters();
+  originalPresetValues = {};
+  const groupParams = params[paramGroup] || [];
+  groupParams.forEach(param => {
+    const address = param.sysex_adress;
+    originalPresetValues[address] = currentValues[address] !== undefined 
+      ? currentValues[address] 
+      : (param.data_type === "float" ? param.default_value * (controller.float_multiplier || 100.0) : param.default_value);
+  });
   tempValues = { ...originalPresetValues };
   console.log(`openModal: paramGroup=${paramGroup}, originalPresetValues=`, JSON.stringify(originalPresetValues));
 
@@ -1144,7 +1153,7 @@ async function openModal(paramGroup) {
       showNotification("Device not connected", "error");
       return;
     }
-    await checkbox_array(); // This now includes sliders
+    await checkbox_array();
     rhythmModal.style.display = 'block';
     return;
   }
@@ -1207,9 +1216,19 @@ function saveSettings(presetId, paramGroup) {
 async function cancelSettings(bankNumber, paramGroup) {
   console.log(`cancelSettings: Restoring settings for bank ${bankNumber}, paramGroup: ${paramGroup}`);
   
-  // Restore currentValues to originalPresetValues for the relevant parameters
+  // Load parameters
   const params = await loadParameters();
   const groupParams = params[paramGroup] || [];
+  if (groupParams.length === 0) {
+    console.warn(`cancelSettings: No parameters found for paramGroup=${paramGroup}`);
+    showNotification(`No parameters available for ${paramGroup.replace(/_/g, " ")}`, "error");
+  }
+
+  // Log original and current values for debugging
+  console.log(`cancelSettings: originalPresetValues=`, JSON.stringify(originalPresetValues));
+  console.log(`cancelSettings: currentValues before restore=`, JSON.stringify(currentValues));
+
+  // Restore currentValues to originalPresetValues for the relevant parameters
   groupParams.forEach(param => {
     const address = param.sysex_adress;
     if (originalPresetValues[address] !== undefined) {
@@ -1217,13 +1236,25 @@ async function cancelSettings(bankNumber, paramGroup) {
       // Send restored value to the device
       if (controller.isConnected()) {
         console.log(`[CANCEL] Restoring sysex=${address}, value=${currentValues[address]}, name=${param.name}`);
-        controller.sendParameter(parseInt(address), currentValues[address]);
+        const success = controller.sendParameter(parseInt(address), currentValues[address]);
+        if (!success) {
+          console.error(`[CANCEL] Failed to send sysex=${address}, value=${currentValues[address]}`);
+          showNotification(`Failed to restore ${param.name}`, "error");
+        }
+      } else {
+        console.warn(`[CANCEL] Device not connected, cannot send sysex=${address}`);
+        showNotification("Device not connected", "error");
       }
+    } else {
+      console.warn(`[CANCEL] No original value found for sysex=${address}, name=${param.name}`);
     }
   });
 
   // Update bankSettings to reflect restored values
   bankSettings[bankNumber] = { ...currentValues };
+
+  // Log currentValues after restoration
+  console.log(`cancelSettings: currentValues after restore=`, JSON.stringify(currentValues));
 
   // Clear tempValues
   tempValues = {};
