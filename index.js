@@ -867,6 +867,7 @@ async function generateSettingsForm(paramGroup) {
         });
         container.appendChild(label);
         container.appendChild(input);
+        console.log(`[DEBUG] Appended switch for sysex=${param.sysex_adress}, name=${param.name}`);
       } else if (param.ui_type === "slider") {
         const sliderContainer = document.createElement("div");
         sliderContainer.className = "slider-container";
@@ -925,7 +926,22 @@ async function generateSettingsForm(paramGroup) {
         input.name = param.name;
         input.title = param.tooltip || param.name;
         const isWaveform = param.name.toLowerCase().includes("waveform");
-        const options = isWaveform ? Object.entries(waveformMap).map(([value, label]) => ({ value: parseInt(value), label })) : (param.options || []);
+        let options;
+        if (["Potentiometer", "harp_potentiometer", "mod_potentiometer"].includes(param.group) && 
+            param.min_value !== undefined && param.max_value !== undefined) {
+          // Generate options from sysexNameMap for Potentiometer, harp_potentiometer, or mod_potentiometer parameters
+          options = [];
+          for (let i = param.min_value; i <= param.max_value; i++) {
+            if (sysexNameMap[i]) {
+              options.push({ value: i, label: sysexNameMap[i] });
+            }
+          }
+        } else {
+          // Existing logic for waveform or explicit options
+          options = isWaveform 
+            ? Object.entries(waveformMap).map(([value, label]) => ({ value: parseInt(value), label })) 
+            : (param.options || []);
+        }
         if (!options.length) {
           console.warn(`No options provided for sysex=${param.sysex_adress}, name=${param.name}`);
           return;

@@ -2348,7 +2348,7 @@
             "iterate": 1,
             "method": "chord_pot.set_alternate(value);",
             "introduction_version": 2,
-            "ui_type": "slider"
+            "ui_type": "select"
         },
         {
             "name": "chord alternate range",
@@ -2380,7 +2380,7 @@
             "iterate": 1,
             "method": "harp_pot.set_alternate(value);",
             "introduction_version": 2,
-            "ui_type": "slider"
+            "ui_type": "select"
         },
         {
             "name": "harp alternate percent range",
@@ -2412,7 +2412,7 @@
             "iterate": 1,
             "method": "mod_pot.set_main(value);",
             "introduction_version": 2,
-            "ui_type": "slider"
+            "ui_type": "select"
         },
         {
             "name": "mod main percent range",
@@ -2442,7 +2442,7 @@
             "iterate": 1,
             "method": "mod_pot.set_alternate(value);",
             "introduction_version": 2,
-            "ui_type": "slider"
+            "ui_type": "select"
         },
         {
             "name": "mod alternate percent range ",
