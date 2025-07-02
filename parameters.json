@@ -2,7 +2,7 @@
     "global_parameter": [
         {
             "name": "bank color",
-            "group": "Settings",
+            "group": "General",
             "default_value": 0,
             "data_type": "int",
             "sysex_adress": 20,
@@ -17,7 +17,7 @@
         },
         {
             "name": "led attenuation",
-            "group": "Settings",
+            "group": "General",
             "default_value": 0,
             "data_type": "float",
             "sysex_adress": 32,
@@ -32,7 +32,7 @@
         },
         {
             "name": "transpose",
-            "group": "Settings",
+            "group": "General",
             "default_value": 0,
             "data_type": "int",
             "sysex_adress": 30,
@@ -47,7 +47,7 @@
         },
         {
             "name": "barry harris mode",
-            "group": "Settings",
+            "group": "General",
             "default_value": false,
             "data_type": "int",
             "sysex_adress": 33,
@@ -57,6 +57,21 @@
             "method": "barry_harris_mode=value;",
             "introduction_version": 4,
             "ui_type": "switch"
+        },
+        {
+            "name": "pan",
+            "group": "Effects",
+            "default_value": 1,
+            "data_type": "float",
+            "sysex_adress": 29,
+            "curve": "linear",
+            "min_value": 0,
+            "max_value": 1,
+            "tooltip": "pans the chord and harp sound, from fully separated to both in the middle ",
+            "iterate": 1,
+            "method": "pan=value;apply_audio_parameter(85, current_sysex_parameters[85]);apply_audio_parameter(184, current_sysex_parameters[184]);",
+            "introduction_version": 2,
+            "ui_type": "slider"
         },
         {
             "name": "reverb size",
@@ -132,21 +147,6 @@
             "method": "main_reverb.diffusion(value);",
             "introduction_version": 2,
             "ui_type": "slider"
-        },
-        {
-            "name": "pan",
-            "group": "Effects",
-            "default_value": 1,
-            "data_type": "float",
-            "sysex_adress": 29,
-            "curve": "linear",
-            "min_value": 0,
-            "max_value": 1,
-            "tooltip": "pans the chord and harp sound, from fully separated to both in the middle ",
-            "iterate": 1,
-            "method": "pan=value;apply_audio_parameter(85, current_sysex_parameters[85]);apply_audio_parameter(184, current_sysex_parameters[184]);",
-            "introduction_version": 2,
-            "ui_type": "slider"
         }
     ],
     "chord_parameter": [
@@ -182,7 +182,7 @@
         },
         {
             "name": "retrigger chords",
-            "group": "Settings",
+            "group": "General",
             "default_value": false,
             "data_type": "int",
             "sysex_adress": 21,
@@ -217,7 +217,7 @@
         },
         {
             "name": "slash level",
-            "group": "Settings",
+            "group": "General",
             "default_value": 0,
             "data_type": "int",
             "sysex_adress": 23,
@@ -372,7 +372,7 @@
         },
         {
             "name": "crunch level",
-            "group": "Effects",
+            "group": "Crunch",
             "default_value": 0.5,
             "data_type": "float",
             "sysex_adress": 185,
@@ -387,7 +387,7 @@
         },
         {
             "name": "crunch type",
-            "group": "Effects",
+            "group": "Crunch",
             "default_value": 0.5,
             "data_type": "int",
             "sysex_adress": 186,
@@ -1384,7 +1384,7 @@
         },
                 {
             "name": "change held strings",
-            "group": "Settings",
+            "group": "General",
             "default_value": false,
             "data_type": "int",
             "sysex_adress": 22,
@@ -1517,7 +1517,7 @@
         },
         {
             "name": "reverb level",
-            "group": "Effects",
+            "group": "Reverb",
             "default_value": 0.5,
             "data_type": "float",
             "sysex_adress": 85,
@@ -1532,7 +1532,7 @@
         },
         {
             "name": "crunch level",
-            "group": "Effects",
+            "group": "Crunch",
             "default_value": 0.5,
             "data_type": "float",
             "sysex_adress": 86,
@@ -1547,7 +1547,7 @@
         },
         {
             "name": "crunch type",
-            "group": "Effects",
+            "group": "Crunch",
             "default_value": 0.5,
             "data_type": "int",
             "sysex_adress": 87,
@@ -2475,7 +2475,7 @@
     "sharp_button_parameter": [        
       {
             "name": "sharp function",
-            "group": "Settings",
+            "group": "General",
             "default_value": false,
             "data_type": "int",
             "sysex_adress": 31,
