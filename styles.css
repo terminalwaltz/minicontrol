@@ -125,6 +125,18 @@ svg {
   box-shadow: none;
 }
 
+#current-bank-indicator {
+  position: absolute;
+  top: calc(25vh + 250px);
+  left: 10px;
+  z-index: 10;
+  padding: 5px 10px;
+  font-size: 1em;
+  color: #333;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 5px;
+}
+
 #control #header {
   margin-bottom: 10px;
 }
@@ -179,18 +191,6 @@ svg {
 
 #control #instruction_zone a:hover {
   text-decoration: underline;
-}
-
-#current-bank-indicator {
-  position: absolute;
-  top: calc(25vh + 250px);
-  left: 10px;
-  z-index: 10;
-  padding: 5px 10px;
-  font-size: 1em;
-  color: #333;
-  background-color: rgba(255, 255, 255, 0.7);
-  border-radius: 5px;
 }
 
 #current-bank-value {
@@ -748,15 +748,27 @@ svg {
   }
 
   #control {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    width: 180px;
+    position: relative; /* Change to relative to place in document flow */
+    top: auto; /* Remove absolute positioning */
+    left: auto;
+    width: 90%; /* Match container width */
+    margin: 10px auto; /* Center and add spacing */
+    z-index: 5; /* Below modals (z-index: 1000) and SVG (default z-index: 0) */
+  }
+
+  #current-bank-indicator {
+    position: relative; /* Change to relative to place in document flow */
+    top: auto;
+    left: auto;
+    width: fit-content;
+    margin: 10px auto; /* Center below control section */
+    z-index: 5; /* Below modals and SVG */
   }
 
   .settings-modal,
   #rhythm-modal {
     width: 100%;
+    z-index: 1000; /* Ensure modals stay on top */
   }
 
   .settings-content,
