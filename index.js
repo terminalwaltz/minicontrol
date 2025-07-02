@@ -327,7 +327,7 @@ async function checkbox_array() {
     showNotification("Rhythm modal not found", "error");
     return;
   }
-  modal.innerHTML = '';
+  modal.innerHTML = ''; // Clear modal content
 
   const modalContent = document.createElement('div');
   modalContent.className = 'modal-content';
@@ -342,6 +342,7 @@ async function checkbox_array() {
   title.textContent = 'Rhythm Settings';
   modalContent.appendChild(title);
 
+  // Checkbox grid for rhythm_button_parameters
   const gridContainer = document.createElement('div');
   gridContainer.className = 'rhythm-grid';
 
@@ -353,7 +354,7 @@ async function checkbox_array() {
   for (let step = 1; step <= 16; step++) {
     const stepHeader = document.createElement('div');
     stepHeader.className = 'rhythm-cell';
-    stepHeader.textContent = `Step ${step}`;
+    stepHeader.textContent = step;
     headerRow.appendChild(stepHeader);
   }
   gridContainer.appendChild(headerRow);
@@ -371,27 +372,124 @@ async function checkbox_array() {
       cell.className = 'rhythm-cell';
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
-      checkbox.id = `checkbox${voice}${step}`;
+      checkbox.id = `checkbox${voice}${step}`; // Match refreshRhythmGrid format
+      checkbox.dataset.voice = voice;
+      checkbox.dataset.step = step;
       checkbox.addEventListener('change', () => sendRhythmData(step));
       cell.appendChild(checkbox);
       row.appendChild(cell);
     }
     gridContainer.appendChild(row);
   }
+  modalContent.appendChild(gridContainer);
 
+  // Sliders for rhythm_parameter
+  const params = await loadParameters();
+  console.log('checkbox_array: Loaded parameters=', params); // Debug log
+  const rhythmParams = (params.rhythm_parameter || []).filter(param => param.group !== "hidden");
+  console.log('checkbox_array: rhythmParams=', rhythmParams); // Debug log
+  if (rhythmParams.length > 0) {
+    const slidersContainer = document.createElement('div');
+    slidersContainer.className = 'parameter-column';
+    const slidersHeader = document.createElement('h3');
+    slidersHeader.textContent = 'Rhythm Parameters';
+    slidersContainer.appendChild(slidersHeader);
+
+    rhythmParams.forEach(param => {
+      if (param.ui_type !== 'slider') {
+        console.warn(`Skipping non-slider parameter: ${param.name} (sysex_adress: ${param.sysex_adress})`);
+        return;
+      }
+
+      const container = document.createElement('div');
+      container.className = 'parameter-row';
+      const label = document.createElement('label');
+      label.textContent = param.name;
+      label.setAttribute('for', `param-${param.sysex_adress}`);
+      label.title = param.tooltip || param.name;
+
+      const sliderContainer = document.createElement('div');
+      sliderContainer.className = 'slider-container';
+      const input = document.createElement('input');
+      input.type = 'range';
+      input.id = `param-${param.sysex_adress}`;
+      input.name = param.name;
+      input.className = 'slider';
+      input.min = param.min_value;
+      input.max = param.max_value;
+      const floatMultiplier = param.data_type === 'float' ? (controller.float_multiplier || 100.0) : 1;
+      const currentValue = tempValues[param.sysex_adress] !== undefined
+        ? tempValues[param.sysex_adress]
+        : (param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value);
+      input.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+      input.step = param.data_type === 'float' ? 0.01 : 1;
+      input.title = param.tooltip || param.name;
+
+      const valueInput = document.createElement('input');
+      valueInput.type = 'number';
+      valueInput.id = `value-${param.sysex_adress}`;
+      valueInput.min = param.min_value;
+      valueInput.max = param.max_value;
+      valueInput.step = param.data_type === 'float' ? 0.01 : 1;
+      valueInput.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+      valueInput.className = 'value-input';
+      valueInput.title = param.tooltip || param.name;
+
+      console.log(`[SLIDER] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, floatMultiplier=${floatMultiplier}, input.value=${input.value}`);
+
+      input.addEventListener('input', (e) => {
+        const value = param.data_type === 'float' ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
+        tempValues[param.sysex_adress] = value;
+        valueInput.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
+        console.log(`[RHYTHM] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
+        controller.sendParameter(parseInt(param.sysex_adress), value);
+        executeMethod(param.method, value);
+      });
+
+      valueInput.addEventListener('change', (e) => {
+        let value = parseFloat(e.target.value) || 0;
+        value = Math.max(param.min_value, Math.min(param.max_value, value));
+        if (param.data_type === 'float') value *= floatMultiplier;
+        tempValues[param.sysex_adress] = value;
+        input.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
+        valueInput.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
+        console.log(`[RHYTHM] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
+        controller.sendParameter(parseInt(param.sysex_adress), value);
+        executeMethod(param.method, value);
+      });
+
+      sliderContainer.appendChild(input);
+      sliderContainer.appendChild(valueInput);
+      container.appendChild(label);
+      container.appendChild(sliderContainer);
+      slidersContainer.appendChild(container);
+    });
+
+    modalContent.appendChild(slidersContainer);
+  } else {
+    console.warn('No rhythm_parameter found in parameters.json');
+  }
+
+  // Buttons
   const buttonContainer = document.createElement('div');
   buttonContainer.className = 'modal-buttons';
   const saveButton = document.createElement('button');
   saveButton.className = 'save-btn';
   saveButton.textContent = 'Save';
-  saveButton.addEventListener('click', () => saveSettings(currentBankNumber, 'rhythm_button_parameters'));
+  saveButton.addEventListener('click', () => {
+    saveSettings(currentBankNumber, 'rhythm_button_parameters');
+    saveSettings(currentBankNumber, 'rhythm_parameter');
+    hideModal('rhythm_button_parameters');
+  });
   const cancelButton = document.createElement('button');
   cancelButton.className = 'cancel-btn';
   cancelButton.textContent = 'Cancel';
-  cancelButton.addEventListener('click', () => hideModal('rhythm_button_parameters'));
+  cancelButton.addEventListener('click', () => {
+    tempValues = { ...currentValues }; // Restore values
+    hideModal('rhythm_button_parameters'); // Close modal
+  });
   buttonContainer.appendChild(saveButton);
   buttonContainer.appendChild(cancelButton);
-  modalContent.appendChild(gridContainer);
   modalContent.appendChild(buttonContainer);
 
   modal.appendChild(modalContent);
@@ -406,9 +504,11 @@ async function checkbox_array() {
     }
   }
 
+  // Ensure modal is in DOM before refreshing grid
+  await new Promise(resolve => setTimeout(resolve, 0)); // Allow DOM update
   await refreshRhythmGrid();
-  console.log('checkbox_array: Generated 7x16 rhythm grid, initial currentValues[220-235]=', 
-    Object.fromEntries(Object.entries(currentValues).filter(([k]) => k >= 220 && k <= 235)));
+  console.log('checkbox_array: Generated rhythm grid and sliders, currentValues[187-191,220-235]=', 
+    Object.fromEntries(Object.entries(currentValues).filter(([k]) => (k >= 187 && k <= 191) || (k >= 220 && k <= 235))));
 }
 
 function sendRhythmData(step) {
@@ -968,6 +1068,7 @@ function updateConnectionStatus(connected, message) {
 let modalEventListenersAdded = false; // Flag to prevent multiple event listeners
 
 async function openModal(paramGroup) {
+  console.log(`Opening modal for paramGroup=${paramGroup}`);
   openParamGroup = paramGroup;
   const modal = document.getElementById("settings-modal");
   if (!modal) {
@@ -983,7 +1084,6 @@ async function openModal(paramGroup) {
   if (paramGroup === "global_parameter") {
     await generateGlobalSettingsForm();
     modal.style.display = "block";
-    // Ensure sysex=42 is sent for waveform
     if (originalPresetValues["42"] !== undefined) {
       const value = parseInt(originalPresetValues["42"]);
       console.log(`[MODAL] Sending sysex=42, value=${value}, name=waveform, waveform=${waveformMap[value] || value}`);
@@ -1004,7 +1104,7 @@ async function openModal(paramGroup) {
       showNotification("Device not connected", "error");
       return;
     }
-    await checkbox_array();
+    await checkbox_array(); // This now includes sliders
     rhythmModal.style.display = 'block';
     return;
   }
@@ -1069,19 +1169,22 @@ function cancelSettings(bankNumber, paramGroup) {
   tempValues = { ...currentValues };
   if (paramGroup === "global_parameter") {
     generateGlobalSettingsForm();
+    hideModal(paramGroup);
+  } else if (paramGroup === "rhythm_button_parameters" || paramGroup === "rhythm_parameter") {
+    // Only refresh grid if modal is open
+    if (document.getElementById('rhythm-modal').style.display === 'block') {
+      checkbox_array();
+    }
+    hideModal("rhythm_button_parameters");
   } else {
     generateSettingsForm(paramGroup);
-  }
-  if (paramGroup === "rhythm_button_parameters") {
-    hideModal("rhythm-modal");
-  } else {
-    hideModal("settings-modal"); // Use settings-modal for both chord and harp
+    hideModal(paramGroup);
   }
 }
 
 function showModal(section) {
   const modalMap = {
-    'rhythm_button_parameters': 'rhythm-modal',
+    'rhythm_parameter': 'rhythm-modal',
     'global_parameter': 'global-settings-modal',
     'harp_parameter': 'harp-settings-modal',
     'chord_parameter': 'chord-settings-modal'
@@ -1115,7 +1218,8 @@ function showModal(section) {
 function hideModal(section) {
   const modalMap = {
     'rhythm_button_parameters': 'rhythm-modal',
-    'global_parameter': 'settings-modal',
+    'rhythm_parameter': 'rhythm-modal',
+    'global_parameter': 'global-settings-modal',
     'harp_parameter': 'harp-settings-modal',
     'chord_parameter': 'chord-settings-modal'
   };
@@ -1129,35 +1233,30 @@ function hideModal(section) {
     modal.style.display = 'none';
     openParamGroup = null;
     tempValues = {};
-    console.log(`hideModal: Closed modal for section=${section}`);
+    console.log(`hideModal: Closed modal for section=${section}, modalId=${modalId}`);
   } else {
     console.error(`Modal element not found: #${modalId}`);
   }
 }
 
 async function refreshRhythmGrid() {
-  const modal = document.getElementById('rhythm-modal');
-  if (!modal || modal.style.display !== 'block') {
-    console.log('refreshRhythmGrid: Skipped, rhythm modal not open');
-    return;
-  }
-
   for (let step = 0; step < 16; step++) {
-    const sysexAddress = BASE_ADDRESS_RHYTHM + step;
-    const value = currentValues[sysexAddress] || 0;
+    const sysexAddress = BASE_ADDRESS_RHYTHM + step; // e.g., 220 + step
+    const patternValue = currentValues[sysexAddress] || 0;
+    rhythmPattern[step] = patternValue;
     for (let voice = 0; voice < 7; voice++) {
       const checkbox = document.getElementById(`checkbox${voice}${step}`);
-      if (checkbox) {
-        checkbox.checked = !!(value & (1 << voice));
-      } else {
-        console.warn(`refreshRhythmGrid: Checkbox not found: checkbox${voice}${step}`);
+      if (!checkbox) {
+        console.error(`refreshRhythmGrid: Checkbox not found: checkbox${voice}${step}`);
+        continue;
       }
+      const bit = (patternValue >> voice) & 1;
+      checkbox.checked = !!bit;
     }
   }
   console.log('refreshRhythmGrid: Updated grid with currentValues[220-235]=', 
     Object.fromEntries(Object.entries(currentValues).filter(([k]) => k >= 220 && k <= 235)));
 }
-
 
 function updateBankIndicator() {
   const bankValue = document.getElementById('current-bank-value');
@@ -1289,7 +1388,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const isConnected = controller.isConnected();
     console.log(`Delayed check: minichord isConnected=${isConnected}`);
     updateConnectionStatus(isConnected, `delayed check: ${isConnected ? 'connected' : 'not connected'}`);
-  }, 1000);
+  }, 500);
 
   const modal = document.getElementById("settings-modal");
   window.addEventListener("click", (e) => {
@@ -1366,30 +1465,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Rhythm button
-  const rhythmButton = document.getElementById("rhythm-button");
-  if (rhythmButton) {
-    addSvgTooltip(rhythmButton, svgTooltips["rhythm-button"]);
-    rhythmButton.addEventListener("click", async () => {
-      const rhythmModal = document.getElementById('rhythm-modal');
-      if (!rhythmModal) {
-        console.error("Rhythm modal element not found: #rhythm-modal");
-        showNotification("Rhythm modal not found", "error");
-        return;
-      }
-      if (!controller.isConnected()) {
-        console.warn("Rhythm button: device not connected");
-        showNotification("Device not connected", "error");
-        return;
-      }
-      openParamGroup = 'rhythm_button_parameters';
-      originalPresetValues = { ...currentValues };
-      tempValues = { ...originalPresetValues };
-      await checkbox_array();
-      rhythmModal.style.display = 'block';
-    });
-  } else {
-    console.error("Rhythm button not found: #rhythm-button");
-  }
+const rhythmButton = document.getElementById("rhythm-button");
+if (rhythmButton) {
+  addSvgTooltip(rhythmButton, "Open rhythm settings");
+  rhythmButton.addEventListener("click", async () => {
+    if (!controller.isConnected()) {
+      console.warn("Rhythm button: device not connected");
+      showNotification("Device not connected", "error");
+      return;
+    }
+    openParamGroup = 'rhythm_button_parameters';
+    originalPresetValues = { ...currentValues };
+    tempValues = { ...originalPresetValues };
+    await checkbox_array();
+    document.getElementById("rhythm-modal").style.display = 'block';
+  });
+}
 
   // Preset buttons
   document.querySelectorAll(".preset-button").forEach(button => {
