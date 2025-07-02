@@ -1204,22 +1204,51 @@ function saveSettings(presetId, paramGroup) {
   }, 100);
 }
 
-function cancelSettings(bankNumber, paramGroup) {
-  console.log(`Cancel settings for bank ${bankNumber}, paramGroup: ${paramGroup}`);
-  tempValues = { ...currentValues };
+async function cancelSettings(bankNumber, paramGroup) {
+  console.log(`cancelSettings: Restoring settings for bank ${bankNumber}, paramGroup: ${paramGroup}`);
+  
+  // Restore currentValues to originalPresetValues for the relevant parameters
+  const params = await loadParameters();
+  const groupParams = params[paramGroup] || [];
+  groupParams.forEach(param => {
+    const address = param.sysex_adress;
+    if (originalPresetValues[address] !== undefined) {
+      currentValues[address] = originalPresetValues[address];
+      // Send restored value to the device
+      if (controller.isConnected()) {
+        console.log(`[CANCEL] Restoring sysex=${address}, value=${currentValues[address]}, name=${param.name}`);
+        controller.sendParameter(parseInt(address), currentValues[address]);
+      }
+    }
+  });
+
+  // Update bankSettings to reflect restored values
+  bankSettings[bankNumber] = { ...currentValues };
+
+  // Clear tempValues
+  tempValues = {};
+
+  // Update UI based on paramGroup
   if (paramGroup === "global_parameter") {
-    generateGlobalSettingsForm();
+    await generateGlobalSettingsForm();
     hideModal(paramGroup);
   } else if (paramGroup === "rhythm_button_parameters" || paramGroup === "rhythm_parameter") {
-    // Only refresh grid if modal is open
     if (document.getElementById('rhythm-modal').style.display === 'block') {
-      checkbox_array();
+      await checkbox_array();
+      await refreshRhythmGrid();
     }
     hideModal("rhythm_button_parameters");
   } else {
-    generateSettingsForm(paramGroup);
+    await generateSettingsForm(paramGroup);
     hideModal(paramGroup);
   }
+
+  // Update LED if bank color was changed
+  if (currentValues[20] !== undefined) {
+    updateLEDBankColor();
+  }
+
+  showNotification(`Cancelled changes for ${paramGroup.replace(/_/g, " ")}`, "info");
 }
 
 function showModal(section) {
