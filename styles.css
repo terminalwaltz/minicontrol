@@ -1,128 +1,457 @@
-/* General Styles */
+/* ==========================================================================
+   Table of Contents:
+   1. General Styles
+   2. Layout
+   3. Components
+      3.1 Status Header
+      3.2 Control Section
+      3.3 Buttons & Selects
+      3.4 Modals (Settings & Rhythm)
+      3.5 SVG Elements
+      3.6 Global Settings
+      3.7 Toggle Switch
+   4. Media Queries
+   5. Tooltip
+   6. Ambient Backlight
+   ========================================================================== */
+
+/* ==========================================================================
+   1. General Styles
+   ========================================================================== */
+
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
-    position: relative;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #f0f0f0;
+  position: relative;
 }
 
+/* ==========================================================================
+   2. Layout
+   ========================================================================== */
+
 .container {
-    display: flex;
-    width: 1000px;
-    height: 400px;
-    margin-left: 220px;
-    margin-top: 50px;
-    flex-direction: row;
-    align-items: flex-start;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 1000px;
+  height: 400px;
+  margin-left: 220px;
+  margin-top: 50px;
 }
 
 svg {
-    width: auto;
-    height: 100%;
-    flex: 1;
-    background-color: transparent;
-    box-shadow: none;
-    border-radius: 0;
+  flex: 1;
+  height: 100%;
+  background-color: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  width: auto; /* Added to ensure proper scaling */
 }
 
-#global-settings {
-    width: 375px;
-    height: 400px;
-    background-color: #fff;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    margin-left: 10px;
-    overflow-y: auto;
-    z-index: 10;
-    flex-shrink: 0;
+/* ==========================================================================
+   3. Components
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   3.1 Status Header
+   -------------------------------------------------------------------------- */
+
+.status-header {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
 }
 
-#global-settings #output_zone {
-    margin-top: 10px;
-    font-size: 0.8em;
-    color: #666;
-    word-wrap: break-word;
-    padding: 5px;
-    background-color: #f9f9f9;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    max-height: 100px;
-    overflow-y: auto;
+.status-header h1 {
+  font-size: 24px;
+  margin: 0;
 }
+
+#connection-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  font-size: 20px;
+  color: black;
+  border: 2px solid;
+  border-radius: 1em;
+}
+
+#connection-status.connected {
+  border-color: green;
+  background-color: lightgreen;
+}
+
+#connection-status.disconnected {
+  border-color: red;
+  background-color: lightcoral;
+}
+
+#connection-status.connected #dot {
+  color: green;
+}
+
+#connection-status.disconnected #dot {
+  color: red;
+}
+
+/* --------------------------------------------------------------------------
+   3.2 Control Section
+   -------------------------------------------------------------------------- */
+
+#control {
+  position: absolute;
+  top: 25vh;
+  left: 10px;
+  z-index: 10;
+  width: 200px;
+  padding: 10px;
+  font-family: sans-serif;
+  line-height: 1.25em;
+  background-color: transparent;
+  border: transparent;
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+#current-bank-indicator {
+  position: absolute;
+  top: calc(25vh + 250px);
+  left: 10px;
+  z-index: 10;
+  padding: 5px 10px;
+  font-size: 1em;
+  color: #333;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 5px;
+}
+
+#control #header {
+  margin-bottom: 10px;
+}
+
+#control .section {
+  margin-bottom: 5px;
+}
+
+#control h5.active {
+  margin: 0;
+  font-size: 1em;
+  font-weight: bold;
+  color: #333;
+}
+
+#control .controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background-color: transparent;
+}
+
+#control .button_div {
+  width: 100%;
+  margin: 0;
+  background-color: transparent;
+  border: transparent;
+}
+
+#control .label.active {
+  display: block;
+  margin-left: 0.5em;
+  font-size: 1em;
+  color: #333;
+}
+
+#control details {
+  margin-top: 2em;
+  font-size: 0.65em;
+  color: #333;
+}
+
+#control #instruction_zone {
+  font-size: 0.6em;
+  color: #333;
+}
+
+#control #instruction_zone a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+#control #instruction_zone a:hover {
+  text-decoration: underline;
+}
+
+#current-bank-value {
+  font-weight: bold;
+}
+
+/* --------------------------------------------------------------------------
+   3.3 Buttons & Selects
+   -------------------------------------------------------------------------- */
+
+#control select.active {
+  width: 80%;
+  padding: 0.2em;
+  font-size: 1.8em;
+  font-family: monospace;
+  text-align: center;
+  border: transparent;
+  border-radius: 0;
+  background-color: white;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.settings-button,
+#control button.active {
+  width: 80%;
+  padding: 0.1em;
+  font-size: 1em;
+  border-style: 2px;
+  border-radius: 3px;
+  border-color: black;
+  background-color: white;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.settings-button:hover,
+#control button.active:hover,
+.settings-button:focus,
+#control button.active:focus {
+  opacity: 0.75;
+  background-color: #f0f0f0;
+}
+
+/* --------------------------------------------------------------------------
+   3.4 Modals (Settings & Rhythm)
+   -------------------------------------------------------------------------- */
+
+.settings-modal,
+#rhythm-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  z-index: 1000;
+  overflow: auto;
+}
+
+.settings-content,
+#rhythm-modal .modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 30px;
+  width: 90%;
+  max-width: 100%;
+  border-radius: 5px;
+  position: relative;
+}
+
+#rhythm-modal .rhythm-grid {
+  display: grid;
+  grid-template-columns: 100px repeat(16, 40px);
+  gap: 5px;
+  margin-top: 10px;
+}
+
+#rhythm-modal .rhythm-row {
+  display: contents;
+}
+
+#rhythm-modal .rhythm-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+#rhythm-modal .rhythm-cell input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 5px auto;
+  cursor: pointer;
+  accent-color: #2ecc71;
+}
+
+#rhythm-modal .modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+#rhythm-modal .modal-buttons button {
+  padding: 10px 20px;
+  font-size: 0.9em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#rhythm-modal .modal-buttons button.save-btn {
+  background-color: #2ecc71;
+  color: #fff;
+}
+
+#rhythm-modal .modal-buttons button.save-btn:hover {
+  background-color: #27ae60;
+}
+
+#rhythm-modal .modal-buttons button.cancel-btn {
+  background-color: #e94e77;
+  color: #fff;
+}
+
+#rhythm-modal .modal-buttons button.cancel-btn:hover {
+  background-color: #c0392b;
+}
+
+#rhythm-modal .close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.5em;
+  color: #333;
+  cursor: pointer;
+}
+
+#rhythm-modal .close-button:hover {
+  color: #c0392b;
+}
+
+.settings-content button {
+  padding: 10px 20px;
+  margin: 0 5px;
+  font-size: 0.9em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: 0.3em;
+  border: 1px solid black;
+  border-radius: 3px;
+  background-color: white;
+  font-size: 1em;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.save-btn {
+  background-color: #2ecc71;
+  color: #fff;
+}
+
+.save-btn:hover {
+  background-color: #27ae60;
+}
+
+.cancel-btn {
+  background-color: #e94e77;
+  color: #fff;
+}
+
+.cancel-btn:hover {
+  background-color: #c0392b;
+}
+
+/* --------------------------------------------------------------------------
+   3.5 SVG Elements
+   -------------------------------------------------------------------------- */
 
 .outline {
-    fill: none;
-    stroke: #333;
-    stroke-width: 4;
-    stroke-linecap: round;
+  fill: none;
+  stroke: #333;
+  stroke-width: 4;
+  stroke-linecap: round;
 }
 
 .chord-button {
-    fill: #4a90e2;
-    stroke: #333;
-    stroke-width: 2;
-    cursor: pointer;
-    transition: fill 0.2s;
+  fill: #4a90e2;
+  stroke: #333;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: fill 0.2s;
 }
 
 .chord-button:hover {
-    fill: #357abd;
+  fill: #357abd;
 }
 
 .sharp-button,
 .rhythm-button {
-    fill: #e94e77;
-    stroke: #333;
-    stroke-width: 2;
-    cursor: pointer;
-    transition: fill 0.2s;
+  fill: #e94e77;
+  stroke: #333;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: fill 0.2s;
 }
 
 .sharp-button:hover,
 .rhythm-button:hover {
-    fill: #c0392b;
+  fill: #c0392b;
 }
 
 .harp-plate {
-    fill: #7f8c8d;
-    stroke: #333;
-    stroke-width: 2;
-    cursor: pointer;
-    transition: fill 0.2s;
-    pointer-events: auto;
+  fill: #7f8c8d;
+  stroke: #333;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: fill 0.2s;
+  pointer-events: auto;
 }
 
 .harp-plate:hover {
-    fill: #6c7070;
+  fill: #6c7070;
 }
 
 .pot {
-    fill: #f1c40f;
-    stroke: #333;
-    stroke-width: 2;
-    cursor: pointer;
-    transition: fill 0.2s;
+  fill: #f1c40f;
+  stroke: #333;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: fill 0.2s;
 }
 
 .pot:hover {
-    fill: #f39c12;
+  fill: #f39c12;
 }
 
 .preset-button {
-    fill: #000000;
-    stroke: #333;
-    stroke-width: 2;
-    cursor: pointer;
-    transition: fill 0.2s;
+  fill: #000000;
+  stroke: #333;
+  stroke-width: 2;
+  cursor: auto;
+  transition: fill 0.2s;
 }
 
 .led {
-    transition: fill 0.2s;
+  transition: fill 0.2s;
 }
 
 .led.color-0 { fill: hsl(0, 70%, 50%) ; }
@@ -150,271 +479,78 @@ svg {
 .led.color-22 { fill: hsl(330, 70%, 50%) ; }
 .led.color-23 { fill: hsl(345, 70%, 50%) ; }
 
+/* --------------------------------------------------------------------------
+   3.6 Global Settings
+   -------------------------------------------------------------------------- */
+
+#global-settings {
+  flex-shrink: 0;
+  width: 375px;
+  height: 400px;
+  margin-left: 10px;
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  z-index: 10;
+}
+
+#global-settings #output_zone {
+  margin-top: 10px;
+  padding: 5px;
+  font-size: 0.8em;
+  color: #666;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  max-height: 100px;
+  overflow-y: auto;
+  word-wrap: break-word;
+}
+
 #global-settings h2,
 .settings-content h2,
 #rhythm-modal h2 {
-    margin: 0 0 10px 0;
-    font-size: 1.5em;
-    color: #333;
-    text-align: center;
+  margin: 0 0 10px 0;
+  font-size: 1.5em;
+  color: #333;
+  text-align: center;
 }
 
 #global-settings h3,
 .settings-content h3 {
-    margin: 10px 0 5px;
-    font-size: 1.5em;
-    color: #333;
-    font-weight: bold;
+  margin: 10px 0 5px;
+  font-size: 1.5em;
+  color: #333;
+  font-weight: bold;
 }
 
 #global-settings input,
 #global-settings select,
 #settings-form input,
 #settings-form select {
-    width: 100%;
-    max-width: 200px;
-    padding: 6px;
-    margin-bottom: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    font-size: 0.85em;
-    box-sizing: border-box;
-    order: 2;
+  width: 100%;
+  max-width: 200px;
+  padding: 6px;
+  margin-bottom: 8px;
+  font-size: 0.85em;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-sizing: border-box;
+  order: 2;
 }
 
 #global-settings input[type="range"],
 #settings-form input[type="range"] {
-    padding: 0;
+  padding: 0;
 }
 
 #global-settings select,
 #settings-form select {
-    padding: 5px;
+  padding: 5px;
 }
-
-.settings-modal,
-#rhythm-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.settings-content,
-#rhythm-modal .modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 95vh;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-#rhythm-modal .rhythm-grid {
-    display: grid;
-    grid-template-columns: 100px repeat(16, 40px);
-    gap: 5px;
-    margin-top: 10px;
-}
-
-#rhythm-modal .rhythm-row {
-    display: contents;
-}
-
-#rhythm-modal .rhythm-cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-#rhythm-modal .rhythm-cell input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin: 5px auto;
-    cursor: pointer;
-    accent-color: #2ecc71;
-}
-
-#rhythm-modal .modal-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-#rhythm-modal .modal-buttons button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.2s;
-}
-
-#rhythm-modal .modal-buttons button.save-btn {
-    background-color: #2ecc71;
-    color: #fff;
-}
-
-#rhythm-modal .modal-buttons button.save-btn:hover {
-    background-color: #27ae60;
-}
-
-#rhythm-modal .modal-buttons button.cancel-btn {
-    background-color: #e94e77;
-    color: #fff;
-}
-
-#rhythm-modal .modal-buttons button.cancel-btn:hover {
-    background-color: #c0392b;
-}
-
-#rhythm-modal .close-button {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 1.5em;
-    cursor: pointer;
-    color: #333;
-    transition: color 0.2s;
-}
-
-#rhythm-modal .close-button:hover {
-    color: #c0392b;
-}
-
-.settings-content button {
-    padding: 10px 20px;
-    margin: 0 5px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.2s;
-}
-
-.save-btn {
-    background-color: #2ecc71;
-    color: #fff;
-}
-
-.save-btn:hover {
-    background-color: #27ae60;
-}
-
-.cancel-btn {
-    background-color: #e94e77;
-    color: #fff;
-}
-
-.cancel-btn:hover {
-    background-color: #c0392b;
-}
-
-@media (max-width: 800px) {
-    #settings-form {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 600px) {
-    .container {
-        flex-direction: column;
-        width: 90%;
-        height: auto;
-        margin-left: 0;
-        margin-top: 60px;
-    }
-
-    #global-settings {
-        width: 100%;
-        height: auto;
-        margin-left: 0;
-        margin-top: 10px;
-    }
-
-    #control {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        width: 180px;
-    }
-
-    .settings-modal,
-    #rhythm-modal {
-        width: 100%;
-    }
-
-    .settings-content,
-    #rhythm-modal .modal-content {
-        width: 90%;
-        padding: 15px;
-    }
-
-    #rhythm-modal .rhythm-grid {
-        grid-template-columns: 80px repeat(16, 30px);
-        gap: 3px;
-    }
-
-    #rhythm-modal .rhythm-cell input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-    }
-}
-
-@media (max-width: 500px) {
-    #settings-form {
-        grid-template-columns: 1fr;
-    }
-
-    #rhythm-modal .rhythm-grid {
-        grid-template-columns: 60px repeat(16, 25px);
-        gap: 2px;
-    }
-
-    #rhythm-modal .rhythm-cell input[type="checkbox"] {
-        width: 16px;
-        height: 16px;
-    }
-}
-
-[data-tooltip] {
-  position: relative;
-  cursor: help;
-}
-
-[data-tooltip]:hover:after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #333;
-  color: #fff;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 0.8em;
-  white-space: nowrap;
-  z-index: 1000;
-  opacity: 0;
-  transition: opacity 0.2s;
-  pointer-events: none;
-}
-
-[data-tooltip]:hover:after {
-  opacity: 1;
-}
-
 
 #settings-form {
   display: flex;
@@ -427,331 +563,290 @@ svg {
   min-width: 250px;
 }
 
-.settings-buttons {
-    position: sticky;
-    top: 0;
-    background-color: #fff;
-    padding: 10px;
-    z-index: 10;
-    display: flex;
-    justify-content: center;
-    border-bottom: 1px solid #ccc;
-}
-
-.status-header {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    z-index: 20;
-}
-
-.status-header h1 {
-    font-size: 24px;
-    margin: 0;
-}
-
-#connection-status {
-    border-style: solid;
-    border-radius: 1em;
-    border-width: 2px;
-    padding: 5px 10px;
-    font-size: 20px;
-    color: black;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-#connection-status.connected {
-    border-color: green;
-    background-color: lightgreen;
-}
-
-#connection-status.disconnected {
-    border-color: red;
-    background-color: lightcoral;
-}
-
-#connection-status.connected #dot {
-    color: green;
-}
-
-#connection-status.disconnected #dot {
-    color: red;
-}
-
-#control {
-    position: absolute;
-    top: 25vh;
-    left: 10px;
-    padding: 10px;
-    width: 200px;
-    z-index: 10;
-    font-family: sans-serif;
-    background-color: transparent;
-    border: transparent;
-    border-radius: 5px;
-    box-shadow: none;
-    line-height: 1.25em;
-}
-
-#header {
-    margin-bottom: 10px;
-}
-
-.section {
-    margin-bottom: 5px;
-}
-
-h5.active {
-    margin: 0;
-    font-size: 1.6em;
-    font-weight: bold;
-    color: #333;
-}
-
-.controls {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.button_div {
-    margin: 0;
-    width: 100%;
-}
-
-.label.active {
-    font-size: 1em;
-    color: #333;
-    margin-right: 0.5em;
-    display: block;
-}
-
-select.active {
-    padding: 0.2em;
-    border: 1px solid black;
-    border-radius: 0;
-    background-color: white;
-    font-size: 1em;
-    text-align: right;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    font-family: monospace;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-button.active {
-    padding: 0.3em;
-    border: 1px solid black;
-    border-radius: 3px;
-    background-color: white;
-    font-size: 1em;
-    cursor: pointer;
-    width: 100%;
-    box-sizing: border-box;
-    transition: opacity 0.2s, background-color 0.2s;
-}
-
-button.active:hover,
-button.active:focus {
-    opacity: 0.75;
-    background-color: #f0f0f0;
-}
-
-details {
-    margin-top: 2em;
-    font-size: 0.65em;
-    color: #333;
-}
-
-#instruction_zone {
-    font-size: 0.6em;
-    color: #333;
-}
-
-#instruction_zone a {
-    color: #0066cc;
-    text-decoration: none;
-}
-
-#instruction_zone a:hover {
-    text-decoration: underline;
-}
-
-#current-bank-indicator {
-    position: absolute;
-    top: calc(25vh + 250px);
-    left: 10px;
-    padding: 5px 10px;
-    font-size: 1em;
-    color: #333;
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 5px;
-    z-index: 10;
-}
-
-#current-bank-value {
-    font-weight: bold;
-}
-
-.control_full {
-    overflow: hidden;
-}
-
 .parameter-column div {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .parameter-column label {
-    font-size: 14px;
-    margin: 0;
+  margin: 0;
+  font-size: 14px;
 }
 
 .parameter-column input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    margin: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
 }
 
-#ambient-backlight {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1;
-    background: radial-gradient(circle at center, transparent 70%, rgba(255, 0, 0, 0.5) 100%);
-    opacity: 0.5;
-    pointer-events: none;
+.control_full {
+  overflow: hidden;
 }
 
 #global-settings .slider-container,
 #settings-modal .slider-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-direction: row;
-    justify-content: flex-start;
-    order: 2;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 10px;
+  order: 2;
 }
 
 #global-settings .slider,
 #settings-modal .slider {
-    width: 100%;
-    max-width: 200px;
-    order: 2;
+  width: 80%;
+  max-width: 150px;
+  order: 2;
 }
 
 #global-settings .value-input,
 #settings-modal .value-input {
-    width: 45px;
-    padding: 2px;
-    font-size: 0.75em;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    background-color: #f9f9f9;
-    text-align: center;
-    order: 3;
+  width: 45px;
+  padding: 2px;
+  font-size: 0.75em;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background-color: #f9f9f9;
+  order: 3;
 }
 
 #global-settings .parameter-row,
 #settings-modal .parameter-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding-right: 5px;
-    margin: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 8px 0;
+  padding-right: 5px;
 }
 
 #global-settings label,
 #settings-modal label {
-    margin: 0;
-    flex: 1;
-    color: #333;
-    font-weight: bold;
-    font-size: 0.8em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    order: 1;
+  flex: 1;
+  margin: 0;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: #333;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: ellipsis;
+  order: 1;
 }
 
+.settings-buttons {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  background-color: #fff;
+  border-bottom: 1px solid #ccc;
+}
+
+/* --------------------------------------------------------------------------
+   3.7 Toggle Switch
+   -------------------------------------------------------------------------- */
+
 .toggle-switch {
-    position: relative;
-    width: 50px;
-    height: 24px;
-    order: 2;
-    margin-left: auto;
+  position: relative;
+  width: 50px;
+  height: 24px;
+  order: 2;
+  margin-left: auto;
 }
 
 .toggle-switch input[type="checkbox"] {
-    opacity: 0;
-    width: 0;
-    height: 0;
-    position: absolute;
-    z-index: -1;
-    pointer-events: auto;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+  z-index: -1;
+  pointer-events: auto;
 }
 
 .toggle-switch .toggle-label {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    border: 1px solid #ccc;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .toggle-switch .toggle-label::before {
-    content: "";
-    position: absolute;
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: #fff;
-    border-radius: 50%;
-    transition: transform 0.2s;
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
 }
 
 .toggle-switch .toggle-label::after {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.75em;
-    color: #fff;
-    font-family: Arial, sans-serif;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75em;
+  color: #fff;
+  font-family: Arial, sans-serif;
 }
 
 .toggle-switch input[type="checkbox"]:checked + .toggle-label {
-    background-color: #2ecc71;
+  background-color: #2ecc71;
 }
 
 .toggle-switch input[type="checkbox"]:checked + .toggle-label::before {
-    transform: translateX(26px);
+  transform: translateX(26px);
 }
 
 .toggle-switch input[type="checkbox"]:checked + .toggle-label::after {
-    content: attr(data-flat);
-    left: 6px;
+  content: attr(data-flat);
+  left: 6px;
 }
 
 .toggle-switch input[type="checkbox"]:not(:checked) + .toggle-label::after {
-    content: attr(data-sharp);
-    right: 6px;
+  content: attr(data-sharp);
+  right: 6px;
+}
+
+/* ==========================================================================
+   4. Media Queries
+   ========================================================================== */
+
+@media (max-width: 800px) {
+  #settings-form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    flex-direction: column;
+    width: 90%;
+    height: auto;
+    margin-left: 0;
+    margin-top: 60px;
+  }
+
+  #global-settings {
+    width: 100%;
+    height: auto;
+    margin-left: 0;
+    margin-top: 10px;
+  }
+
+  #control {
+    position: relative; /* Change to relative to place in document flow */
+    top: auto; /* Remove absolute positioning */
+    left: auto;
+    width: 90%; /* Match container width */
+    margin: 10px auto; /* Center and add spacing */
+    z-index: 5; /* Below modals (z-index: 1000) and SVG (default z-index: 0) */
+  }
+
+  #current-bank-indicator {
+    position: relative; /* Change to relative to place in document flow */
+    top: auto;
+    left: auto;
+    width: fit-content;
+    margin: 10px auto; /* Center below control section */
+    z-index: 5; /* Below modals and SVG */
+  }
+
+  .settings-modal,
+  #rhythm-modal {
+    width: 100%;
+    z-index: 1000; /* Ensure modals stay on top */
+  }
+
+  .settings-content,
+  #rhythm-modal .modal-content {
+    width: 90%;
+    padding: 15px;
+  }
+
+  #rhythm-modal .rhythm-grid {
+    grid-template-columns: 80px repeat(16, 30px);
+    gap: 3px;
+  }
+
+  #rhythm-modal .rhythm-cell input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 500px) {
+  #settings-form {
+    grid-template-columns: 1fr;
+  }
+
+  #rhythm-modal .rhythm-grid {
+    grid-template-columns: 60px repeat(16, 25px);
+    gap: 2px;
+  }
+
+  #rhythm-modal .rhythm-cell input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ==========================================================================
+   5. Tooltip
+   ========================================================================== */
+
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]:hover:after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  padding: 5px 10px;
+  font-size: 0.8em;
+  color: #fff;
+  background-color: #333;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+[data-tooltip]:hover:after {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   6. Ambient Backlight
+   ========================================================================== */
+
+#ambient-backlight {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at center, transparent 70%, rgba(255, 0, 0, 0.5) 100%);
+  opacity: 0.5;
+  pointer-events: none;
 }
