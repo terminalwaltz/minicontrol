@@ -1261,8 +1261,11 @@ function hideModal(section) {
     'rhythm_button_parameters': 'rhythm-modal',
     'rhythm_parameter': 'rhythm-modal',
     'global_parameter': 'global-settings-modal',
-    'harp_parameter': 'harp-settings-modal',
-    'chord_parameter': 'chord-settings-modal'
+    'harp_parameter': 'settings-modal',
+    'chord_parameter': 'settings-modal',
+    'chord_potentiometer': 'settings-modal',
+    'harp_potentiometer': 'settings-modal',
+    'modulation_potentiometer': 'settings-modal'
   };
   const modalId = modalMap[section];
   if (!modalId) {
@@ -1534,13 +1537,13 @@ if (rhythmButton) {
   });
 }
 
-  // Preset buttons
+/*   // Preset buttons
   document.querySelectorAll(".preset-button").forEach(button => {
     addSvgTooltip(button, svgTooltips[button.id] || "Select preset");
     button.addEventListener("click", () => {
       console.log(`Preset ${button.id} clicked`);
     });
-  });
+  }); */
 
   // Power LED
   const powerLed = document.getElementById("power_led");
