@@ -674,58 +674,64 @@ async function generateGlobalSettingsForm() {
         container.appendChild(label);
         container.appendChild(input);
       }
-    } else if (param.ui_type === "slider") {
-      const sliderContainer = document.createElement("div");
-      sliderContainer.className = "slider-container";
-      input = document.createElement("input");
-      input.type = "range";
-      input.id = `global-param-${param.sysex_adress}`;
-      input.name = param.name;
-      input.className = "slider";
-      input.min = param.min_value;
-      input.max = param.max_value;
-      const sliderValue = param.data_type === "float" 
-        ? Number((currentValue / floatMultiplier).toFixed(2)) 
-        : currentValue;
-      input.value = sliderValue;
-      input.step = param.data_type === "float" ? 0.01 : 1;
-      input.title = param.tooltip || param.name; // Add tooltip
-      const valueInput = document.createElement("input");
-      valueInput.type = "number";
-      valueInput.id = `value-${param.sysex_adress}`;
-      valueInput.min = param.min_value;
-      valueInput.max = param.max_value;
-      valueInput.step = param.data_type === "float" ? 0.01 : 1;
-      valueInput.value = param.data_type === "float" ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
-      valueInput.title = param.tooltip || param.name; // Add tooltip
-      console.log(`[SLIDER] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, floatMultiplier=${floatMultiplier}, sliderValue=${sliderValue}, input.value=${input.value}`);
-      valueInput.className = "value-input";
+} else if (param.ui_type === "slider") {
+  const sliderContainer = document.createElement("div");
+  sliderContainer.className = "slider-container";
+  input = document.createElement("input");
+  input.type = "range";
+  input.id = `global-param-${param.sysex_adress}`;
+  input.name = param.name;
+  input.className = "slider";
+  input.min = param.min_value;
+  input.max = param.max_value;
+  const floatMultiplier = param.data_type === "float" ? (controller.float_multiplier || 100.0) : 1;
+  const currentValue = currentValues[param.sysex_adress] !== undefined 
+    ? currentValues[param.sysex_adress] 
+    : (param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value);
+  const sliderValue = param.data_type === "float" 
+    ? Number((currentValue / floatMultiplier).toFixed(2)) 
+    : currentValue;
+  input.value = sliderValue;
+  input.step = param.data_type === "float" ? 0.01 : 1;
+  input.title = param.tooltip || param.name;
+  const valueInput = document.createElement("input");
+  valueInput.type = "number";
+  valueInput.id = `value-${param.sysex_adress}`;
+  valueInput.min = param.min_value;
+  valueInput.max = param.max_value;
+  valueInput.step = param.data_type === "float" ? 0.01 : 1;
+  // Explicitly set as string to preserve precision
+  valueInput.value = sliderValue.toString();
+  valueInput.className = "value-input";
+  valueInput.title = param.tooltip || param.name;
+  console.log(`[SLIDER INIT] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, floatMultiplier=${floatMultiplier}, sliderValue=${sliderValue}, valueInput.value=${valueInput.value}`);
 
-      input.addEventListener("input", (e) => {
-        const value = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
-        tempValues[param.sysex_adress] = value;
-        valueInput.value = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)) : value;
-        console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
-        controller.sendParameter(parseInt(param.sysex_adress), value);
-        if (param.sysex_adress === 20) updateLEDBankColor();
-      });
+  input.addEventListener("input", (e) => {
+    const value = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
+    tempValues[param.sysex_adress] = value;
+    valueInput.value = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)).toString() : value.toString();
+    console.log(`[SLIDER INPUT] sysex=${param.sysex_adress}, value=${value}, name=${param.name}, valueInput.value=${valueInput.value}`);
+    controller.sendParameter(parseInt(param.sysex_adress), value);
+    if (param.sysex_adress === 20) updateLEDBankColor();
+  });
 
-      valueInput.addEventListener("change", (e) => {
-        let value = parseFloat(e.target.value) || 0;
-        value = Math.max(param.min_value, Math.min(param.max_value, value));
-        if (param.data_type === "float") value *= floatMultiplier;
-        tempValues[param.sysex_adress] = value;
-        input.value = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)) : value;
-        valueInput.value = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)) : value;
-        console.log(`[GLOBAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
-        controller.sendParameter(parseInt(param.sysex_adress), value);
-        if (param.sysex_adress === 20) updateLEDBankColor();
-      });
+  valueInput.addEventListener("change", (e) => {
+    let value = parseFloat(e.target.value) || 0;
+    value = Math.max(param.min_value, Math.min(param.max_value, value));
+    if (param.data_type === "float") value *= floatMultiplier;
+    tempValues[param.sysex_adress] = value;
+    const scaledValue = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)) : value;
+    input.value = scaledValue.toString();
+    valueInput.value = scaledValue.toString();
+    console.log(`[VALUE INPUT] sysex=${param.sysex_adress}, value=${value}, name=${param.name}, scaledValue=${scaledValue}, valueInput.value=${valueInput.value}`);
+    controller.sendParameter(parseInt(param.sysex_adress), value);
+    if (param.sysex_adress === 20) updateLEDBankColor();
+  });
 
-      sliderContainer.appendChild(valueInput);
-      sliderContainer.appendChild(input);
-      container.appendChild(label);
-      container.appendChild(sliderContainer);
+  sliderContainer.appendChild(valueInput); // Order: number input first
+  sliderContainer.appendChild(input);
+  container.appendChild(label);
+  container.appendChild(sliderContainer);
     } else if (param.ui_type === "select") {
         input = document.createElement("select");
         input.id = `global-param-${param.sysex_adress}`;
