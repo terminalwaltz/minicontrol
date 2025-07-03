@@ -1065,9 +1065,7 @@ function updateConnectionStatus(connected, message) {
     window.scrollTo(0, 0);
   }
 }
-
 let modalEventListenersAdded = false;
-
 // Opens a modal for editing parameters
 // Why: Displays the UI for global, chord, harp, or rhythm settings
 async function openModal(paramGroup) {
