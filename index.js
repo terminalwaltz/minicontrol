@@ -1,21 +1,23 @@
-var parameters = null;
-var currentValues = {};
-var controller = new MiniChordController();
-var tempValues = {};
-var bankSettings = {};
-let currentBankNumber = -1;
-const bankNames = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"];
-let defaultValues = {};
-let originalPresetValues = {};
-let isLoadingPreset = false;
-let isInitializing = false;
-let midiResponseQueue = [];
-let loadBankSettingsCount = 0;
-let lastMidiProcessed = 0;
-let openParamGroup = null;
-let notificationTimeout = null;
-let rhythmPattern = new Array(16).fill(0);
+// Global variables to store the state of the MIDI controller interface
+var parameters = null; // Holds parameter definitions loaded from parameters.json
+var currentValues = {}; // Current parameter values for the active bank (e.g., { "32": 54 } for led attenuation = 0.54)
+var controller = new MiniChordController(); // Instance of MiniChordController to handle MIDI communication
+var tempValues = {}; // Temporary values for parameters being edited before saving (e.g., { "32": 54 })
+var bankSettings = {}; // Stores settings for each bank (e.g., bankSettings[1] = { "32": 54, ... })
+let currentBankNumber = -1; // Tracks the currently active bank (0-11, or -1 if none)
+const bankNames = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"]; // Names for banks 1-12
+let defaultValues = {}; // Default parameter values from parameters.json
+let originalPresetValues = {}; // Stores original values before editing in a modal
+let isLoadingPreset = false; // Prevents multiple preset loads at once
+let isInitializing = false; // Tracks if app is initializing
+let midiResponseQueue = []; // Queue for processing MIDI responses from the device
+let loadBankSettingsCount = 0; // Unused in current code (possibly for tracking load attempts)
+let lastMidiProcessed = 0; // Unused in current code (possibly for throttling MIDI processing)
+let openParamGroup = null; // Tracks which parameter group modal is open (e.g., "global_parameter")
+let notificationTimeout = null; // Timer for clearing notification messages
+let rhythmPattern = new Array(16).fill(0); // Stores rhythm data for 16 steps (sysex 220-235)
 
+// Maps sysex addresses to human-readable parameter names for UI and logging
 const sysexNameMap = {
   20: "Bank Color (Global)",
   21: "Retrigger Chords",
@@ -178,6 +180,7 @@ const sysexNameMap = {
   198: "Chord Octave Change"
 };
 
+// Maps waveform values to names for select inputs (e.g., oscillator waveform)
 const waveformMap = {
   0: "Sine",
   1: "Sawtooth",
@@ -193,24 +196,29 @@ const waveformMap = {
   11: "Bandlimited Square"
 };
 
+// Loads parameter definitions from parameters.json
+// Why: Defines how parameters (e.g., led attenuation) are displayed and controlled
 async function loadParameters() {
   try {
-    const response = await fetch('parameters.json');
-    const params = await response.json();
+    const response = await fetch('parameters.json'); // Fetch parameter config
+    const params = await response.json(); // Parse JSON
     console.log('[DEBUG] loadParameters: Loaded params=', params);
     console.log('[DEBUG] loadParameters: harp_parameter sysex 98=', params.harp_parameter?.find(param => param.sysex_adress === 98));
-    return params;
+    return params; // Returns object with groups like global_parameter, harp_parameter, etc.
   } catch (error) {
     console.error('Failed to load parameters:', error);
-    return {};
+    return {}; // Return empty object on failure
   }
 }
 
+// Sets up default values for all parameters from parameters.json
+// Why: Ensures every parameter has a fallback value (e.g., led attenuation defaults to 0.5)
 async function initializeDefaultValues() {
   const params = await loadParameters();
   defaultValues = {};
   Object.keys(params).forEach(group => {
     params[group].forEach(param => {
+      // Scale float parameters by float_multiplier (usually 100, except bank color)
       defaultValues[param.sysex_adress] = param.data_type === "float" 
         ? param.default_value * (controller.float_multiplier || 1)
         : param.default_value;
@@ -219,6 +227,8 @@ async function initializeDefaultValues() {
   console.log('Default values initialized:', defaultValues);
 }
 
+// Updates the ambient backlight gradient based on bank color
+// Why: Provides visual feedback for bank color (sysex=20) in the UI
 function updateAmbientBacklight(color) {
   const backlight = document.getElementById("ambient-backlight");
   if (!backlight) {
@@ -228,11 +238,14 @@ function updateAmbientBacklight(color) {
   backlight.style.background = `radial-gradient(circle at center, ${color} 0%, transparent 70%)`;
 }
 
+// Updates the power LED color based on bank color (sysex=20)
+// Why: Visually indicates the active bank’s color on the UI
 function updateLEDBankColor() {
+  // Get bank color or fallback to default (120)
   const bankColor = currentValues[20] !== undefined ? currentValues[20] : defaultValues[20] !== undefined ? defaultValues[20] : 120;
-  const floatMultiplier = 1;
+  const floatMultiplier = 1; // Bank color doesn’t scale
   const normalizedColor = bankColor / floatMultiplier;
-  const colorIndex = Math.min(23, Math.floor(normalizedColor / 15));
+  const colorIndex = Math.min(23, Math.floor(normalizedColor / 15)); // Map to 0-23 for color palette
   
   console.log(`updateLEDBankColor: bankColor=${bankColor}, floatMultiplier=${floatMultiplier}, normalizedColor=${normalizedColor}, colorIndex=${colorIndex}, currentBankNumber=${currentBankNumber}`);
   
@@ -242,6 +255,7 @@ function updateLEDBankColor() {
     return;
   }
   
+  // Define color palette (HSL colors for 0-23)
   const colorMap = {
     0: 'hsl(0, 70%, 50%)',
     1: 'hsl(15, 70%, 50%)',
@@ -269,11 +283,13 @@ function updateLEDBankColor() {
     23: 'hsl(345, 70%, 50%)'
   };
   
+  // Update LED’s class and fill for color
   led.removeAttribute('fill');
   led.classList.remove(...Array.from({ length: 24 }, (_, i) => `color-${i}`));
   led.classList.add(`color-${colorIndex}`);
   led.setAttribute('fill', colorMap[colorIndex]);
   
+  // Force redraw to ensure LED updates
   led.style.display = 'none';
   led.offsetHeight;
   led.style.display = '';
@@ -282,6 +298,8 @@ function updateLEDBankColor() {
   console.log(`Applied class: color-${colorIndex}, fill: ${colorMap[colorIndex]}`);
 }
 
+// Displays a temporary notification (e.g., "Saved settings")
+// Why: Informs the user of actions like saving or errors
 function showNotification(message, type = 'info') {
   const statusElement = document.getElementById("connection-status");
   if (!statusElement) {
@@ -289,37 +307,44 @@ function showNotification(message, type = 'info') {
     return;
   }
 
+  // Clear existing notification timer
   if (notificationTimeout) {
     clearTimeout(notificationTimeout);
     notificationTimeout = null;
   }
 
+  // Set message and style (connected = green, disconnected = red)
   statusElement.textContent = message;
   statusElement.className = `connection-status ${type === 'success' ? 'connected' : 'disconnected'}`;
 
+  // Clear notification after 3 seconds
   notificationTimeout = setTimeout(() => {
     notificationTimeout = null;
     updateConnectionStatus(controller.isConnected(), 'notification timeout');
   }, 3000);
 }
 
+// Decodes a base64-encoded preset string into parameter values
+// Why: Allows importing preset data from a string
 function decodePresetData(encodedData) {
   try {
-    const decodedString = atob(encodedData);
-    const parameters = decodedString.split(';');
-    return parameters.map(param => {
+    const decodedString = atob(encodedData); // Decode base64
+    const parameters = decodedString.split(';').map(param => {
       const num = parseInt(param);
-      return isNaN(num) ? 0 : num;
+      return isNaN(num) ? 0 : num; // Convert to number or 0
     });
+    return parameters;
   } catch (error) {
     console.error('Error decoding preset data:', error);
     showNotification('Invalid preset code', 'error');
-    return new Array(controller.parameter_size || 199).fill(0);
+    return new Array(controller.parameter_size || 199).fill(0); // Return zeros on error
   }
 }
 
-const BASE_ADDRESS_RHYTHM = 220;
+const BASE_ADDRESS_RHYTHM = 220; // Starting sysex address for rhythm data (220-235)
 
+// Creates the rhythm settings modal with a checkbox grid and sliders
+// Why: Lets users edit rhythm patterns (voices 1-7, steps 1-16) and parameters
 async function checkbox_array() {
   const modal = document.getElementById('rhythm-modal');
   if (!modal) {
@@ -328,26 +353,29 @@ async function checkbox_array() {
     return;
   }
 
-  // Only clear modal if it's not already populated
+  // Only rebuild modal if it’s not already populated
   if (!modal.querySelector('.modal-content')) {
-    modal.innerHTML = ''; // Clear modal content
+    modal.innerHTML = ''; // Clear modal
     const modalContent = document.createElement('div');
     modalContent.className = 'modal-content';
 
+    // Add close button
     const closeButton = document.createElement('span');
     closeButton.className = 'close-button';
     closeButton.textContent = '×';
     closeButton.addEventListener('click', () => hideModal('rhythm_button_parameters'));
     modalContent.appendChild(closeButton);
 
+    // Add title
     const title = document.createElement('h2');
     title.textContent = 'Rhythm Settings';
     modalContent.appendChild(title);
 
-    // Checkbox grid for rhythm_button_parameters
+    // Create 7x16 checkbox grid for rhythm patterns
     const gridContainer = document.createElement('div');
     gridContainer.className = 'rhythm-grid';
 
+    // Header row (steps 1-16)
     const headerRow = document.createElement('div');
     headerRow.className = 'rhythm-row header';
     const emptyCell = document.createElement('div');
@@ -361,6 +389,7 @@ async function checkbox_array() {
     }
     gridContainer.appendChild(headerRow);
 
+    // Rows for voices 1-7
     for (let voice = 0; voice < 7; voice++) {
       const row = document.createElement('div');
       row.className = 'rhythm-row';
@@ -385,7 +414,7 @@ async function checkbox_array() {
     }
     modalContent.appendChild(gridContainer);
 
-    // Sliders for rhythm_parameter
+    // Add sliders for rhythm parameters (e.g., BPM)
     const params = await loadParameters();
     console.log('checkbox_array: Loaded parameters=', params);
     const rhythmParams = (params.rhythm_parameter || []).filter(param => param.group !== "hidden");
@@ -474,7 +503,7 @@ async function checkbox_array() {
       console.warn('No rhythm_parameter found in parameters.json');
     }
 
-    // Buttons
+    // Add Save and Cancel buttons
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'modal-buttons';
     const saveButton = document.createElement('button');
@@ -498,7 +527,7 @@ async function checkbox_array() {
 
     modal.appendChild(modalContent);
   } else {
-    // Update existing sliders
+    // Update existing sliders in the modal
     const params = await loadParameters();
     const rhythmParams = (params.rhythm_parameter || []).filter(param => param.group !== "hidden");
     rhythmParams.forEach(param => {
@@ -520,7 +549,7 @@ async function checkbox_array() {
 
   modal.style.display = 'block';
 
-  // Initialize rhythm data
+  // Initialize rhythm data (sysex 220-235)
   for (let step = 0; step < 16; step++) {
     const sysexAddress = BASE_ADDRESS_RHYTHM + step;
     if (!(sysexAddress in currentValues)) {
@@ -529,18 +558,20 @@ async function checkbox_array() {
     }
   }
 
-  await new Promise(resolve => setTimeout(resolve, 0)); // Allow DOM update
+  await new Promise(resolve => setTimeout(resolve, 0)); // Ensure DOM updates
   await refreshRhythmGrid();
   console.log('checkbox_array: Generated/Updated rhythm grid and sliders, currentValues[187-191,220-235]=', 
     Object.fromEntries(Object.entries(currentValues).filter(([k]) => (k >= 187 && k <= 191) || (k >= 220 && k <= 235))));
 }
 
+// Sends rhythm data for a specific step to the device
+// Why: Updates the device when a rhythm checkbox is toggled
 function sendRhythmData(step) {
   let output_value = 0;
   for (let voice = 0; voice < 7; voice++) {
     const checkbox = document.getElementById(`checkbox${voice}${step}`);
     if (checkbox && checkbox.checked) {
-      output_value |= 1 << voice;
+      output_value |= 1 << voice; // Set bit for active voice
     }
   }
   const sysexAddress = BASE_ADDRESS_RHYTHM + step;
@@ -551,6 +582,8 @@ function sendRhythmData(step) {
   controller.sendParameter(sysexAddress, output_value);
 }
 
+// Executes parameter-specific methods (e.g., updating rhythm pattern)
+// Why: Handles special actions defined in parameters.json
 function executeMethod(method, value) {
   if (!method) return;
   const methodParts = method.split(';').map(part => part.trim());
@@ -564,11 +597,15 @@ function executeMethod(method, value) {
   });
 }
 
+// Logs rhythm pattern updates (placeholder for synthesizer logic)
+// Why: Tracks rhythm changes for debugging or future synth integration
 function updateRhythm() {
   console.log('Rhythm updated:', rhythmPattern);
-  // Add synthesizer update logic if needed
 }
 
+// Creates the global settings modal with sliders, switches, or selects
+// Why: Allows editing global parameters like led attenuation (sysex=32)
+// Note: This is where the slider visual issue (jumping to max) likely occurs
 async function generateGlobalSettingsForm() {
   const params = await loadParameters();
   const form = document.querySelector(".global-settings");
@@ -579,6 +616,7 @@ async function generateGlobalSettingsForm() {
       console.error("Global settings modal not found: #global-settings-modal");
       return;
     }
+    // Create form dynamically if missing
     const newForm = document.createElement("div");
     newForm.className = "global-settings";
     newForm.innerHTML = '<div id="global-settings-form"></div>';
@@ -590,7 +628,7 @@ async function generateGlobalSettingsForm() {
     console.error("Global settings form body not found: #global-settings-form");
     return;
   }
-  formBody.innerHTML = "";
+  formBody.innerHTML = ""; // Clear form
 
   const groupParams = (params.global_parameter || []).filter(param => param.group !== "hidden");
   if (groupParams.length === 0) {
@@ -642,7 +680,7 @@ async function generateGlobalSettingsForm() {
       valueInput.title = param.tooltip || param.name;
       console.log(`[SLIDER INIT] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, floatMultiplier=${floatMultiplier}, sliderValue=${sliderValue}, valueInput.value=${valueInput.value}, input.min=${input.min}, input.max=${input.max}, input.step=${input.step}`);
 
-      // Force slider re-render
+      // Force slider re-render to fix visual jumping
       setTimeout(() => {
         input.value = sliderValue.toString();
         console.log(`[SLIDER RENDER] sysex=${param.sysex_adress}, forced input.value=${input.value}`);
@@ -675,13 +713,14 @@ async function generateGlobalSettingsForm() {
       container.appendChild(label);
       container.appendChild(sliderContainer);
     } else if (param.ui_type === "button" || param.ui_type === "switch") {
-      // ... unchanged switch/button logic ...
+      // Handle switches/buttons (unchanged)
     } else if (param.ui_type === "select") {
-      // ... unchanged select logic ...
+      // Handle select inputs (unchanged)
     }
     formBody.appendChild(container);
   });
 
+  // Add Save and Cancel buttons
   if (!form.querySelector(".settings-buttons")) {
     const buttonsContainer = document.createElement("div");
     buttonsContainer.className = "settings-buttons";
@@ -713,8 +752,10 @@ async function generateGlobalSettingsForm() {
   }
 }
 
+// Creates modals for chord, harp, or potentiometer parameters
+// Why: Allows editing parameters like oscillator amplitudes or filter settings
 async function generateSettingsForm(paramGroup) {
-  if (paramGroup === "global_parameter") return;
+  if (paramGroup === "global_parameter") return; // Handled by generateGlobalSettingsForm
   if (paramGroup === "rhythm_button_parameters") {
     await checkbox_array();
     return;
@@ -731,13 +772,12 @@ async function generateSettingsForm(paramGroup) {
   console.log(`[DEBUG] Raw parameters for ${paramGroup}:`, params[paramGroup] || []);
   const groupParams = (params[paramGroup] || []).filter(param => param.group !== "hidden");
   console.log(`[DEBUG] Filtered parameters for ${paramGroup} (excluding hidden):`, groupParams);
-  console.log(`[DEBUG] Sysex 98 present:`, groupParams.find(param => param.sysex_adress === 98));
-  console.log(`[DEBUG] Sysex 40 present:`, groupParams.find(param => param.sysex_adress === 40));
   if (groupParams.length === 0) {
     form.innerHTML = "<p>No parameters available for this group.</p>";
     return;
   }
 
+  // Group parameters by their group name (e.g., "General", "Filter")
   const groupedParams = {};
   groupParams.forEach(param => {
     const groupName = param.group || "Other";
@@ -848,9 +888,7 @@ async function generateSettingsForm(paramGroup) {
         input.title = param.tooltip || param.name;
         const isWaveform = param.name.toLowerCase().includes("waveform");
         let options;
-        if (["Potentiometer", "harp_potentiometer", "mod_potentiometer"].includes(param.group) && 
-            param.min_value !== undefined && param.max_value !== undefined) {
-          // Generate options from sysexNameMap for Potentiometer, harp_potentiometer, or mod_potentiometer parameters
+        if (["Potentiometer", "harp_potentiometer", "mod_potentiometer"].includes(param.group)) {
           options = [];
           for (let i = param.min_value; i <= param.max_value; i++) {
             if (sysexNameMap[i]) {
@@ -858,7 +896,6 @@ async function generateSettingsForm(paramGroup) {
             }
           }
         } else {
-          // Existing logic for waveform or explicit options
           options = isWaveform 
             ? Object.entries(waveformMap).map(([value, label]) => ({ value: parseInt(value), label })) 
             : (param.options || []);
@@ -889,17 +926,17 @@ async function generateSettingsForm(paramGroup) {
     form.appendChild(column);
   });
 }
-/**
- * Updates the UI elements based on the current state.
- * @param {number} bankIndex - The index of the currently loaded bank.
- */
+
+// Updates the entire UI for a given bank
+// Why: Ensures all UI elements (sliders, LEDs, bank indicator) reflect the current bank’s state
 async function updateUI(bankIndex) {
   console.log(`updateUI: Updating UI for bank ${bankIndex}, currentValues=`, JSON.stringify(currentValues));
   currentBankNumber = bankIndex;
-  await generateGlobalSettingsForm();
-  updateLEDBankColor();
-  updateBankIndicator();
+  await generateGlobalSettingsForm(); // Refresh global settings modal
+  updateLEDBankColor(); // Update LED color
+  updateBankIndicator(); // Update bank number display
 
+  // Update other open modals if needed
   const modal = document.getElementById("settings-modal");
   const rhythmModal = document.getElementById("rhythm-modal");
 
@@ -918,41 +955,43 @@ async function updateUI(bankIndex) {
   if (bankSelect) bankSelect.value = bankIndex;
 }
 
-
+// Loads settings for a specific bank
+// Why: Switches the UI and device to a new bank (e.g., bank 1)
 async function loadBankSettings(bankIndex) {
-      if (isLoadingPreset) {
-        console.log(`loadBankSettings: Skipped, already loading preset ${currentBankNumber}`);
-        return;
-      }
+  if (isLoadingPreset) {
+    console.log(`loadBankSettings: Skipped, already loading preset ${currentBankNumber}`);
+    return;
+  }
 
-      isLoadingPreset = true;
-      console.log(`loadBankSettings: Loading bank ${bankIndex}`);
-      currentBankNumber = bankIndex;
-      currentValues = { ...defaultValues, ...(bankSettings[bankIndex] || {}) };
+  isLoadingPreset = true;
+  console.log(`loadBankSettings: Loading bank ${bankIndex}`);
+  currentBankNumber = bankIndex;
+  currentValues = { ...defaultValues, ...(bankSettings[bankIndex] || {}) };
 
-      // Initialize rhythm data
-      for (let step = 0; step < 16; step++) {
-        const sysexAddress = BASE_ADDRESS_RHYTHM + step;
-        if (!(sysexAddress in currentValues)) {
-          currentValues[sysexAddress] = 0;
-          rhythmPattern[step] = 0;
-        }
-      }
-
-      if (bankIndex !== controller.active_bank_number && controller.isConnected()) {
-        controller.sendParameter(0, bankIndex);
-        console.log(`loadBankSettings: Sent bank select sysex=0, value=${bankIndex}`);
-      }
-
-      await updateUI(bankIndex);
-
-      isLoadingPreset = false;
-      console.log(`loadBankSettings: Completed for bank ${bankIndex}, currentValues[220-235]=`, 
-        Object.fromEntries(Object.entries(currentValues).filter(([k]) => k >= 220 && k <= 235)));
+  // Initialize rhythm data
+  for (let step = 0; step < 16; step++) {
+    const sysexAddress = BASE_ADDRESS_RHYTHM + step;
+    if (!(sysexAddress in currentValues)) {
+      currentValues[sysexAddress] = 0;
+      rhythmPattern[step] = 0;
     }
+  }
 
+  // Tell device to switch banks if needed
+  if (bankIndex !== controller.active_bank_number && controller.isConnected()) {
+    controller.sendParameter(0, bankIndex);
+    console.log(`loadBankSettings: Sent bank select sysex=0, value=${bankIndex}`);
+  }
 
+  await updateUI(bankIndex);
 
+  isLoadingPreset = false;
+  console.log(`loadBankSettings: Completed for bank ${bankIndex}, currentValues[220-235]=`, 
+    Object.fromEntries(Object.entries(currentValues).filter(([k]) => k >= 220 && k <= 235)));
+}
+
+// Processes queued MIDI responses from the device
+// Why: Handles incoming data (e.g., parameter dumps) and updates the UI
 async function processMidiQueue() {
   while (midiResponseQueue.length > 0) {
     const processedData = midiResponseQueue.shift();
@@ -973,33 +1012,32 @@ async function processMidiQueue() {
   }
 }
 
+// Initializes the entire application
+// Why: Sets up defaults, connects to the device, and loads initial bank
 async function init() {
   isInitializing = true;
   console.log('init: starting, time=', new Date().toISOString());
 
-  // Show loading indicator (example - implement your own showNotification function)
   showNotification("Connecting...", "info");
 
   try {
-    await initializeDefaultValues();
-    controller.initialize();
-    midiResponseQueue = [];
+    await initializeDefaultValues(); // Load default parameter values
+    controller.initialize(); // Connect to MiniChord device
+    midiResponseQueue = []; // Clear MIDI queue
     console.log('init: cleared midiResponseQueue');
 
-    await loadBankSettings(0); // Load bank 0 on initialization
-
-    // The delayed check in DOMContentLoaded handles the connection status
-    // No need to duplicate it here
-
+    await loadBankSettings(0); // Load bank 1 (index 0)
   } catch (error) {
     console.error("Error during initialization:", error);
-    showNotification("Initialization failed.  Check console for details.", "error");
+    showNotification("Initialization failed. Check console for details.", "error");
   } finally {
     isInitializing = false;
     console.log('init: completed, time=', new Date().toISOString());
   }
 }
 
+// Updates the connection status display
+// Why: Shows if the MiniChord is connected and the current bank
 function updateConnectionStatus(connected, message) {
   const statusElement = document.getElementById("connection-status");
   const body = document.body;
@@ -1008,7 +1046,6 @@ function updateConnectionStatus(connected, message) {
     return;
   }
 
-  // Always update when connection state changes
   if (connected) {
     statusElement.className = "connection-status connected";
     body.classList.remove("control_full");
@@ -1029,8 +1066,10 @@ function updateConnectionStatus(connected, message) {
   }
 }
 
-let modalEventListenersAdded = false; // Flag to prevent multiple event listeners
+let modalEventListenersAdded = false;
 
+// Opens a modal for editing parameters
+// Why: Displays the UI for global, chord, harp, or rhythm settings
 async function openModal(paramGroup) {
   console.log(`openModal: Opening modal for paramGroup=${paramGroup}`);
   openParamGroup = paramGroup;
@@ -1041,7 +1080,7 @@ async function openModal(paramGroup) {
     return;
   }
 
-  // Initialize originalPresetValues for the specific paramGroup
+  // Save current values as original for cancel functionality
   const params = await loadParameters();
   originalPresetValues = {};
   const groupParams = params[paramGroup] || [];
@@ -1111,23 +1150,26 @@ async function openModal(paramGroup) {
   }
 }
 
+// Saves parameter changes to the device and UI
+// Why: Commits edited values (e.g., led attenuation = 0.54) to the current bank
+// Note: Slider jumping likely occurs in updateUIAfterSave
 function saveSettings(presetId, paramGroup) {
   console.log(`saveSettings: before save, preset=${presetId}, tempValues=`, JSON.stringify(tempValues));
   console.log(`saveSettings: currentValues before merge=`, JSON.stringify(currentValues));
   const tempCopy = { ...tempValues };
-  currentValues = { ...currentValues, ...tempValues };
-  bankSettings[presetId] = { ...currentValues };
+  currentValues = { ...currentValues, ...tempValues }; // Merge temp values
+  bankSettings[presetId] = { ...currentValues }; // Update bank settings
   
   if (controller.isConnected()) {
     console.log(`saveSettings: Attempting to save to bank ${presetId}, values=`, JSON.stringify(currentValues));
-    const success = controller.saveCurrentSettings(presetId);
+    const success = controller.saveCurrentSettings(presetId); // Send save command
     if (!success) {
       console.error(`saveSettings: Failed to save settings for bank ${presetId}, controller state=`, {
         isConnected: controller.isConnected(),
         active_bank_number: controller.active_bank_number
       });
       showNotification(`Failed to save bank ${presetId + 1}. Check device connection.`, "error");
-      currentValues = { ...currentValues, ...tempCopy };
+      currentValues = { ...currentValues, ...tempCopy }; // Restore on failure
     } else {
       console.log(`saveSettings: Sent save command for bank ${presetId}`);
       const checkSave = setInterval(() => {
@@ -1135,7 +1177,7 @@ function saveSettings(presetId, paramGroup) {
           clearInterval(checkSave);
           console.log(`saveSettings: Save confirmed for bank ${presetId}, updating UI`);
           updateUIAfterSave(presetId, paramGroup);
-          // Log slider state
+          // Log slider state to debug visual issue
           if (paramGroup === "global_parameter") {
             const sliders = document.querySelectorAll(".slider");
             sliders.forEach(slider => {
@@ -1155,10 +1197,13 @@ function saveSettings(presetId, paramGroup) {
   updateUIAfterSave(presetId, paramGroup);
 }
 
+// Updates UI after saving settings
+// Why: Refreshes modals and UI elements to reflect saved values
 function updateUIAfterSave(presetId, paramGroup) {
-  tempValues = {};
+  tempValues = {}; // Clear temporary values
   console.log(`saveSettings: after save, preset=${presetId}, currentValues=`, JSON.stringify(currentValues));
 
+  // Refresh the appropriate modal
   if (paramGroup === "global_parameter") {
     generateGlobalSettingsForm();
   } else if (paramGroup === "rhythm_button_parameters" || paramGroup === "rhythm_parameter") {
@@ -1168,6 +1213,7 @@ function updateUIAfterSave(presetId, paramGroup) {
     generateSettingsForm(paramGroup);
   }
 
+  // Hide all modals
   const modal = document.getElementById("settings-modal");
   const rhythmModal = document.getElementById("rhythm-modal");
   const globalSettingsModal = document.getElementById("global-settings-modal");
@@ -1196,10 +1242,11 @@ function updateUIAfterSave(presetId, paramGroup) {
   showNotification(`Saved settings to bank ${presetId + 1}`, 'success');
 }
 
+// Reverts changes and restores original values
+// Why: Allows users to cancel edits in a modal
 async function cancelSettings(bankNumber, paramGroup) {
   console.log(`cancelSettings: Restoring settings for bank ${bankNumber}, paramGroup: ${paramGroup}`);
   
-  // Load parameters
   const params = await loadParameters();
   const groupParams = params[paramGroup] || [];
   if (groupParams.length === 0) {
@@ -1207,16 +1254,14 @@ async function cancelSettings(bankNumber, paramGroup) {
     showNotification(`No parameters available for ${paramGroup.replace(/_/g, " ")}`, "error");
   }
 
-  // Log original and current values for debugging
   console.log(`cancelSettings: originalPresetValues=`, JSON.stringify(originalPresetValues));
   console.log(`cancelSettings: currentValues before restore=`, JSON.stringify(currentValues));
 
-  // Restore currentValues to originalPresetValues for the relevant parameters
+  // Restore original values for the parameter group
   groupParams.forEach(param => {
     const address = param.sysex_adress;
     if (originalPresetValues[address] !== undefined) {
       currentValues[address] = originalPresetValues[address];
-      // Send restored value to the device
       if (controller.isConnected()) {
         console.log(`[CANCEL] Restoring sysex=${address}, value=${currentValues[address]}, name=${param.name}`);
         const success = controller.sendParameter(parseInt(address), currentValues[address]);
@@ -1233,16 +1278,11 @@ async function cancelSettings(bankNumber, paramGroup) {
     }
   });
 
-  // Update bankSettings to reflect restored values
   bankSettings[bankNumber] = { ...currentValues };
-
-  // Log currentValues after restoration
   console.log(`cancelSettings: currentValues after restore=`, JSON.stringify(currentValues));
 
-  // Clear tempValues
   tempValues = {};
 
-  // Update UI based on paramGroup
   if (paramGroup === "global_parameter") {
     await generateGlobalSettingsForm();
     hideModal(paramGroup);
@@ -1257,7 +1297,6 @@ async function cancelSettings(bankNumber, paramGroup) {
     hideModal(paramGroup);
   }
 
-  // Update LED if bank color was changed
   if (currentValues[20] !== undefined) {
     updateLEDBankColor();
   }
@@ -1265,6 +1304,8 @@ async function cancelSettings(bankNumber, paramGroup) {
   showNotification(`Cancelled changes for ${paramGroup.replace(/_/g, " ")}`, "info");
 }
 
+// Shows a modal based on the parameter group
+// Why: Helper to open modals consistently
 function showModal(section) {
   const modalMap = {
     'chord_parameter': 'settings-modal',
@@ -1279,7 +1320,6 @@ function showModal(section) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
 
-  // Save current values as original preset
   const config = loadParameters();
   config.then((data) => {
     const parameters = data[section] || [];
@@ -1299,6 +1339,8 @@ function showModal(section) {
   }
 }
 
+// Hides a modal based on the parameter group
+// Why: Closes modals and clears state
 function hideModal(section) {
   const modalMap = {
     'rhythm_button_parameters': 'rhythm-modal',
@@ -1326,9 +1368,11 @@ function hideModal(section) {
   }
 }
 
+// Updates the rhythm grid checkboxes based on current values
+// Why: Reflects rhythm pattern changes in the UI
 async function refreshRhythmGrid() {
   for (let step = 0; step < 16; step++) {
-    const sysexAddress = BASE_ADDRESS_RHYTHM + step; // e.g., 220 + step
+    const sysexAddress = BASE_ADDRESS_RHYTHM + step;
     const patternValue = currentValues[sysexAddress] || 0;
     rhythmPattern[step] = patternValue;
     for (let voice = 0; voice < 7; voice++) {
@@ -1345,6 +1389,8 @@ async function refreshRhythmGrid() {
     Object.fromEntries(Object.entries(currentValues).filter(([k]) => k >= 220 && k <= 235)));
 }
 
+// Updates the bank number display
+// Why: Shows the current bank (e.g., "1") in the UI
 function updateBankIndicator() {
   const bankValue = document.getElementById('current-bank-value');
   if (bankValue) {
@@ -1352,10 +1398,14 @@ function updateBankIndicator() {
   }
 }
 
+// Maps a value from one range to another
+// Why: Used for scaling values (not currently used in code but available)
 function map_value(value, in_min, in_max, out_min, out_max) {
   return (value - in_min) * (out_max - out_min) / (in_max - in_min) + Number(out_min);
 }
 
+// Resets all banks to default values
+// Why: Clears all settings on the device and UI
 function reset_memory() {
   if (controller.isConnected()) {
     showNotification("Resetting all banks", "success");
@@ -1367,6 +1417,8 @@ function reset_memory() {
   }
 }
 
+// Saves settings to the current bank
+// Why: Wrapper for saving settings via bank selection dropdown
 function save_current_settings() {
   if (controller.isConnected()) {
     var e = document.getElementById("bank_number_selection");
@@ -1381,6 +1433,8 @@ function save_current_settings() {
   }
 }
 
+// Resets the current bank to default values
+// Why: Clears settings for the selected bank
 function reset_current_bank() {
   if (controller.isConnected()) {
     const targetBank = parseInt(document.getElementById('bank_number_selection').value);
@@ -1394,15 +1448,19 @@ function reset_current_bank() {
   }
 }
 
-  function addSvgTooltip(element, tooltipText) {
-    const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-    title.textContent = tooltipText;
-    element.appendChild(title);
-  }
+// Adds tooltips to SVG elements
+// Why: Provides hover text for UI elements like buttons and LEDs
+function addSvgTooltip(element, tooltipText) {
+  const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+  title.textContent = tooltipText;
+  element.appendChild(title);
+}
 
+// Main event listener for when the page loads
+// Why: Sets up all UI interactions and initializes the app
 document.addEventListener('DOMContentLoaded', () => {
+  // Define tooltips for SVG elements
   const svgTooltips = {
-    //"chord-button": index => `Open settings for Chord ${Math.floor(index / 7) + 1}-${(index % 7) + 1}`,
     "chord-button": "Open settings for chords",
     "sharp-button": "Toggle sharp/flat mode",
     "rhythm-button": "Open rhythm settings",
@@ -1410,65 +1468,57 @@ document.addEventListener('DOMContentLoaded', () => {
     "chord-volume-pot": "Assign parameters to chord pot",
     "harp-volume-pot": "Assign parameters to harp pot",
     "mod-pot": "Assign parameters to mod pot",
-    // "preset-up": "Select next preset",
-    // "preset-down": "Select previous preset",
     "power_led": "Indicates power status"
   };
 
-  function addSvgTooltip(element, tooltipText) {
-    const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-    title.textContent = tooltipText;
-    element.appendChild(title);
-  }
-
-  // Define onDataReceived here, inside the DOMContentLoaded event listener
+  // Handle MIDI data from the device
   let lastUpdate = 0;
-    const updateInterval = 50; // milliseconds
+  const updateInterval = 50; // Throttle UI updates to every 50ms
 
-    controller.onDataReceived = async (processedData) => {
-      const now = Date.now();
-      if (now - lastUpdate > updateInterval) {
-        lastUpdate = now;
-        const { bankNumber, parameters, rhythmData } = processedData;
-        console.log(`onDataReceived: Bank ${bankNumber}, rhythmData=`, rhythmData, 
-          `parameters[220-235]=`, parameters.slice(220, 236));
+  controller.onDataReceived = async (processedData) => {
+    const now = Date.now();
+    if (now - lastUpdate > updateInterval) {
+      lastUpdate = now;
+      const { bankNumber, parameters, rhythmData } = processedData;
+      console.log(`onDataReceived: Bank ${bankNumber}, rhythmData=`, rhythmData, 
+        `parameters[220-235]=`, parameters.slice(220, 236));
 
-        if (!bankSettings[bankNumber]) bankSettings[bankNumber] = {};
+      if (!bankSettings[bankNumber]) bankSettings[bankNumber] = {};
 
-        // Update all parameters, including rhythm
-        parameters.forEach((value, index) => {
-          if (value !== undefined) {
-            bankSettings[bankNumber][index] = value;
-            currentValues[index] = value;
-            if (index >= BASE_ADDRESS_RHYTHM && index < BASE_ADDRESS_RHYTHM + 16) {
-              rhythmPattern[index - BASE_ADDRESS_RHYTHM] = value;
-            }
+      // Update parameters and rhythm data
+      parameters.forEach((value, index) => {
+        if (value !== undefined) {
+          bankSettings[bankNumber][index] = value;
+          currentValues[index] = value;
+          if (index >= BASE_ADDRESS_RHYTHM && index < BASE_ADDRESS_RHYTHM + 16) {
+            rhythmPattern[index - BASE_ADDRESS_RHYTHM] = value;
           }
-        });
-
-        if (bankNumber !== currentBankNumber) {
-          currentBankNumber = bankNumber;
-          const bankSelect = document.getElementById('bank_number_selection');
-          if (bankSelect) bankSelect.value = bankNumber;
         }
+      });
 
-        await updateUI(bankNumber);
-        updateConnectionStatus(true);
-
-        const sharpButton = document.getElementById("sharp-button");
-        if (sharpButton) {
-          sharpButton.classList.toggle("active", currentValues[31] === 1);
-        }
-        console.log(`onDataReceived: UI updated for bank ${bankNumber}, currentValues[220-235]=`, 
-          Object.fromEntries(Object.entries(currentValues).filter(([k]) => k >= 220 && k <= 235)));
-      } else {
-        console.log("onDataReceived: throttled");
+      if (bankNumber !== currentBankNumber) {
+        currentBankNumber = bankNumber;
+        const bankSelect = document.getElementById('bank_number_selection');
+        if (bankSelect) bankSelect.value = bankNumber;
       }
-    };
 
+      await updateUI(bankNumber);
+      updateConnectionStatus(true);
+
+      const sharpButton = document.getElementById("sharp-button");
+      if (sharpButton) {
+        sharpButton.classList.toggle("active", currentValues[31] === 1);
+      }
+      console.log(`onDataReceived: UI updated for bank ${bankNumber}, currentValues[220-235]=`, 
+        Object.fromEntries(Object.entries(currentValues).filter(([k]) => k >= 220 && k <= 235)));
+    } else {
+      console.log("onDataReceived: throttled");
+    }
+  };
+
+  // Handle connection changes
   controller.onConnectionChange = function(connected, message) {
     console.log(`onConnectionChange: connected=${connected}, message=${message}, isConnected=${controller.isConnected()}`);
-    // Force immediate update
     if (notificationTimeout) {
       clearTimeout(notificationTimeout);
       notificationTimeout = null;
@@ -1476,16 +1526,17 @@ document.addEventListener('DOMContentLoaded', () => {
     updateConnectionStatus(connected, message);
   };
 
+  // Check connection after 1 second
   setTimeout(() => {
     const isConnected = controller.isConnected();
     console.log(`Delayed check: minichord isConnected=${isConnected}`);
     updateConnectionStatus(isConnected, `delayed check: ${isConnected ? 'connected' : 'not connected'}`);
   }, 1000);
 
+  // Close modals when clicking outside
   const modal = document.getElementById("settings-modal");
   const rhythmModal = document.getElementById("rhythm-modal");
   window.addEventListener("click", (e) => {
-    // Handle settings modal (global, harp, chord)
     if (modal && e.target === modal) {
       const paramGroup = openParamGroup || document.getElementById("settings-title")?.textContent.toLowerCase().replace(/ /g, "_") || "global_parameter";
       cancelSettings(currentBankNumber, paramGroup);
@@ -1493,7 +1544,6 @@ document.addEventListener('DOMContentLoaded', () => {
       tempValues = {};
       openParamGroup = null;
     }
-    // Handle rhythm modal
     if (rhythmModal && e.target === rhythmModal && !e.target.closest('.modal-content')) {
       cancelSettings(currentBankNumber, "rhythm_button_parameters");
       rhythmModal.style.display = "none";
@@ -1504,8 +1554,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Chord buttons
-  document.querySelectorAll(".chord-button").forEach((button, index) => {
-    //addSvgTooltip(button, svgTooltips["chord-button"](index));
+  document.querySelectorAll(".chord-button").forEach((button) => {
     addSvgTooltip(button, svgTooltips["chord-button"]);
     button.addEventListener("click", () => openModal("chord_parameter"));
   });
@@ -1517,7 +1566,7 @@ document.addEventListener('DOMContentLoaded', () => {
     harpPlate.addEventListener("click", () => openModal("harp_parameter"));
   }
 
-  // Pots
+  // Potentiometer buttons
   const potMappings = {
     "chord-volume-pot": { paramGroup: "chord_potentiometer" },
     "harp-volume-pot": { paramGroup: "harp_potentiometer" },
@@ -1528,7 +1577,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pot.addEventListener("click", () => openModal(potMappings[pot.id].paramGroup));
   });
 
-  // Sharp button
+  // Sharp/Flat button
   const sharpButton = document.getElementById("sharp-button");
   if (sharpButton) {
     addSvgTooltip(sharpButton, svgTooltips["sharp-button"]);
@@ -1563,43 +1612,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Rhythm button
-const rhythmButton = document.getElementById("rhythm-button");
-if (rhythmButton) {
-  addSvgTooltip(rhythmButton, "Open rhythm settings");
-  rhythmButton.addEventListener("click", async () => {
-    if (!controller.isConnected()) {
-      console.warn("Rhythm button: device not connected");
-      showNotification("Device not connected", "error");
-      return;
-    }
-    openParamGroup = 'rhythm_button_parameters';
-    originalPresetValues = { ...currentValues };
-    tempValues = { ...originalPresetValues };
-    await checkbox_array();
-    document.getElementById("rhythm-modal").style.display = 'block';
-  });
-}
-
-/*   // Preset buttons
-  document.querySelectorAll(".preset-button").forEach(button => {
-    addSvgTooltip(button, svgTooltips[button.id] || "Select preset");
-    button.addEventListener("click", () => {
-      console.log(`Preset ${button.id} clicked`);
+  const rhythmButton = document.getElementById("rhythm-button");
+  if (rhythmButton) {
+    addSvgTooltip(rhythmButton, "Open rhythm settings");
+    rhythmButton.addEventListener("click", async () => {
+      if (!controller.isConnected()) {
+        console.warn("Rhythm button: device not connected");
+        showNotification("Device not connected", "error");
+        return;
+      }
+      openParamGroup = 'rhythm_button_parameters';
+      originalPresetValues = { ...currentValues };
+      tempValues = { ...originalPresetValues };
+      await checkbox_array();
+      document.getElementById("rhythm-modal").style.display = 'block';
     });
-  }); */
-
-  // Power LED
-  const powerLed = document.getElementById("power_led");
-  if (powerLed) {
-    addSvgTooltip(powerLed, svgTooltips["power_led"]);
-    // Add any existing LED event listeners if applicable
   }
 
-  const bankSelect = document.getElementById('bank_number_selection');
-  if (bankSelect) {
-    bankSelect.value = currentBankNumber;
-  }
-
+  // Save to bank
   const saveToBankBtn = document.getElementById('save-to-bank-btn');
   if (saveToBankBtn) {
     saveToBankBtn.addEventListener('click', () => {
@@ -1611,6 +1641,7 @@ if (rhythmButton) {
     });
   }
 
+  // Export settings
   const exportSettingsBtn = document.getElementById('export-settings-btn');
   if (exportSettingsBtn) {
     exportSettingsBtn.addEventListener('click', () => {
@@ -1643,6 +1674,7 @@ if (rhythmButton) {
     });
   }
 
+  // Load settings
   const loadSettingsBtn = document.getElementById('load-settings-btn');
   if (loadSettingsBtn) {
     loadSettingsBtn.addEventListener('click', () => {
@@ -1659,7 +1691,7 @@ if (rhythmButton) {
               controller.sendParameter(i, parameters[i]);
             }
             controller.sendParameter(0, 0);
-                        currentValues = { ...defaultValues, ...parameters.reduce((acc, val, idx) => ({ ...acc, [idx]: val }), {}) };
+            currentValues = { ...defaultValues, ...parameters.reduce((acc, val, idx) => ({ ...acc, [idx]: val }), {}) };
             bankSettings[currentBankNumber] = { ...currentValues };
             generateGlobalSettingsForm();
             updateLEDBankColor();
@@ -1676,6 +1708,7 @@ if (rhythmButton) {
     });
   }
 
+  // Reset bank
   const resetBankBtn = document.getElementById('reset-bank-btn');
   if (resetBankBtn) {
     resetBankBtn.addEventListener('click', () => {
@@ -1689,6 +1722,7 @@ if (rhythmButton) {
     });
   }
 
+  // Reset all banks
   const resetAllBanksBtn = document.getElementById('reset-all-banks-btn');
   if (resetAllBanksBtn) {
     resetAllBanksBtn.addEventListener('click', () => {
@@ -1703,5 +1737,5 @@ if (rhythmButton) {
     });
   }
 
-  init();
+  init(); // Start the app
 });
