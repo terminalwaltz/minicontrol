@@ -181,6 +181,30 @@
             "ui_type": "slider"
         },
         {
+            "name": "chord frame shift",
+            "group": "General",
+            "default_value": 0,
+            "data_type": "int",
+            "sysex_adress": 18,
+            "curve": "linear",
+            "min_value": 0,
+            "max_value": 6,
+            "tooltip": "Shifts the register frame up (e.g. 1 makes D the lowest pitched, 2 makes E the lowest pitched",
+            "iterate": 6,
+            "method": "chord_frame_shift=value;",
+            "introduction_version": 3,
+            "ui_type": "slider",
+            "options": [
+              { "value": 0, "label": "1" },
+              { "value": 1, "label": "2" },
+              { "value": 2, "label": "3" },
+              { "value": 3, "label": "4" },
+              { "value": 4, "label": "5" },
+              { "value": 5, "label": "6" },
+              { "value": 6, "label": "7" }
+      ]
+        },
+        {
             "name": "retrigger chords",
             "group": "General",
             "default_value": false,
