@@ -46,19 +46,6 @@
             "ui_type": "slider"
         },
         {
-            "name": "barry harris mode",
-            "group": "General",
-            "default_value": false,
-            "data_type": "int",
-            "sysex_adress": 33,
-            "curve": "linear",
-            "tooltip": "change major chords to major 6, the minor chords to minor 6, and the diminished chords to fully diminished. Recommend Harp Shuffling array #5",
-            "iterate": 1,
-            "method": "barry_harris_mode=value;",
-            "introduction_version": 4,
-            "ui_type": "switch"
-        },
-        {
             "name": "pan",
             "group": "Effects",
             "default_value": 1,
@@ -203,6 +190,19 @@
               { "value": 5, "label": "6" },
               { "value": 6, "label": "7" }
       ]
+        },
+        {
+            "name": "barry harris mode",
+            "group": "General",
+            "default_value": false,
+            "data_type": "int",
+            "sysex_adress": 33,
+            "curve": "linear",
+            "tooltip": "change major chords to major 6, the minor chords to minor 6, and the diminished chords to fully diminished. Recommend Harp Shuffling array #5",
+            "iterate": 1,
+            "method": "barry_harris_mode=value;",
+            "introduction_version": 2,
+            "ui_type": "switch"
         },
         {
             "name": "retrigger chords",
