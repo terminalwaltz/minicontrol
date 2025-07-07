@@ -19,6 +19,10 @@
    1. General Styles
    ========================================================================== */
 
+* {
+  box-sizing: border-box; /* Ensure padding and borders are included in width/height */
+}
+
 body {
   font-family: Arial, sans-serif;
   display: flex;
@@ -100,15 +104,17 @@ svg {
 }
 
 #connection-status.connected::before {
-  content: '●';
+  content: '\25CF'; /* Unicode for Black Circle (●) */
   color: green;
   font-size: 20px;
+  font-family: Arial, sans-serif; /* Ensure consistent font rendering */
 }
 
 #connection-status.disconnected::before {
-  content: '●';
+  content: '\25CF'; /* Unicode for Black Circle (●) */
   color: red;
   font-size: 20px;
+  font-family: Arial, sans-serif; /* Ensure consistent font rendering */
 }
 
 /* --------------------------------------------------------------------------
@@ -247,6 +253,7 @@ svg {
    3.4 Modals (Settings & Rhythm)
    -------------------------------------------------------------------------- */
 
+#global-settings-modal,
 .settings-modal,
 #rhythm-modal {
   display: none;
@@ -255,20 +262,22 @@ svg {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent backdrop */
   z-index: 1000;
-  overflow: auto;
+  overflow: auto; /* Allow vertical scrolling if needed */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
-.settings-content,
-#rhythm-modal .modal-content {
+.modal-content,
+#global-settings,
+#settings-form {
   background-color: #fff;
-  margin: 5% auto;
-  padding: 30px;
+  margin: 5% auto; /* Center vertically */
+  padding: 1rem;
+  border-radius: 8px;
   width: 90%;
-  max-width: 100%;
-  border-radius: 5px;
-  position: relative;
+  box-sizing: border-box; /* Include padding in width */
+  /* border: 1px solid red; /* Uncomment for debugging overflow */
 }
 
 #rhythm-modal .rhythm-grid {
@@ -295,6 +304,14 @@ svg {
   margin: 5px auto;
   cursor: pointer;
   accent-color: #2ecc71;
+}
+
+#rhythm-modal .rhythm-row .rhythm-cell:first-child {
+  width: 100px; /* Wider label cell */
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #rhythm-modal .modal-buttons {
@@ -345,26 +362,25 @@ svg {
 }
 
 .settings-content button {
-  padding: 10px 20px;
+  padding: 0.5rem 1rem;
   margin: 0 5px;
-  font-size: 0.9em;
+  font-size: 0.9rem;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .save-btn,
 .cancel-btn {
-  padding: 0.3em;
-  border: 1px solid black;
-  border-radius: 3px;
-  background-color: white;
-  font-size: 1em;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  width: 100%;
+  width: auto; /* Fit content */
   box-sizing: border-box;
-  transition: opacity 0.2s, background-color 0.2s;
+  transition: background-color 0.2s;
 }
 
 .save-btn {
@@ -490,21 +506,22 @@ svg {
 
 #global-settings {
   flex-shrink: 0;
-  width: 375px;
-  height: 400px;
+  width: 90%;
+  max-width: 400px;
+  height: auto;
   margin-left: 10px;
-  padding: 10px;
+  padding: 1rem;
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  overflow-y: auto;
+  overflow-y: auto; /* Allow vertical scrolling */
   z-index: 10;
 }
 
 #global-settings #output_zone {
   margin-top: 10px;
   padding: 5px;
-  font-size: 0.8em;
+  font-size: 0.8rem;
   color: #666;
   background-color: #f9f9f9;
   border: 1px solid #ccc;
@@ -518,7 +535,7 @@ svg {
 .settings-content h2,
 #rhythm-modal h2 {
   margin: 0 0 10px 0;
-  font-size: 1.5em;
+  font-size: 1.5rem;
   color: #333;
   text-align: center;
 }
@@ -526,7 +543,7 @@ svg {
 #global-settings h3,
 .settings-content h3 {
   margin: 10px 0 5px;
-  font-size: 1.5em;
+  font-size: 1.3rem;
   color: #333;
   font-weight: bold;
 }
@@ -539,7 +556,7 @@ svg {
   max-width: 200px;
   padding: 6px;
   margin-bottom: 8px;
-  font-size: 0.85em;
+  font-size: 0.85rem;
   border: 1px solid #ccc;
   border-radius: 5px;
   background-color: #f9f9f9;
@@ -559,25 +576,31 @@ svg {
 
 #settings-form {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Multi-column layout for desktop */
   gap: 20px;
 }
 
 .parameter-column {
   flex: 1;
-  min-width: 250px;
+  min-width: 250px; /* Ensure columns on desktop */
+  box-sizing: border-box;
 }
 
 .parameter-column div {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .parameter-column label {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.9rem;
+  flex: 0 0 auto;
+  width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .parameter-column input[type="checkbox"] {
@@ -595,23 +618,74 @@ svg {
   display: flex;
   align-items: center;
   flex-direction: row;
-  justify-content: flex-start;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
   order: 2;
 }
 
 #global-settings .slider,
 #settings-modal .slider {
-  width: 80%;
-  max-width: 150px;
+  flex: 1;
+  width: 100%;
+  max-width: 200px;
+  min-width: 80px;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #ccc;
+  border-radius: 5px;
+  outline: none;
   order: 2;
+}
+
+#global-settings .slider::-webkit-slider-thumb,
+#settings-modal .slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #2ecc71;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#global-settings .slider::-moz-range-thumb,
+#settings-modal .slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #2ecc71;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#global-settings .slider::-webkit-slider-runnable-track,
+#settings-modal .slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8px;
+  background: #ccc;
+  border-radius: 5px;
+}
+
+#global-settings .slider::-moz-range-track,
+#settings-modal .slider::-moz-range-track {
+  width: 100%;
+  height: 8px;
+  background: #ccc;
+  border-radius: 5px;
 }
 
 #global-settings .value-input,
 #settings-modal .value-input {
-  width: 45px;
-  padding: 2px;
-  font-size: 0.75em;
+  width: 3.5rem;
+  max-width: 20vw;
+  padding: 0.2rem;
+  font-size: 0.9rem;
   text-align: center;
   border: 1px solid #ccc;
   border-radius: 3px;
@@ -623,21 +697,24 @@ svg {
 #settings-modal .parameter-row {
   display: flex;
   align-items: center;
+  flex-direction: row; /* Horizontal layout for desktop */
   justify-content: space-between;
-  gap: 8px;
-  margin: 8px 0;
-  padding-right: 5px;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 #global-settings label,
 #settings-modal label {
-  flex: 1;
+  flex: 0 0 auto;
+  width: 100px;
   margin: 0;
-  font-size: 0.8em;
+  font-size: 0.9rem;
   font-weight: bold;
   color: #333;
   white-space: nowrap;
-  overflow: visible;
+  overflow: hidden;
   text-overflow: ellipsis;
   order: 1;
 }
@@ -648,11 +725,11 @@ svg {
   z-index: 10;
   display: flex;
   justify-content: center;
-  padding: 10px;
+  gap: 0.5rem;
+  padding: 0.5rem;
   background-color: #fff;
   border-bottom: 1px solid #ccc;
 }
-
 /* --------------------------------------------------------------------------
    3.7 Toggle Switch
    -------------------------------------------------------------------------- */
@@ -730,82 +807,219 @@ svg {
    4. Media Queries
    ========================================================================== */
 
+@media (max-width: 600px) {
+  .status-header h1 {
+    font-size: 1.2rem; /* Scale down for mobile */
+  }
+
+  #connection-status {
+    font-size: 1rem; /* Scale text for mobile */
+    padding: 4px 8px;
+  }
+
+  #connection-status.connected::before,
+  #connection-status.disconnected::before {
+    font-size: 1rem; /* Scale dot for mobile */
+  }
+}
+
 @media (max-width: 800px) {
+  .container {
+    width: 95%;
+    margin-left: 0;
+    margin-top: 60px;
+  }
+
+  #global-settings {
+    width: 95%;
+    max-width: 95vw;
+    margin-left: 0;
+  }
+
   #settings-form {
-    grid-template-columns: repeat(2, 1fr);
+    flex-direction: column; /* Single-column for smaller screens */
+    gap: 0.5rem;
+  }
+
+  .parameter-column {
+    min-width: 0; /* Allow full width */
   }
 }
 
 @media (max-width: 600px) {
   .container {
     flex-direction: column;
-    width: 90%;
+    width: 95%;
     height: auto;
     margin-left: 0;
     margin-top: 60px;
   }
 
   #global-settings {
-    width: 100%;
+    width: 95%;
+    max-width: 95vw;
     height: auto;
     margin-left: 0;
     margin-top: 10px;
+    padding: 0.5rem;
   }
 
   #control {
-    position: relative; /* Change to relative to place in document flow */
-    top: auto; /* Remove absolute positioning */
+    position: relative;
+    top: auto;
     left: auto;
-    width: 90%; /* Match container width */
-    margin: 10px auto; /* Center and add spacing */
-    z-index: 5; /* Below modals (z-index: 1000) and SVG (default z-index: 0) */
+    width: 95%;
+    margin: 10px auto;
+    z-index: 5;
   }
 
   #current-bank-indicator {
-    position: relative; /* Change to relative to place in document flow */
+    position: relative;
     top: auto;
     left: auto;
     width: fit-content;
-    margin: 10px auto; /* Center below control section */
-    z-index: 5; /* Below modals and SVG */
+    margin: 10px auto;
+    z-index: 5;
   }
 
+  #global-settings-modal,
   .settings-modal,
   #rhythm-modal {
     width: 100%;
-    z-index: 1000; /* Ensure modals stay on top */
+    z-index: 1000;
   }
 
-  .settings-content,
-  #rhythm-modal .modal-content {
-    width: 90%;
-    padding: 15px;
+  .modal-content,
+  #global-settings,
+  #settings-form {
+    width: 95%;
+    max-width: 95vw;
+    min-width: 0;
+    margin: 2% auto;
+    padding: 0.5rem;
+  }
+
+  #global-settings .slider,
+  #settings-modal .slider {
+    max-width: 65vw;
+    min-width: 0;
+  }
+
+  #global-settings .value-input,
+  #settings-modal .value-input {
+    width: 3rem;
+    max-width: 15vw;
+    font-size: 0.8rem;
+  }
+
+  #global-settings .parameter-row,
+  #settings-modal .parameter-row {
+    flex-direction: column; /* Stack vertically on mobile */
+    align-items: flex-start;
+  }
+
+  #global-settings label,
+  #settings-modal label {
+    width: 100%;
+    font-size: 0.85rem;
   }
 
   #rhythm-modal .rhythm-grid {
-    grid-template-columns: 80px repeat(16, 30px);
-    gap: 3px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 95vw;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    box-sizing: border-box;
+    margin-top: 10px;
+  }
+
+  #rhythm-modal .rhythm-row {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  #rhythm-modal .rhythm-row.header {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 10;
+  }
+
+  #rhythm-modal .rhythm-cell {
+    flex: 0 0 auto;
+    width: 5%; /* 16 steps = 80% total */
+    height: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-sizing: border-box;
+    font-size: 0.7rem;
   }
 
   #rhythm-modal .rhythm-cell input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 1rem;
+    height: 1rem;
+    margin: 0 auto;
+    cursor: pointer;
+    accent-color: #2ecc71;
+  }
+
+  #rhythm-modal .rhythm-row .rhythm-cell:first-child {
+    width: 15%; /* Label column */
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #global-settings h2,
+  .settings-content h2,
+  #rhythm-modal h2 {
+    font-size: 1.2rem;
+  }
+
+  #global-settings h3,
+  .settings-content h3 {
+    font-size: 1.1rem;
+  }
+
+  #global-settings input,
+  #global-settings select,
+  #settings-form input,
+  #settings-form select {
+    font-size: 0.8rem;
+    padding: 4px;
+  }
+
+  .save-btn,
+  .cancel-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
   }
 }
 
 @media (max-width: 500px) {
-  #settings-form {
-    grid-template-columns: 1fr;
+  #rhythm-modal .rhythm-grid {
+    max-width: 95vw;
   }
 
-  #rhythm-modal .rhythm-grid {
-    grid-template-columns: 60px repeat(16, 25px);
-    gap: 2px;
+  #rhythm-modal .rhythm-cell {
+    width: 1.2rem; /* Fixed size for steps */
+    height: 1.2rem;
+    font-size: 0.6rem;
   }
 
   #rhythm-modal .rhythm-cell input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  #rhythm-modal .rhythm-row .rhythm-cell:first-child {
+    width: 2.5rem;
+    font-size: 0.6rem;
   }
 }
 
@@ -826,7 +1040,7 @@ svg {
   transform: translateX(-50%);
   z-index: 1000;
   padding: 5px 10px;
-  font-size: 0.8em;
+  font-size: 0.8rem;
   color: #fff;
   background-color: #333;
   border-radius: 4px;
