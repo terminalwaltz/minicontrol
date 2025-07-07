@@ -658,76 +658,62 @@ async function generateGlobalSettingsForm() {
       sliderContainer.className = "slider-container";
       input = document.createElement("input");
       input.type = "range";
-      input.id = `global-param-${param.sysex_adress}`;
+      input.id = `param-${param.sysex_adress}`;
       input.name = param.name;
       input.className = "slider";
-      input.min = param.data_type === "float" ? "0" : param.min_value.toString();
-      input.max = param.data_type === "float" ? "1" : param.max_value.toString();
+
+      const floatMultiplier = param.data_type === "float" ? (controller.float_multiplier || 100.0) : 1;
+
+      // Set slider attributes based on param definition
+      input.min = param.min_value.toString();
+      input.max = param.max_value.toString();
       input.step = param.data_type === "float" ? "0.01" : "1";
-      const sliderValue = param.data_type === "float" ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
-      input.value = sliderValue.toString();
+
+      const sliderValue = param.data_type === "float"
+        ? Number((currentValue / floatMultiplier).toFixed(2))
+        : currentValue;
+
+      input.value = sliderValue;
       input.title = param.tooltip || param.name;
+
+      // Create number input box next to slider
       const valueInput = document.createElement("input");
       valueInput.type = "number";
       valueInput.id = `value-${param.sysex_adress}`;
-      valueInput.min = param.data_type === "float" ? "0" : param.min_value.toString();
-      valueInput.max = param.data_type === "float" ? "1" : param.max_value.toString();
+      valueInput.min = param.min_value.toString();
+      valueInput.max = param.max_value.toString();
       valueInput.step = param.data_type === "float" ? "0.01" : "1";
-      valueInput.value = sliderValue.toString();
-      valueInput.className = "value-input";
+      valueInput.value = sliderValue;
       valueInput.title = param.tooltip || param.name;
-      console.log(`[SLIDER INIT] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, floatMultiplier=${floatMultiplier}, sliderValue=${sliderValue}, valueInput.value=${valueInput.value}, input.min=${input.min}, input.max=${input.max}, input.step=${input.step}`);
+      valueInput.className = "value-input";
 
-      // Force redraw for mobile browsers
-      setTimeout(() => {
-        input.value = ''; // Clear value first
-        input.value = sliderValue.toString(); // Re-set value
-        input.dispatchEvent(new Event('input')); // Trigger input event
-        input.dispatchEvent(new Event('change')); // Trigger change event
-        input.style.display = 'none'; // Force reflow
-        input.offsetHeight; // Trigger reflow
-        input.style.display = '';
-        console.log(`[SLIDER RENDER] sysex=${param.sysex_adress}, forced input.value=${input.value}`);
-      }, 100); // Increased delay for mobile
+      // Debug log
+      console.log(`[SLIDER] sysex=${param.sysex_adress}, min=${input.min}, max=${input.max}, current=${sliderValue}, scaled=${currentValue}`);
 
+      // Event: slider moved
       input.addEventListener("input", (e) => {
-        const value = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
-        tempValues[param.sysex_adress] = value;
-        valueInput.value = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)).toString() : value.toString();
-        console.log(`[SLIDER INPUT] sysex=${param.sysex_adress}, value=${value}, name=${param.name}, valueInput.value=${valueInput.value}`);
-        controller.sendParameter(parseInt(param.sysex_adress), value);
-        if (param.sysex_adress === 20) updateLEDBankColor();
+        const rawValue = parseFloat(e.target.value);
+        const scaled = param.data_type === "float" ? rawValue * floatMultiplier : parseInt(rawValue);
+        tempValues[param.sysex_adress] = scaled;
+        valueInput.value = rawValue;
+        controller.sendParameter(parseInt(param.sysex_adress), scaled);
+        if (param.method) executeMethod(param.method, scaled);
       });
 
-      input.addEventListener("touchend", (e) => {
-        const value = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
-        tempValues[param.sysex_adress] = value;
-        valueInput.value = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)).toString() : value.toString();
-        console.log(`[SLIDER TOUCHEND] sysex=${param.sysex_adress}, value=${value}, name=${param.name}, valueInput.value=${valueInput.value}`);
-        controller.sendParameter(parseInt(param.sysex_adress), value);
-        if (param.sysex_adress === 20) updateLEDBankColor();
-        input.dispatchEvent(new Event('input')); // Trigger input event
-        input.style.display = 'none';
-        input.offsetHeight;
-        input.style.display = '';
-      });
-
+      // Event: number box changed
       valueInput.addEventListener("change", (e) => {
-        let value = parseFloat(e.target.value) || 0;
-        value = Math.max(param.min_value, Math.min(param.max_value, value));
-        if (param.data_type === "float") value *= floatMultiplier;
-        tempValues[param.sysex_adress] = value;
-        const scaledValue = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)) : value;
-        input.value = scaledValue.toString();
-        valueInput.value = scaledValue.toString();
-        console.log(`[VALUE INPUT] sysex=${param.sysex_adress}, value=${value}, name=${param.name}, scaledValue=${scaledValue}, valueInput.value=${valueInput.value}`);
-        controller.sendParameter(parseInt(param.sysex_adress), value);
-        if (param.sysex_adress === 20) updateLEDBankColor();
-        input.dispatchEvent(new Event('input')); // Trigger input event
+        let rawValue = parseFloat(e.target.value) || 0;
+        rawValue = Math.max(param.min_value, Math.min(param.max_value, rawValue));
+        const scaled = param.data_type === "float" ? rawValue * floatMultiplier : parseInt(rawValue);
+        tempValues[param.sysex_adress] = scaled;
+        input.value = rawValue;
+        valueInput.value = rawValue;
+        controller.sendParameter(parseInt(param.sysex_adress), scaled);
+        if (param.method) executeMethod(param.method, scaled);
       });
 
-      sliderContainer.appendChild(valueInput);
       sliderContainer.appendChild(input);
+      sliderContainer.appendChild(valueInput);
       container.appendChild(label);
       container.appendChild(sliderContainer);
     } else if (param.ui_type === "button" || param.ui_type === "switch") {
@@ -855,8 +841,8 @@ async function generateSettingsForm(paramGroup) {
           input.id = `param-${param.sysex_adress}`;
           input.name = param.name;
           input.className = "slider";
-          input.min = param.data_type === "float" ? "0" : param.min_value.toString();
-          input.max = param.data_type === "float" ? "1" : param.max_value.toString();
+          input.min = param.min_value.toString();
+          input.max = param.max_value.toString();
           input.step = param.data_type === "float" ? "0.01" : "1";
           const sliderValue = param.data_type === "float" 
             ? Number((currentValue / floatMultiplier).toFixed(2)) 
@@ -866,8 +852,8 @@ async function generateSettingsForm(paramGroup) {
           const valueInput = document.createElement("input");
           valueInput.type = "number";
           valueInput.id = `value-${param.sysex_adress}`;
-          valueInput.min = param.data_type === "float" ? "0" : param.min_value.toString();
-          valueInput.max = param.data_type === "float" ? "1" : param.max_value.toString();
+          valueInput.min = param.min_value.toString();
+          valueInput.max = param.max_value.toString();
           valueInput.step = param.data_type === "float" ? "0.01" : "1";
           valueInput.value = sliderValue.toString();
           valueInput.className = "value-input";
@@ -1292,50 +1278,52 @@ function saveSettings(presetId, paramGroup) {
 
 // Updates UI after saving settings
 // Why: Refreshes modals and UI elements to reflect saved values
-function updateUIAfterSave(presetId, paramGroup) {
-  tempValues = {}; // Clear temporary values
-  console.log(`saveSettings: after save, preset=${presetId}, currentValues=`, JSON.stringify(currentValues));
+async function updateUIAfterSave(presetId, paramGroup) {
+  tempValues = {}; // Clear temporary values after save
+  console.log(`updateUIAfterSave: Saved preset ${presetId}, paramGroup=${paramGroup}`);
 
-  // Refresh the appropriate modal
-  if (paramGroup === "global_parameter") {
-    generateGlobalSettingsForm();
-  } else if (paramGroup === "rhythm_button_parameters" || paramGroup === "rhythm_parameter") {
-    checkbox_array();
-    refreshRhythmGrid();
-  } else {
-    generateSettingsForm(paramGroup);
+  try {
+    // Refresh the appropriate modal content if the modal is still visible
+    if (paramGroup === "global_parameter") {
+      await generateGlobalSettingsForm();
+    } else if (paramGroup === "rhythm_button_parameters" || paramGroup === "rhythm_parameter") {
+      await checkbox_array();
+      await refreshRhythmGrid();
+    } else {
+      await generateSettingsForm(paramGroup);
+    }
+
+    // Hide all relevant modals cleanly
+    hideModal(paramGroup);
+
+    // Reapply LED color (sysex 20)
+    if (currentValues[20] !== undefined) {
+      updateLEDBankColor();
+    }
+
+    // Show success notification
+    showNotification(`Saved settings to bank ${presetId + 1}`, 'success');
+
+    // Optional: Force visual refresh of sliders if needed
+    setTimeout(() => {
+      document.querySelectorAll('.slider').forEach(slider => {
+        const currentValue = slider.value;
+        slider.value = currentValue; // Re-apply value
+        slider.dispatchEvent(new Event('input')); // Re-trigger logic
+        console.log(`[SLIDER SYNC] id=${slider.id}, value=${slider.value}`);
+      });
+    }, 50);
+  } catch (error) {
+    console.error("updateUIAfterSave: Error updating UI", error);
+    showNotification("Failed to refresh UI after save", "error");
   }
 
-  // Hide all modals
-  const modal = document.getElementById("settings-modal");
-  const rhythmModal = document.getElementById("rhythm-modal");
-  const globalSettingsModal = document.getElementById("global-settings-modal");
-  if (modal) {
-    modal.style.display = "none";
-    console.log(`saveSettings: Hid settings-modal`);
-  } else {
-    console.warn(`saveSettings: settings-modal not found`);
-  }
-  if (rhythmModal) {
-    rhythmModal.style.display = "none";
-    console.log(`saveSettings: Hid rhythm-modal`);
-  } else {
-    console.warn(`saveSettings: rhythm-modal not found`);
-  }
-  if (globalSettingsModal) {
-    globalSettingsModal.style.display = "none";
-    console.log(`saveSettings: Hid global-settings-modal`);
-  } else {
-    console.warn(`saveSettings: global-settings-modal not found`);
-  }
+  // Reset open param group
   openParamGroup = null;
-
-  if (currentValues[20] !== undefined) updateLEDBankColor();
-
-  showNotification(`Saved settings to bank ${presetId + 1}`, 'success');
 }
 
-  // Force update all sliders
+
+/*   // Force update all sliders
   setTimeout(() => {
     document.querySelectorAll('.slider').forEach(slider => {
       const currentValue = slider.value;
@@ -1345,8 +1333,8 @@ function updateUIAfterSave(presetId, paramGroup) {
       slider.offsetHeight;
       slider.style.display = '';
       console.log(`[SLIDER POST-SAVE] id=${slider.id}, value=${slider.value}`);
-    });
-  }, 100); // Increased delay for mobile
+    }); 
+  }, 100); // Increased delay for mobile*/
 
 // Reverts changes and restores original values
 // Why: Allows users to cancel edits in a modal

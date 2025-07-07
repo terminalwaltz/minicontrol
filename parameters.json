@@ -973,7 +973,7 @@
             "name": "frequency",
             "group": "Tremolo",
             "default_value": 0,
-            "data_type": "float",
+            "data_type": "int",
             "sysex_adress": 157,
             "curve": "linear",
             "min_value": 0,
