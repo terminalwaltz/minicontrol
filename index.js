@@ -1292,6 +1292,48 @@ function saveSettings(presetId, paramGroup) {
 
 // Updates UI after saving settings
 // Why: Refreshes modals and UI elements to reflect saved values
+function updateUIAfterSave(presetId, paramGroup) {
+  tempValues = {}; // Clear temporary values
+  console.log(`saveSettings: after save, preset=${presetId}, currentValues=`, JSON.stringify(currentValues));
+
+  // Refresh the appropriate modal
+  if (paramGroup === "global_parameter") {
+    generateGlobalSettingsForm();
+  } else if (paramGroup === "rhythm_button_parameters" || paramGroup === "rhythm_parameter") {
+    checkbox_array();
+    refreshRhythmGrid();
+  } else {
+    generateSettingsForm(paramGroup);
+  }
+
+  // Hide all modals
+  const modal = document.getElementById("settings-modal");
+  const rhythmModal = document.getElementById("rhythm-modal");
+  const globalSettingsModal = document.getElementById("global-settings-modal");
+  if (modal) {
+    modal.style.display = "none";
+    console.log(`saveSettings: Hid settings-modal`);
+  } else {
+    console.warn(`saveSettings: settings-modal not found`);
+  }
+  if (rhythmModal) {
+    rhythmModal.style.display = "none";
+    console.log(`saveSettings: Hid rhythm-modal`);
+  } else {
+    console.warn(`saveSettings: rhythm-modal not found`);
+  }
+  if (globalSettingsModal) {
+    globalSettingsModal.style.display = "none";
+    console.log(`saveSettings: Hid global-settings-modal`);
+  } else {
+    console.warn(`saveSettings: global-settings-modal not found`);
+  }
+  openParamGroup = null;
+
+  if (currentValues[20] !== undefined) updateLEDBankColor();
+
+  showNotification(`Saved settings to bank ${presetId + 1}`, 'success');
+}
 
   // Force update all sliders
   setTimeout(() => {
