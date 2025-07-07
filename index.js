@@ -363,7 +363,7 @@ async function checkbox_array() {
     const closeButton = document.createElement('span');
     closeButton.className = 'close-button';
     closeButton.textContent = '×';
-    closeButton.addEventListener('click', () => hideModal('rhythm_button_parameters'));
+    closeButton.addEventListener('click', () => hideModal('rhythm_parameter'));
     modalContent.appendChild(closeButton);
 
     // Add title
@@ -510,16 +510,16 @@ async function checkbox_array() {
     saveButton.className = 'save-btn';
     saveButton.textContent = 'Save';
     saveButton.addEventListener('click', () => {
-      saveSettings(currentBankNumber, 'rhythm_button_parameters');
       saveSettings(currentBankNumber, 'rhythm_parameter');
-      hideModal('rhythm_button_parameters');
+      saveSettings(currentBankNumber, 'rhythm_parameter');
+      hideModal('rhythm_parameter');
     });
     const cancelButton = document.createElement('button');
     cancelButton.className = 'cancel-btn';
     cancelButton.textContent = 'Cancel';
     cancelButton.addEventListener('click', () => {
       tempValues = { ...currentValues };
-      hideModal('rhythm_button_parameters');
+      hideModal('rhythm_parameter');
     });
     buttonContainer.appendChild(saveButton);
     buttonContainer.appendChild(cancelButton);
@@ -756,7 +756,7 @@ async function generateGlobalSettingsForm() {
 // Why: Allows editing parameters like oscillator amplitudes or filter settings
 async function generateSettingsForm(paramGroup) {
   if (paramGroup === "global_parameter") return; // Handled by generateGlobalSettingsForm
-  if (paramGroup === "rhythm_button_parameters") {
+  if (paramGroup === "rhythm_parameter") {
     await checkbox_array();
     return;
   }
@@ -1017,16 +1017,19 @@ async function processMidiQueue() {
 async function init() {
   isInitializing = true;
   console.log('init: starting, time=', new Date().toISOString());
-
   showNotification("Connecting...", "info");
-
   try {
-    await initializeDefaultValues(); // Load default parameter values
-    controller.initialize(); // Connect to MiniChord device
-    midiResponseQueue = []; // Clear MIDI queue
+    if (!parameters) {
+      parameters = await loadParameters();
+      console.log('[DEBUG] init: Loaded parameters=', parameters);
+    } else {
+      console.log('[DEBUG] init: Parameters already loaded=', parameters);
+    }
+    await initializeDefaultValues();
+    controller.initialize();
+    midiResponseQueue = [];
     console.log('init: cleared midiResponseQueue');
-
-    await loadBankSettings(0); // Load bank 1 (index 0)
+    await loadBankSettings(0);
   } catch (error) {
     console.error("Error during initialization:", error);
     showNotification("Initialization failed. Check console for details.", "error");
@@ -1102,7 +1105,7 @@ async function openModal(paramGroup) {
     return;
   }
 
-  if (paramGroup === "rhythm_button_parameters") {
+  if (paramGroup === "rhythm_parameter") {
     const rhythmModal = document.getElementById('rhythm-modal');
     if (!rhythmModal) {
       console.error("Rhythm modal element not found: #rhythm-modal");
@@ -1204,7 +1207,7 @@ function updateUIAfterSave(presetId, paramGroup) {
   // Refresh the appropriate modal
   if (paramGroup === "global_parameter") {
     generateGlobalSettingsForm();
-  } else if (paramGroup === "rhythm_button_parameters" || paramGroup === "rhythm_parameter") {
+  } else if (paramGroup === "rhythm_parameter" || paramGroup === "rhythm_parameter") {
     checkbox_array();
     refreshRhythmGrid();
   } else {
@@ -1284,12 +1287,12 @@ async function cancelSettings(bankNumber, paramGroup) {
   if (paramGroup === "global_parameter") {
     await generateGlobalSettingsForm();
     hideModal(paramGroup);
-  } else if (paramGroup === "rhythm_button_parameters" || paramGroup === "rhythm_parameter") {
+  } else if (paramGroup === "rhythm_parameter" || paramGroup === "rhythm_parameter") {
     if (document.getElementById('rhythm-modal').style.display === 'block') {
       await checkbox_array();
       await refreshRhythmGrid();
     }
-    hideModal("rhythm_button_parameters");
+    hideModal("rhythm_parameter");
   } else {
     await generateSettingsForm(paramGroup);
     hideModal(paramGroup);
@@ -1309,7 +1312,7 @@ function showModal(section) {
     'chord_parameter': 'settings-modal',
     'harp_parameter': 'settings-modal',
     'global_parameter': 'global-settings-modal',
-    'rhythm_button_parameters': 'rhythm-modal',
+    'rhythm_parameter': 'rhythm-modal',
     'rhythm_parameter': 'rhythm-modal'
   };
   const modalId = modalMap[section];
@@ -1330,7 +1333,7 @@ function showModal(section) {
   });
 
   modal.style.display = 'block';
-  if (section === 'rhythm_button_parameters') {
+  if (section === 'rhythm_parameter') {
     checkbox_array();
   } else {
     generateSettingsForm(section);
@@ -1341,7 +1344,7 @@ function showModal(section) {
 // Why: Closes modals and clears state
 function hideModal(section) {
   const modalMap = {
-    'rhythm_button_parameters': 'rhythm-modal',
+    'rhythm_parameter': 'rhythm-modal',
     'rhythm_parameter': 'rhythm-modal',
     'global_parameter': 'global-settings-modal',
     'harp_parameter': 'settings-modal',
@@ -1543,7 +1546,7 @@ document.addEventListener('DOMContentLoaded', () => {
       openParamGroup = null;
     }
     if (rhythmModal && e.target === rhythmModal && !e.target.closest('.modal-content')) {
-      cancelSettings(currentBankNumber, "rhythm_button_parameters");
+      cancelSettings(currentBankNumber, "rhythm_parameter");
       rhythmModal.style.display = "none";
       tempValues = {};
       openParamGroup = null;
@@ -1619,7 +1622,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showNotification("Device not connected", "error");
         return;
       }
-      openParamGroup = 'rhythm_button_parameters';
+      openParamGroup = 'rhythm_parameter';
       originalPresetValues = { ...currentValues };
       tempValues = { ...originalPresetValues };
       await checkbox_array();
@@ -1650,7 +1653,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (parameters.global_parameter.some(param => param.sysex_adress == address) || 
               parameters.harp_parameter.some(param => param.sysex_adress == address) || 
               parameters.chord_parameter.some(param => param.sysex_adress == address) ||
-              parameters.rhythm_button_parameters.some(param => param.sysex_adress == address)) {
+              parameters.rhythm_parameter.some(param => param.sysex_adress == address)) {
             sysex_array[address] = value;
           }
         }
@@ -1673,38 +1676,50 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Load settings
-  const loadSettingsBtn = document.getElementById('load-settings-btn');
-  if (loadSettingsBtn) {
-    loadSettingsBtn.addEventListener('click', () => {
-      if (controller.isConnected()) {
-        let preset_code = prompt('Paste preset code');
-        if (preset_code != null) {
-          const parameters = decodePresetData(preset_code);
-          if (parameters.length !== (controller.parameter_size || 199)) {
-            showNotification("Malformed preset code", "error");
+const loadSettingsBtn = document.getElementById('load-settings-btn');
+if (loadSettingsBtn) {
+  loadSettingsBtn.addEventListener('click', async () => {
+    if (controller.isConnected()) {
+      let preset_code = prompt('Paste preset code');
+      if (preset_code != null) {
+        const presetParameters = decodePresetData(preset_code);
+        if (presetParameters.length !== (controller.parameter_size || 199)) {
+          showNotification("Malformed preset code", "error");
+          return;
+        }
+        try {
+          const params = await loadParameters(); // Load parameters fresh
+          if (!params.global_parameter) {
+            showNotification("Invalid parameters.json: missing global_parameter", "error");
             return;
           }
-          try {
-            for (let i = 2; i < parameters.length; i++) {
-              controller.sendParameter(i, parameters[i]);
+          for (let i = 2; i < presetParameters.length; i++) {
+            if (
+              params.global_parameter.some(param => param.sysex_adress == i) ||
+              params.harp_parameter?.some(param => param.sysex_adress == i) ||
+              params.chord_parameter?.some(param => param.sysex_adress == i) ||
+              params.rhythm_parameter?.some(param => param.sysex_adress == i)
+            ) {
+              controller.sendParameter(i, presetParameters[i]);
             }
-            controller.sendParameter(0, 0);
-            currentValues = { ...defaultValues, ...parameters.reduce((acc, val, idx) => ({ ...acc, [idx]: val }), {}) };
-            bankSettings[currentBankNumber] = { ...currentValues };
-            generateGlobalSettingsForm();
-            updateLEDBankColor();
-            showNotification("Preset loaded successfully", "success");
-          } catch (error) {
-            console.error('Error loading preset:', error);
-            showNotification("Error loading preset", "error");
           }
+          controller.sendParameter(0, 0);
+          currentValues = { ...defaultValues, ...presetParameters.reduce((acc, val, idx) => ({ ...acc, [idx]: val }), {}) };
+          bankSettings[currentBankNumber] = { ...currentValues };
+          await generateGlobalSettingsForm();
+          updateLEDBankColor();
+          showNotification("Preset loaded successfully", "success");
+        } catch (error) {
+          console.error('Error loading preset:', error);
+          showNotification("Error loading preset", "error");
         }
-      } else {
-        showNotification("Device not connected", "error");
-        document.getElementById("information_zone")?.focus();
       }
-    });
-  }
+    } else {
+      showNotification("Device not connected", "error");
+      document.getElementById("information_zone")?.focus();
+    }
+  });
+}
 
   // Reset bank
   const resetBankBtn = document.getElementById('reset-bank-btn');
