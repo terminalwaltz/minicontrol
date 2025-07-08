@@ -660,8 +660,7 @@ function updateRhythm() {
 }
 
 // Creates the global settings modal with sliders, switches, or selects
-// Why: Allows editing global parameters like led attenuation (sysex=32)
-// Note: This is where the slider visual issue (jumping to max) likely occurs
+// Why: Allows editing global parameters like led attenuation (sysex=32) and bank color (sysex=20)
 async function generateGlobalSettingsForm() {
   const globalSettings = document.getElementById("global-settings");
   const settingsForm = document.getElementById("global-settings-form");
@@ -672,20 +671,22 @@ async function generateGlobalSettingsForm() {
 
   globalParams.forEach((param) => {
     const floatMultiplier = param.sysex_adress === 20 ? 1 : (controller.float_multiplier || 100.0);
-    const currentValue = currentValues[param.sysex_adress] !== undefined
-      ? currentValues[param.sysex_adress]
-      : param.default_value * floatMultiplier;
+    const currentValue = tempValues[param.sysex_adress] !== undefined
+      ? tempValues[param.sysex_adress]
+      : currentValues[param.sysex_adress] !== undefined
+        ? currentValues[param.sysex_adress]
+        : param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value;
     const scaledValue = param.data_type === "float" ? currentValue / floatMultiplier : currentValue;
 
     const row = document.createElement("div");
     row.className = "parameter-row";
     row.innerHTML = `
-      <label for="param-${param.sysex_adress}" data-tooltip="${param.description}">${param.name}</label>
+      <label for="param-${param.sysex_adress}" data-tooltip="${param.description || param.tooltip || param.name}">${param.name}</label>
       <div class="slider-container">
         <input type="range" class="slider" id="param-${param.sysex_adress}"
           min="${param.min_value * floatMultiplier}" max="${param.max_value * floatMultiplier}"
-          value="${currentValue}" step="${param.step * floatMultiplier}">
-        <input type="text" class="value-input" value="${scaledValue.toFixed(2)}">
+          value="${currentValue}" step="${param.step * floatMultiplier || (param.data_type === 'float' ? 0.01 : 1)}">
+        <input type="number" class="value-input" value="${scaledValue.toFixed(2)}" step="${param.step || (param.data_type === 'float' ? 0.01 : 1)}">
       </div>
     `;
     settingsForm.appendChild(row);
@@ -697,13 +698,34 @@ async function generateGlobalSettingsForm() {
       const newValue = parseFloat(slider.value);
       tempValues[param.sysex_adress] = newValue;
       valueInput.value = (newValue / floatMultiplier).toFixed(2);
+      console.log(`[GLOBAL SLIDER] Sending sysex=${param.sysex_adress}, value=${newValue}, name=${param.name}`);
+      if (controller.isConnected()) {
+        controller.sendParameter(parseInt(param.sysex_adress), newValue);
+      } else {
+        console.warn(`[GLOBAL SLIDER] Device not connected, cannot send sysex=${param.sysex_adress}`);
+        showNotification("Device not connected", "error");
+      }
+      if (param.method) {
+        executeMethod(param.method, newValue);
+      }
     });
 
     valueInput.addEventListener("change", () => {
-      let newValue = parseFloat(valueInput.value) * floatMultiplier;
+      let newValue = parseFloat(valueInput.value) || 0;
       newValue = Math.max(param.min_value * floatMultiplier, Math.min(param.max_value * floatMultiplier, newValue));
       tempValues[param.sysex_adress] = newValue;
       slider.value = newValue;
+      valueInput.value = (newValue / floatMultiplier).toFixed(2);
+      console.log(`[GLOBAL VALUE INPUT] Sending sysex=${param.sysex_adress}, value=${newValue}, name=${param.name}`);
+      if (controller.isConnected()) {
+        controller.sendParameter(parseInt(param.sysex_adress), newValue);
+      } else {
+        console.warn(`[GLOBAL VALUE INPUT] Device not connected, cannot send sysex=${param.sysex_adress}`);
+        showNotification("Device not connected", "error");
+      }
+      if (param.method) {
+        executeMethod(param.method, newValue);
+      }
     });
   });
 
@@ -711,18 +733,36 @@ async function generateGlobalSettingsForm() {
   const saveBtn = document.getElementById("save-global-btn");
   const cancelBtn = document.getElementById("cancel-global-btn");
 
-  saveBtn.addEventListener("click", () => {
+  // Remove existing event listeners to prevent duplicates
+  const saveBtnClone = saveBtn.cloneNode(true);
+  const cancelBtnClone = cancelBtn.cloneNode(true);
+  saveBtn.parentNode.replaceChild(saveBtnClone, saveBtn);
+  cancelBtn.parentNode.replaceChild(cancelBtnClone, cancelBtn);
+
+  saveBtnClone.addEventListener("click", () => {
+    console.log(`[SAVE GLOBAL] Saving settings for paramGroup=global_parameter, bank=${currentBankNumber}`);
     Object.assign(currentValues, tempValues);
     bankSettings[currentBankNumber] = { ...currentValues };
-    Object.keys(tempValues).forEach(sysex => {
-      controller.sendParameter(parseInt(sysex), tempValues[sysex]);
-    });
+    if (controller.isConnected()) {
+      Object.keys(tempValues).forEach(sysex => {
+        console.log(`[SAVE GLOBAL] Sending sysex=${sysex}, value=${tempValues[sysex]}`);
+        controller.sendParameter(parseInt(sysex), tempValues[sysex]);
+      });
+    } else {
+      console.warn(`[SAVE GLOBAL] Device not connected, cannot save settings`);
+      showNotification("Device not connected", "error");
+    }
+    updateUIAfterSave(currentBankNumber, "global_parameter");
     showNotification("Global settings saved", "success");
   });
 
-  cancelBtn.addEventListener("click", () => {
+  cancelBtnClone.addEventListener("click", () => {
+    console.log(`[CANCEL GLOBAL] Cancelling settings for paramGroup=global_parameter, bank=${currentBankNumber}`);
     tempValues = { ...currentValues };
     generateGlobalSettingsForm(); // Refresh form
+    if (currentValues[20] !== undefined) {
+      updateLEDBankColor();
+    }
     showNotification("Changes discarded", "info");
   });
 }
