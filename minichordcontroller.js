@@ -2,6 +2,7 @@ class MiniChordController {
   constructor() {
     this.device = false;
     this.parameter_size = 256;
+    this.pendingSave = false; // Initialize pendingSave
     this.color_hue_sysex_adress = 20;
     this.base_adress_rythm = 220;
     this.potentiometer_memory_adress = [4, 5, 6];
@@ -91,61 +92,44 @@ class MiniChordController {
   }
 
   processCurrentData(midiMessage) {
-    const data = midiMessage.data.slice(1);
-    const expectedLength = this.parameter_size * 2 + 1;
-
-    if (data.length !== expectedLength) {
-      //console.warn(`processCurrentData: Insufficient data length for parameters, got ${data.length}, expected ${expectedLength}`);
-      this.isProcessingData = false;
-      return;
-    }
-
-    const processedData = {
-      parameters: [],
-      rhythmData: [],
-      bankNumber: data[2 * 1],
-      firmwareVersion: 0
-    };
-
-    for (let i = 2; i < this.parameter_size; i++) {
-      const sysex_value = data[2 * i] + 128 * data[2 * i + 1];
-
-      if (i === this.firmware_adress) {
-        processedData.firmwareVersion = sysex_value;
-        if (processedData.firmwareVersion < this.min_firmware_accepted) {
-          alert("Please update the minichord firmware");
-        }
-      } else if (i >= this.base_adress_rythm && i < this.base_adress_rythm + 16) {
-        // Rhythm data: unpack to boolean array
-        const j = i - this.base_adress_rythm;
-        const rhythmBits = [];
-        for (let k = 0; k < 7; k++) {
-          rhythmBits[k] = !!(sysex_value & (1 << k));
-        }
-        processedData.rhythmData[j] = rhythmBits;
-        processedData.parameters[i] = sysex_value;
-      } else {
-        processedData.parameters[i] = sysex_value;
+  const data = midiMessage.data.slice(1);
+  const expectedLength = this.parameter_size * 2 + 1;
+  if (data.length !== expectedLength) {
+    console.warn(`processCurrentData: Invalid data length, got ${data.length}, expected ${expectedLength}`);
+    this.isProcessingData = false;
+    return;
+  }
+  const processedData = {
+    parameters: [],
+    rhythmData: [],
+    bankNumber: data[2 * 1],
+    firmwareVersion: 0
+  };
+  for (let i = 2; i < this.parameter_size; i++) {
+    const sysex_value = data[2 * i] + 128 * data[2 * i + 1];
+    if (i === this.firmware_adress) {
+      processedData.firmwareVersion = sysex_value / 100.0;
+      console.log(`[PROCESS DATA] Firmware version: ${processedData.firmwareVersion}`);
+    } else if (i >= this.base_adress_rythm && i < this.base_adress_rythm + 16) {
+      const j = i - this.base_adress_rythm;
+      const rhythmBits = [];
+      for (let k = 0; k < 7; k++) {
+        rhythmBits[k] = !!(sysex_value & (1 << k));
       }
+      processedData.rhythmData[j] = rhythmBits;
+      processedData.parameters[i] = sysex_value;
+    } else {
+      processedData.parameters[i] = sysex_value;
     }
-
-    // Override potentiometer and volume values for safety
-    for (const i of this.potentiometer_memory_adress) {
-      this.sendParameter(i, 512);
-      processedData.parameters[i] = 512;
-    }
-
-    for (const i of this.volume_memory_adress) {
-      this.sendParameter(i, 0.5 * this.float_multiplier);
-      processedData.parameters[i] = 0.5 * this.float_multiplier;
-    }
-
-    this.active_bank_number = processedData.bankNumber;
-
-    if (this.onDataReceived) {
-      this.onDataReceived(processedData);
+    if (i === 32 || i === 20 || (i >= 187 && i <= 191)) {
+      console.log(`[PROCESS DATA] Sysex=${i}, value=${sysex_value}`);
     }
   }
+  this.active_bank_number = processedData.bankNumber;
+  if (this.onDataReceived) {
+    this.onDataReceived(processedData);
+  }
+}
 
 
   sendSysEx(bytes) {
@@ -158,27 +142,46 @@ class MiniChordController {
     this.device.send([0xF0, ...bytes, 0xF7]);
   }
   sendParameter(address, value) {
-    if (!this.device) {
-      console.warn(`sendParameter: no device connected, address=${address}, value=${value}`);
-      return false;
-    }
-    const loVal = value % 128;
-    const hiVal = Math.floor(value / 128);
-    const loAddr = address % 128;
-    const hiAddr = Math.floor(address / 128);
-    try {
-      this.sendSysEx([loAddr, hiAddr, loVal, hiVal]);
-      return true;
-    } catch (error) {
-      console.error(`sendParameter: failed, address=${address}, value=${value}, error=`, error);
-      return false;
-    }
+  if (!this.device) {
+    console.warn(`sendParameter: no device connected, address=${address}, value=${value}`);
+    return false;
   }
+  const finalValue = Math.round(value); // Force integer for all parameters
+  const loVal = finalValue % 128;
+  const hiVal = Math.floor(finalValue / 128);
+  const loAddr = address % 128;
+  const hiAddr = Math.floor(address / 128);
+  try {
+    this.sendSysEx([loAddr, hiAddr, loVal, hiVal]);
+    console.log(`[SEND PARAMETER] Sysex=${address}, value=${finalValue}`);
+    return true;
+  } catch (error) {
+    console.error(`sendParameter: failed, address=${address}, value=${finalValue}, error=`, error);
+    return false;
+  }
+}
 
-  saveCurrentSettings(bankNumber) {
-    if (!this.device) return;
-    this.sendSysEx([0, 0, 2, bankNumber]);
+saveCurrentSettings(bankNumber) {
+  if (!this.device) {
+    console.warn(`[SAVE] No device connected for bank ${bankNumber}`);
+    return false;
   }
+  try {
+    this.pendingSave = true;
+    this.sendSysEx([0, 0, 2, bankNumber]);
+    console.log(`[SAVE] Sent sysex=[0, 0, 2, ${bankNumber}] for bank ${bankNumber}`);
+    // Simulate device acknowledgment (adjust timeout based on MIDI spec)
+    setTimeout(() => {
+      this.pendingSave = false;
+      console.log(`[SAVE] Cleared pendingSave for bank ${bankNumber}`);
+    }, 500); // Adjust based on Minichord save latency
+    return true;
+  } catch (error) {
+    console.error(`[SAVE] Failed to send save command for bank ${bankNumber}:`, error);
+    this.pendingSave = false;
+    return false;
+  }
+}
 
   resetCurrentBank() {
     if (!this.device || this.active_bank_number === -1) return;

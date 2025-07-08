@@ -664,6 +664,11 @@ function updateRhythm() {
 async function generateGlobalSettingsForm() {
   const globalSettings = document.getElementById("global-settings");
   const settingsForm = document.getElementById("global-settings-form");
+  if (!globalSettings || !settingsForm) {
+    console.error("Global settings elements not found: #global-settings or #global-settings-form");
+    showNotification("Global settings form not found", "error");
+    return;
+  }
   const params = await loadParameters();
   const globalParams = params.global_parameter || [];
 
@@ -671,12 +676,12 @@ async function generateGlobalSettingsForm() {
 
   globalParams.forEach((param) => {
     const floatMultiplier = param.sysex_adress === 20 ? 1 : (controller.float_multiplier || 100.0);
-    const currentValue = tempValues[param.sysex_adress] !== undefined
-      ? tempValues[param.sysex_adress]
-      : currentValues[param.sysex_adress] !== undefined
-        ? currentValues[param.sysex_adress]
+    const currentValue = currentValues[param.sysex_adress] !== undefined
+      ? currentValues[param.sysex_adress]
+      : tempValues[param.sysex_adress] !== undefined
+        ? tempValues[param.sysex_adress]
         : param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value;
-    const scaledValue = param.data_type === "float" ? currentValue / floatMultiplier : currentValue;
+    const scaledValue = param.data_type === "float" ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
 
     const row = document.createElement("div");
     row.className = "parameter-row";
@@ -686,7 +691,8 @@ async function generateGlobalSettingsForm() {
         <input type="range" class="slider" id="param-${param.sysex_adress}"
           min="${param.min_value * floatMultiplier}" max="${param.max_value * floatMultiplier}"
           value="${currentValue}" step="${param.step * floatMultiplier || (param.data_type === 'float' ? 0.01 : 1)}">
-        <input type="number" class="value-input" value="${scaledValue.toFixed(2)}" step="${param.step || (param.data_type === 'float' ? 0.01 : 1)}">
+        <input type="number" class="value-input" value="${param.data_type === 'float' ? scaledValue.toFixed(2) : scaledValue}"
+          step="${param.step || (param.data_type === 'float' ? 0.01 : 1)}">
       </div>
     `;
     settingsForm.appendChild(row);
@@ -694,11 +700,18 @@ async function generateGlobalSettingsForm() {
     const slider = row.querySelector(".slider");
     const valueInput = row.querySelector(".value-input");
 
+    // Force redraw to ensure slider updates
+    slider.value = currentValue; // Explicitly set value
+    slider.dispatchEvent(new Event('input')); // Trigger input event
+    slider.style.display = 'none';
+    slider.offsetHeight; // Force reflow
+    slider.style.display = '';
+
     slider.addEventListener("input", () => {
       const newValue = parseFloat(slider.value);
       tempValues[param.sysex_adress] = newValue;
-      valueInput.value = (newValue / floatMultiplier).toFixed(2);
-      console.log(`[GLOBAL SLIDER] Sending sysex=${param.sysex_adress}, value=${newValue}, name=${param.name}`);
+      valueInput.value = param.data_type === "float" ? (newValue / floatMultiplier).toFixed(2) : Math.round(newValue / floatMultiplier);
+      console.log(`[GLOBAL SLIDER] Sending sysex=${param.sysex_adress}, value=${newValue}, name=${param.name}, valueInput.value=${valueInput.value}`);
       if (controller.isConnected()) {
         controller.sendParameter(parseInt(param.sysex_adress), newValue);
       } else {
@@ -713,10 +726,13 @@ async function generateGlobalSettingsForm() {
     valueInput.addEventListener("change", () => {
       let newValue = parseFloat(valueInput.value) || 0;
       newValue = Math.max(param.min_value * floatMultiplier, Math.min(param.max_value * floatMultiplier, newValue));
+      if (param.data_type === "int") {
+        newValue = Math.round(newValue); // Ensure integer values
+      }
       tempValues[param.sysex_adress] = newValue;
       slider.value = newValue;
-      valueInput.value = (newValue / floatMultiplier).toFixed(2);
-      console.log(`[GLOBAL VALUE INPUT] Sending sysex=${param.sysex_adress}, value=${newValue}, name=${param.name}`);
+      valueInput.value = param.data_type === "float" ? (newValue / floatMultiplier).toFixed(2) : Math.round(newValue / floatMultiplier);
+      console.log(`[GLOBAL VALUE INPUT] Sending sysex=${param.sysex_adress}, value=${newValue}, name=${param.name}, valueInput.value=${valueInput.value}`);
       if (controller.isConnected()) {
         controller.sendParameter(parseInt(param.sysex_adress), newValue);
       } else {
@@ -765,6 +781,10 @@ async function generateGlobalSettingsForm() {
     }
     showNotification("Changes discarded", "info");
   });
+
+  // Ensure modal is visible
+  globalSettings.style.display = "block";
+  console.log(`[DEBUG] generateGlobalSettingsForm: Form generated, currentValues=`, JSON.stringify(currentValues));
 }
 
 // Creates modals for chord, harp, or potentiometer parameters
@@ -1132,18 +1152,21 @@ async function init() {
     if (!isInitialized || !controller.isConnected()) {
       console.warn('init: Failed to connect to MiniChord device');
       showNotification("Failed to connect to MiniChord device", "error");
-      currentBankNumber = 0;
+      currentBankNumber = 0; // Fallback to Bank 1
       currentValues = { ...defaultValues };
       await updateUI(0);
     } else {
       midiResponseQueue = [];
       console.log('init: cleared midiResponseQueue');
-      await loadBankSettings(0);
+      // Query the device's current bank
+      const activeBankNumber = controller.active_bank_number !== undefined ? controller.active_bank_number : 0;
+      console.log(`init: Device current bank=${activeBankNumber + 1} (index=${activeBankNumber})`);
+      await loadBankSettings(activeBankNumber); // Load the device's current bank
     }
   } catch (error) {
     console.error("Error during initialization:", error);
     showNotification("Initialization failed. Check console for details.", "error");
-    currentBankNumber = 0;
+    currentBankNumber = 0; // Fallback to Bank 1
     currentValues = { ...defaultValues };
     await updateUI(0);
   } finally {
@@ -1250,56 +1273,67 @@ function saveSettings(presetId, paramGroup) {
   console.log(`saveSettings: before save, preset=${presetId}, tempValues=`, JSON.stringify(tempValues));
   console.log(`saveSettings: currentValues before merge=`, JSON.stringify(currentValues));
   const tempCopy = { ...tempValues };
-  currentValues = { ...currentValues, ...tempValues }; // Merge temp values
-  bankSettings[presetId] = { ...currentValues }; // Update bank settings
-  
+  currentValues = { ...currentValues, ...tempValues };
+  bankSettings[presetId] = { ...currentValues };
   if (controller.isConnected()) {
-    console.log(`saveSettings: Attempting to save to bank ${presetId}, values=`, JSON.stringify(currentValues));
-    const success = controller.saveCurrentSettings(presetId); // Send save command
+    console.log(`saveSettings: Sending parameters to bank ${presetId}, values=`, JSON.stringify(tempValues));
+    Object.keys(tempValues).forEach(sysex => {
+      const value = Math.round(tempValues[sysex]); // Force integer
+      console.log(`[SAVE GLOBAL] Sending sysex=${sysex}, value=${value}`);
+      controller.sendParameter(parseInt(sysex), value);
+    });
+    const success = controller.saveCurrentSettings(presetId);
     if (!success) {
       console.error(`saveSettings: Failed to save settings for bank ${presetId}, controller state=`, {
         isConnected: controller.isConnected(),
         active_bank_number: controller.active_bank_number
       });
       showNotification(`Failed to save bank ${presetId + 1}. Check device connection.`, "error");
-      currentValues = { ...currentValues, ...tempCopy }; // Restore on failure
-    } else {
-      console.log(`saveSettings: Sent save command for bank ${presetId}`);
-      const checkSave = setInterval(() => {
-        if (!controller.pendingSave) {
-          clearInterval(checkSave);
-          console.log(`saveSettings: Save confirmed for bank ${presetId}, updating UI`);
-          updateUIAfterSave(presetId, paramGroup);
-          // Log slider state to debug visual issue
-          if (paramGroup === "global_parameter") {
-            const sliders = document.querySelectorAll(".slider");
-            sliders.forEach(slider => {
-              console.log(`[SLIDER POST-SAVE] id=${slider.id}, value=${slider.value}, min=${slider.min}, max=${slider.max}, step=${slider.step}`);
-            });
-          }
-        }
-      }, 100);
+      currentValues = { ...currentValues, ...tempCopy };
       return;
     }
+    console.log(`saveSettings: Sent save command for bank ${presetId}`);
+    const checkSave = setInterval(() => {
+      if (!controller.pendingSave) {
+        clearInterval(checkSave);
+        console.log(`saveSettings: Save confirmed for bank ${presetId}`);
+        // Request parameter dump to verify
+        controller.sendSysEx([0, 0, 0, 0]); // Adjust based on MIDI spec
+        console.log(`[SAVE] Requested parameter dump to verify bank ${presetId}`);
+        updateUIAfterSave(presetId, paramGroup);
+      }
+    }, 100);
   } else {
     console.warn(`saveSettings: Device not connected, cannot save bank ${presetId}`);
     showNotification("Device not connected", "error");
     currentValues = { ...currentValues, ...tempCopy };
+    updateUIAfterSave(presetId, paramGroup);
   }
-
-  updateUIAfterSave(presetId, paramGroup);
 }
 
 // Updates UI after saving settings
 // Why: Refreshes modals and UI elements to reflect saved values
 async function updateUIAfterSave(presetId, paramGroup) {
   tempValues = {}; // Clear temporary values after save
-  console.log(`updateUIAfterSave: Saved preset ${presetId}, paramGroup=${paramGroup}`);
+  console.log(`updateUIAfterSave: Saved preset ${presetId}, paramGroup=${paramGroup}, currentValues=`, JSON.stringify(currentValues));
 
   try {
-    // Refresh the appropriate modal content if the modal is still visible
+    // Refresh the appropriate modal content
     if (paramGroup === "global_parameter") {
       await generateGlobalSettingsForm();
+      // Ensure sliders are updated in the DOM
+      const sliders = document.querySelectorAll('#global-settings-form .slider');
+      const valueInputs = document.querySelectorAll('#global-settings-form .value-input');
+      sliders.forEach((slider, index) => {
+        const sysex = parseInt(slider.id.replace('param-', ''));
+        const param = (parameters.global_parameter || []).find(p => p.sysex_adress === sysex);
+        if (!param) return;
+        const floatMultiplier = param.sysex_adress === 20 ? 1 : (controller.float_multiplier || 100.0);
+        const value = currentValues[sysex] !== undefined ? currentValues[sysex] : param.default_value * floatMultiplier;
+        slider.value = value;
+        valueInputs[index].value = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)) : Math.round(value / floatMultiplier);
+        console.log(`[SLIDER POST-SAVE] id=${slider.id}, value=${slider.value}, valueInput=${valueInputs[index].value}, sysex=${sysex}, name=${param.name}`);
+      });
     } else if (paramGroup === "rhythm_button_parameters" || paramGroup === "rhythm_parameter") {
       await checkbox_array();
       await refreshRhythmGrid();
@@ -1307,8 +1341,10 @@ async function updateUIAfterSave(presetId, paramGroup) {
       await generateSettingsForm(paramGroup);
     }
 
-    // Hide all relevant modals cleanly
-    hideModal(paramGroup);
+    // Only hide non-global modals (optional: keep global modal open for UX)
+    if (paramGroup !== "global_parameter") {
+      hideModal(paramGroup);
+    }
 
     // Reapply LED color (sysex 20)
     if (currentValues[20] !== undefined) {
@@ -1317,23 +1353,15 @@ async function updateUIAfterSave(presetId, paramGroup) {
 
     // Show success notification
     showNotification(`Saved settings to bank ${presetId + 1}`, 'success');
-
-    // Optional: Force visual refresh of sliders if needed
-    setTimeout(() => {
-      document.querySelectorAll('.slider').forEach(slider => {
-        const currentValue = slider.value;
-        slider.value = currentValue; // Re-apply value
-        slider.dispatchEvent(new Event('input')); // Re-trigger logic
-        console.log(`[SLIDER SYNC] id=${slider.id}, value=${slider.value}`);
-      });
-    }, 50);
   } catch (error) {
     console.error("updateUIAfterSave: Error updating UI", error);
     showNotification("Failed to refresh UI after save", "error");
   }
 
-  // Reset open param group
-  openParamGroup = null;
+  // Reset open param group for non-global modals
+  if (paramGroup !== "global_parameter") {
+    openParamGroup = null;
+  }
 }
 
 
@@ -1569,39 +1597,35 @@ async function handleDataReceived(processedData) {
   if (now - lastUpdate > updateInterval) {
     lastUpdate = now;
     const { bankNumber, parameters, rhythmData } = processedData;
-    console.log(`handleDataReceived: Bank ${bankNumber}, rhythmData=`, rhythmData, 
-      `parameters[220-235]=`, parameters.slice(220, 236));
-
+    console.log(`handleDataReceived: Bank ${bankNumber + 1}, rhythmData=`, rhythmData, 
+      `parameters[20,32,187-191,220-235]=`, 
+      Object.fromEntries(parameters.map((v, i) => [i, v]).filter(([k]) => k === 20 || k === 32 || (k >= 187 && k <= 191) || (k >= 220 && k <= 235))));
     if (!bankSettings[bankNumber]) bankSettings[bankNumber] = {};
-
-    // Update all parameters in bankSettings and currentValues
     parameters.forEach((value, index) => {
-      if (value !== undefined) {
-        bankSettings[bankNumber][index] = value;
+      if (value !== undefined && index !== controller.firmware_adress) {
+        // Only update if not already set in bankSettings
+        if (bankSettings[bankNumber][index] === undefined) {
+          bankSettings[bankNumber][index] = value;
+        }
         if (bankNumber === currentBankNumber) {
-          currentValues[index] = value;
+          currentValues[index] = bankSettings[bankNumber][index]; // Use saved value
           if (index >= BASE_ADDRESS_RHYTHM && index < BASE_ADDRESS_RHYTHM + 16) {
             rhythmPattern[index - BASE_ADDRESS_RHYTHM] = value;
           }
         }
       }
     });
-
-    // Update UI if the bank matches or force switch if not initializing/loading
-    if (bankNumber !== currentBankNumber && !isLoadingPreset && !isInitializing) {
-      console.log(`handleDataReceived: Switching to bank ${bankNumber}`);
+    if (bankNumber !== currentBankNumber && !isLoadingPreset) {
+      console.log(`handleDataReceived: Switching to bank ${bankNumber + 1}`);
       await loadBankSettings(bankNumber);
     } else if (bankNumber === currentBankNumber) {
       await updateUI(bankNumber);
     }
-
     updateConnectionStatus(true);
     const sharpButton = document.getElementById("sharp-button");
     if (sharpButton) {
       sharpButton.classList.toggle("active", currentValues[31] === 1);
     }
-    console.log(`handleDataReceived: UI updated for bank ${bankNumber}, currentValues=`, 
-      JSON.stringify(currentValues));
   } else {
     console.log("handleDataReceived: throttled");
   }
