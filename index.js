@@ -347,6 +347,7 @@ const BASE_ADDRESS_RHYTHM = 220; // Starting sysex address for rhythm data (220-
 
 // Creates the rhythm settings modal with a checkbox grid and sliders
 // Why: Lets users edit rhythm patterns (voices 1-7, steps 1-16) and parameters
+// Creates the rhythm settings modal with a checkbox grid and sliders
 async function checkbox_array() {
   const modal = document.getElementById('rhythm-modal');
   if (!modal) {
@@ -416,21 +417,21 @@ async function checkbox_array() {
     }
     modalContent.appendChild(gridContainer);
 
-    // Add sliders for rhythm parameters (e.g., BPM)
+    // Add controls for rhythm parameters (sliders and selects)
     const params = await loadParameters();
     console.log('checkbox_array: Loaded parameters=', params);
     const rhythmParams = (params.rhythm_parameter || []).filter(param => param.group !== "hidden");
     console.log('checkbox_array: rhythmParams=', rhythmParams);
     if (rhythmParams.length > 0) {
-      const slidersContainer = document.createElement('div');
-      slidersContainer.className = 'parameter-column';
-      const slidersHeader = document.createElement('h3');
-      slidersHeader.textContent = 'Rhythm Parameters';
-      slidersContainer.appendChild(slidersHeader);
+      const controlsContainer = document.createElement('div');
+      controlsContainer.className = 'parameter-column';
+      const controlsHeader = document.createElement('h3');
+      controlsHeader.textContent = 'Rhythm Parameters';
+      controlsContainer.appendChild(controlsHeader);
 
       rhythmParams.forEach(param => {
-        if (param.ui_type !== 'slider') {
-          console.warn(`Skipping non-slider parameter: ${param.name} (sysex_adress: ${param.sysex_adress})`);
+        if (!["slider", "select"].includes(param.ui_type)) {
+          console.warn(`Skipping parameter with unsupported ui_type: ${param.name} (sysex_adress: ${param.sysex_adress}, ui_type: ${param.ui_type})`);
           return;
         }
 
@@ -441,66 +442,104 @@ async function checkbox_array() {
         label.setAttribute('for', `param-${param.sysex_adress}`);
         label.title = param.tooltip || param.name;
 
-        const sliderContainer = document.createElement('div');
-        sliderContainer.className = 'slider-container';
-        const input = document.createElement('input');
-        input.type = 'range';
-        input.id = `param-${param.sysex_adress}`;
-        input.name = param.name;
-        input.className = 'slider';
-        input.min = param.min_value;
-        input.max = param.max_value;
         const floatMultiplier = param.data_type === 'float' ? (controller.float_multiplier || 100.0) : 1;
         const currentValue = tempValues[param.sysex_adress] !== undefined
           ? tempValues[param.sysex_adress]
           : currentValues[param.sysex_adress] !== undefined
             ? currentValues[param.sysex_adress]
             : param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value;
-        input.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
-        input.step = param.data_type === 'float' ? 0.01 : 1;
-        input.title = param.tooltip || param.name;
 
-        const valueInput = document.createElement('input');
-        valueInput.type = 'number';
-        valueInput.id = `value-${param.sysex_adress}`;
-        valueInput.min = param.min_value;
-        valueInput.max = param.max_value;
-        valueInput.step = param.data_type === 'float' ? 0.01 : 1;
-        valueInput.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
-        valueInput.className = 'value-input';
-        valueInput.title = param.tooltip || param.name;
+        if (param.ui_type === 'slider') {
+          const sliderContainer = document.createElement('div');
+          sliderContainer.className = 'slider-container';
+          const input = document.createElement('input');
+          input.type = 'range';
+          input.id = `param-${param.sysex_adress}`;
+          input.name = param.name;
+          input.className = 'slider';
+          input.min = param.min_value;
+          input.max = param.max_value;
+          input.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+          input.step = param.data_type === 'float' ? 0.01 : 1;
+          input.title = param.tooltip || param.name;
 
-        console.log(`[SLIDER] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, floatMultiplier=${floatMultiplier}, input.value=${input.value}`);
+          const valueInput = document.createElement('input');
+          valueInput.type = 'number';
+          valueInput.id = `value-${param.sysex_adress}`;
+          valueInput.min = param.min_value;
+          valueInput.max = param.max_value;
+          valueInput.step = param.data_type === 'float' ? 0.01 : 1;
+          valueInput.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+          valueInput.className = 'value-input';
+          valueInput.title = param.tooltip || param.name;
 
-        input.addEventListener('input', (e) => {
-          const value = param.data_type === 'float' ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
-          tempValues[param.sysex_adress] = value;
-          valueInput.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
-          console.log(`[RHYTHM] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
-          controller.sendParameter(parseInt(param.sysex_adress), value);
-          executeMethod(param.method, value);
-        });
+          console.log(`[SLIDER] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, floatMultiplier=${floatMultiplier}, input.value=${input.value}`);
 
-        valueInput.addEventListener('change', (e) => {
-          let value = parseFloat(e.target.value) || 0;
-          value = Math.max(param.min_value, Math.min(param.max_value, value));
-          if (param.data_type === 'float') value *= floatMultiplier;
-          tempValues[param.sysex_adress] = value;
-          input.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
-          valueInput.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
-          console.log(`[RHYTHM] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
-          controller.sendParameter(parseInt(param.sysex_adress), value);
-          executeMethod(param.method, value);
-        });
+          input.addEventListener('input', (e) => {
+            const value = param.data_type === 'float' ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
+            tempValues[param.sysex_adress] = value;
+            valueInput.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
+            console.log(`[RHYTHM] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
+            controller.sendParameter(parseInt(param.sysex_adress), value);
+            executeMethod(param.method, value);
+          });
 
-        sliderContainer.appendChild(input);
-        sliderContainer.appendChild(valueInput);
-        container.appendChild(label);
-        container.appendChild(sliderContainer);
-        slidersContainer.appendChild(container);
+          valueInput.addEventListener('change', (e) => {
+            let value = parseFloat(e.target.value) || 0;
+            value = Math.max(param.min_value, Math.min(param.max_value, value));
+            if (param.data_type === 'float') value *= floatMultiplier;
+            tempValues[param.sysex_adress] = value;
+            input.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
+            valueInput.value = param.data_type === 'float' ? Number((value / floatMultiplier).toFixed(2)) : value;
+            console.log(`[RHYTHM] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}`);
+            controller.sendParameter(parseInt(param.sysex_adress), value);
+            executeMethod(param.method, value);
+          });
+
+          sliderContainer.appendChild(input);
+          sliderContainer.appendChild(valueInput);
+          container.appendChild(label);
+          container.appendChild(sliderContainer);
+        } else if (param.ui_type === 'select') {
+          const selectContainer = document.createElement('div');
+          selectContainer.className = 'select-container';
+          const input = document.createElement('select');
+          input.id = `param-${param.sysex_adress}`;
+          input.name = param.name;
+          input.title = param.tooltip || param.name;
+
+          const options = param.options || [];
+          if (!options.length) {
+            console.warn(`No options provided for select parameter: ${param.name} (sysex_adress: ${param.sysex_adress})`);
+            return;
+          }
+
+          options.forEach(option => {
+            const opt = document.createElement('option');
+            opt.value = option.value;
+            opt.text = option.label;
+            input.appendChild(opt);
+          });
+
+          input.value = String(currentValue);
+
+          input.addEventListener('change', (e) => {
+            const value = param.data_type === 'float' ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
+            tempValues[param.sysex_adress] = value;
+            console.log(`[RHYTHM] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}, label=${e.target.selectedOptions[0].text}`);
+            controller.sendParameter(parseInt(param.sysex_adress), value);
+            executeMethod(param.method, value);
+          });
+
+          selectContainer.appendChild(input);
+          container.appendChild(label);
+          container.appendChild(selectContainer);
+        }
+
+        controlsContainer.appendChild(container);
       });
 
-      modalContent.appendChild(slidersContainer);
+      modalContent.appendChild(controlsContainer);
     } else {
       console.warn('No rhythm_parameter found in parameters.json');
     }
@@ -510,14 +549,15 @@ async function checkbox_array() {
     buttonContainer.className = 'modal-buttons';
     const saveButton = document.createElement('button');
     saveButton.className = 'save-btn';
+    saveButton.id = 'save-rhythm-btn'; // Unique ID for rhythm modal
     saveButton.textContent = 'Save';
     saveButton.addEventListener('click', () => {
-      saveSettings(currentBankNumber, 'rhythm_parameter');
       saveSettings(currentBankNumber, 'rhythm_parameter');
       hideModal('rhythm_parameter');
     });
     const cancelButton = document.createElement('button');
     cancelButton.className = 'cancel-btn';
+    cancelButton.id = 'cancel-rhythm-btn'; // Unique ID for rhythm modal
     cancelButton.textContent = 'Cancel';
     cancelButton.addEventListener('click', () => {
       tempValues = { ...currentValues };
@@ -529,22 +569,36 @@ async function checkbox_array() {
 
     modal.appendChild(modalContent);
   } else {
-    // Update existing sliders in the modal
+    // Update existing controls in the modal
     const params = await loadParameters();
     const rhythmParams = (params.rhythm_parameter || []).filter(param => param.group !== "hidden");
     rhythmParams.forEach(param => {
-      const input = document.getElementById(`param-${param.sysex_adress}`);
-      const valueInput = document.getElementById(`value-${param.sysex_adress}`);
-      if (input && valueInput) {
-        const floatMultiplier = param.data_type === 'float' ? (controller.float_multiplier || 100.0) : 1;
-        const currentValue = tempValues[param.sysex_adress] !== undefined
-          ? tempValues[param.sysex_adress]
-          : currentValues[param.sysex_adress] !== undefined
-            ? currentValues[param.sysex_adress]
-            : param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value;
-        input.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
-        valueInput.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
-        console.log(`[SLIDER UPDATE] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, input.value=${input.value}`);
+      if (param.ui_type === 'slider') {
+        const input = document.getElementById(`param-${param.sysex_adress}`);
+        const valueInput = document.getElementById(`value-${param.sysex_adress}`);
+        if (input && valueInput) {
+          const floatMultiplier = param.data_type === 'float' ? (controller.float_multiplier || 100.0) : 1;
+          const currentValue = tempValues[param.sysex_adress] !== undefined
+            ? tempValues[param.sysex_adress]
+            : currentValues[param.sysex_adress] !== undefined
+              ? currentValues[param.sysex_adress]
+              : param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value;
+          input.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+          valueInput.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+          console.log(`[SLIDER UPDATE] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, input.value=${input.value}`);
+        }
+      } else if (param.ui_type === 'select') {
+        const input = document.getElementById(`param-${param.sysex_adress}`);
+        if (input) {
+          const floatMultiplier = param.data_type === 'float' ? (controller.float_multiplier || 100.0) : 1;
+          const currentValue = tempValues[param.sysex_adress] !== undefined
+            ? tempValues[param.sysex_adress]
+            : currentValues[param.sysex_adress] !== undefined
+              ? currentValues[param.sysex_adress]
+              : param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value;
+          input.value = String(currentValue);
+          console.log(`[SELECT UPDATE] sysex=${param.sysex_adress}, name=${param.name}, currentValue=${currentValue}, input.value=${input.value}`);
+        }
       }
     });
   }
@@ -562,7 +616,7 @@ async function checkbox_array() {
 
   await new Promise(resolve => setTimeout(resolve, 0)); // Ensure DOM updates
   await refreshRhythmGrid();
-  console.log('checkbox_array: Generated/Updated rhythm grid and sliders, currentValues[187-191,220-235]=', 
+  console.log('checkbox_array: Generated/Updated rhythm grid and controls, currentValues[187-191,220-235]=', 
     Object.fromEntries(Object.entries(currentValues).filter(([k]) => (k >= 187 && k <= 191) || (k >= 220 && k <= 235))));
 }
 
