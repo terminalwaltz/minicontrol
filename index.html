@@ -78,7 +78,7 @@
     
     <div id="instruction_zone">
       For instruction on how to use this tool, please refer to the 
-      <a href="../user_manual/#custom-presets">minichord documentation.</a>
+      <a href="../user_manual/#custom-presets">minichord documentation.</a><br><br>
             To test and load user-submitted presets, visit the 
             <a href="https://minichord.com/minicontrol/minishop.html">minishop.</a>
     </div>
@@ -129,23 +129,30 @@
       <!-- Power LED -->
       <circle class="led" id="power_led" cx="450" cy="275" r="10" fill="red" />
     </svg>
-    <div class="global-settings" id="global-settings">
-      <h2>Global Settings</h2>
-      <div id="global-settings-form"></div>
-      <div id="output_zone" style="margin-top: 10px; font-size: 0.8em; color: #666;"></div> <!-- Added output zone -->
-    </div>
+
     <div class="modal" id="rhythm-modal" style="display: none;"></div>
     <!-- Settings Modal -->
-    <div id="settings-modal" class="settings-modal">
-      <div class="settings-content">
-        <div class="settings-buttons">
-          <button id="save-btn" class="save-btn">Save</button>
-          <button id="cancel-btn" class="cancel-btn">Cancel</button>
-        </div>
-        <h2 id="settings-title"></h2>
-        <div id="settings-form"></div>
-      </div>
+    <div class="global-settings-section" id="global-settings">
+  <div class="settings-buttons">
+    <button id="save-global-btn" class="save-btn">Save</button>
+    <button id="cancel-global-btn" class="cancel-btn">Cancel</button>
+  </div>
+  <h2>Global Settings</h2>
+  <div id="global-settings-form"></div>
+  <div id="output_zone" style="margin-top: 10px; font-size: 0.8em; color: #666;"></div>
+</div>
+<div class="modal" id="rhythm-modal" style="display: none;"></div>
+<div id="settings-modal" class="settings-modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close-button">×</span>
+    <div class="modal-buttons">
+      <button id="save-settings-btn" class="save-btn">Save</button>
+      <button id="cancel-settings-btn" class="cancel-btn">Cancel</button>
     </div>
+    <h2 id="settings-title"></h2>
+    <div id="settings-form"></div>
+  </div>
+</div>
   </div>
   <script src="minichordcontroller.js"></script>
   <script src="index.js"></script>
