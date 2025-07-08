@@ -685,6 +685,7 @@ async function generateSettingsForm(paramGroup) {
   const form = document.getElementById("settings-form");
   if (!form) {
     console.error("Settings form not found: #settings-form");
+    showNotification("Settings form not found", "error");
     return;
   }
   form.innerHTML = ""; // Clear form content, keep static buttons
@@ -873,6 +874,36 @@ async function generateSettingsForm(paramGroup) {
     });
     form.appendChild(column);
   });
+
+  // Attach event listeners to Save and Cancel buttons
+  const saveBtn = document.getElementById("save-settings-btn");
+  const cancelBtn = document.getElementById("cancel-settings-btn");
+
+  if (!saveBtn || !cancelBtn) {
+    console.error("Save or Cancel button not found: #save-settings-btn or #cancel-settings-btn");
+    showNotification("Save/Cancel buttons not found in settings modal", "error");
+    return;
+  }
+
+  // Remove existing event listeners to prevent duplicates
+  const saveBtnClone = saveBtn.cloneNode(true);
+  const cancelBtnClone = cancelBtn.cloneNode(true);
+  saveBtn.parentNode.replaceChild(saveBtnClone, saveBtn);
+  cancelBtn.parentNode.replaceChild(cancelBtnClone, cancelBtn);
+
+  // Attach new event listeners
+  saveBtnClone.addEventListener("click", () => {
+    console.log(`[SAVE] Saving settings for paramGroup=${paramGroup}, bank=${currentBankNumber}`);
+    saveSettings(currentBankNumber, paramGroup);
+  });
+
+  cancelBtnClone.addEventListener("click", () => {
+    console.log(`[CANCEL] Cancelling settings for paramGroup=${paramGroup}, bank=${currentBankNumber}`);
+    cancelSettings(currentBankNumber, paramGroup);
+    hideModal(paramGroup);
+  });
+
+  console.log(`[DEBUG] Attached event listeners to save-settings-btn and cancel-settings-btn for paramGroup=${paramGroup}`);
 }
 
 // Updates the entire UI for a given bank
