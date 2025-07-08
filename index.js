@@ -200,16 +200,23 @@ const waveformMap = {
 
 // Loads parameter definitions from parameters.json
 // Why: Defines how parameters (e.g., led attenuation) are displayed and controlled
+let cachedParameters = null;
 async function loadParameters() {
+  if (cachedParameters) {
+    console.log('[DEBUG] loadParameters: Using cached parameters');
+    return cachedParameters;
+  }
   try {
-    const response = await fetch('parameters.json'); // Fetch parameter config
-    const params = await response.json(); // Parse JSON
-    console.log('[DEBUG] loadParameters: Loaded params=', params);
-    console.log('[DEBUG] loadParameters: harp_parameter sysex 98=', params.harp_parameter?.find(param => param.sysex_adress === 98));
-    return params; // Returns object with groups like global_parameter, harp_parameter, etc.
+    const response = await fetch('parameters.json');
+    cachedParameters = await response.json();
+    console.log('[DEBUG] loadParameters: Loaded params=', cachedParameters);
+    cachedParameters.global_parameter?.forEach(param => {
+      console.log(`[DEBUG] Global param: sysex=${param.sysex_adress}, name=${param.name}, data_type=${param.data_type}, default_value=${param.default_value}`);
+    });
+    return cachedParameters;
   } catch (error) {
     console.error('Failed to load parameters:', error);
-    return {}; // Return empty object on failure
+    return {};
   }
 }
 
@@ -683,16 +690,17 @@ async function generateGlobalSettingsForm() {
         : param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value;
     const scaledValue = param.data_type === "float" ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
 
-    const row = document.createElement("div");
+   const row = document.createElement("div");
     row.className = "parameter-row";
     row.innerHTML = `
       <label for="param-${param.sysex_adress}" data-tooltip="${param.description || param.tooltip || param.name}">${param.name}</label>
       <div class="slider-container">
         <input type="range" class="slider" id="param-${param.sysex_adress}"
           min="${param.min_value * floatMultiplier}" max="${param.max_value * floatMultiplier}"
-          value="${currentValue}" step="${param.step * floatMultiplier || (param.data_type === 'float' ? 0.01 : 1)}">
+          value="${currentValue}" step="${param.step * floatMultiplier || (param.data_type === 'float' ? 1 : 1)}">
         <input type="number" class="value-input" value="${param.data_type === 'float' ? scaledValue.toFixed(2) : scaledValue}"
-          step="${param.step || (param.data_type === 'float' ? 0.01 : 1)}">
+          step="${param.step || (param.data_type === 'float' ? 0.01 : 1)}"
+          min="${param.min_value}" max="${param.max_value}">
       </div>
     `;
     settingsForm.appendChild(row);
@@ -700,12 +708,8 @@ async function generateGlobalSettingsForm() {
     const slider = row.querySelector(".slider");
     const valueInput = row.querySelector(".value-input");
 
-    // Force redraw to ensure slider updates
-    slider.value = currentValue; // Explicitly set value
-    slider.dispatchEvent(new Event('input')); // Trigger input event
-    slider.style.display = 'none';
-    slider.offsetHeight; // Force reflow
-    slider.style.display = '';
+    // Remove forced redraw here; rely on browser rendering
+    slider.value = currentValue; // Set to device value (0-100 for float)
 
     slider.addEventListener("input", () => {
       const newValue = parseFloat(slider.value);
@@ -723,26 +727,52 @@ async function generateGlobalSettingsForm() {
       }
     });
 
-    valueInput.addEventListener("change", () => {
-      let newValue = parseFloat(valueInput.value) || 0;
-      newValue = Math.max(param.min_value * floatMultiplier, Math.min(param.max_value * floatMultiplier, newValue));
-      if (param.data_type === "int") {
-        newValue = Math.round(newValue); // Ensure integer values
-      }
-      tempValues[param.sysex_adress] = newValue;
-      slider.value = newValue;
-      valueInput.value = param.data_type === "float" ? (newValue / floatMultiplier).toFixed(2) : Math.round(newValue / floatMultiplier);
-      console.log(`[GLOBAL VALUE INPUT] Sending sysex=${param.sysex_adress}, value=${newValue}, name=${param.name}, valueInput.value=${valueInput.value}`);
-      if (controller.isConnected()) {
-        controller.sendParameter(parseInt(param.sysex_adress), newValue);
-      } else {
-        console.warn(`[GLOBAL VALUE INPUT] Device not connected, cannot send sysex=${param.sysex_adress}`);
-        showNotification("Device not connected", "error");
-      }
-      if (param.method) {
-        executeMethod(param.method, newValue);
-      }
-    });
+valueInput.addEventListener("change", (e) => {
+  // Get the current value as a fallback
+  const currentValue = tempValues[param.sysex_adress] !== undefined
+    ? tempValues[param.sysex_adress]
+    : currentValues[param.sysex_adress] !== undefined
+      ? currentValues[param.sysex_adress]
+      : param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value;
+
+  // Parse the new value, fallback to current value if invalid
+  let newValue = parseFloat(e.target.value);
+  if (isNaN(newValue)) {
+    console.warn(`[GLOBAL VALUE INPUT] Invalid input for sysex=${param.sysex_adress}, name=${param.name}, reverting to currentValue=${currentValue}`);
+    newValue = currentValue / (param.data_type === "float" ? floatMultiplier : 1);
+    valueInput.value = param.data_type === "float" ? Number(newValue.toFixed(2)) : Math.round(newValue);
+    slider.value = param.data_type === "float" ? newValue * floatMultiplier : newValue; // Scale for slider
+    return;
+  }
+
+  // Clamp the value to min/max
+  newValue = Math.max(param.min_value, Math.min(param.max_value, newValue));
+  if (param.data_type === "float") {
+    newValue *= floatMultiplier; // Scale for device
+  } else {
+    newValue = Math.round(newValue); // Ensure integer for int types
+  }
+
+  // Update tempValues and UI
+  tempValues[param.sysex_adress] = newValue;
+  slider.value = newValue; // Set slider to device value (0-100 for float)
+  valueInput.value = param.data_type === "float" ? Number((newValue / floatMultiplier).toFixed(2)) : newValue;
+
+  console.log(`[GLOBAL VALUE INPUT] Sending sysex=${param.sysex_adress}, value=${newValue}, name=${param.name}, valueInput.value=${valueInput.value}, slider.value=${slider.value}`);
+
+  // Send to device if connected
+  if (controller.isConnected()) {
+    controller.sendParameter(parseInt(param.sysex_adress), newValue);
+  } else {
+    console.warn(`[GLOBAL VALUE INPUT] Device not connected, cannot send sysex=${param.sysex_adress}`);
+    showNotification("Device not connected", "error");
+  }
+
+  // Execute any associated method
+  if (param.method) {
+    executeMethod(param.method, newValue);
+  }
+});
   });
 
   // Add button event listeners
@@ -926,19 +956,46 @@ async function generateSettingsForm(paramGroup) {
           input.style.display = '';
         });
 
-        valueInput.addEventListener("change", (e) => {
-          let value = parseFloat(e.target.value) || 0;
-          value = Math.max(param.min_value, Math.min(param.max_value, value));
-          if (param.data_type === "float") value *= floatMultiplier;
-          tempValues[param.sysex_adress] = value;
-          const scaledValue = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)) : value;
-          input.value = scaledValue.toString();
-          valueInput.value = scaledValue.toString();
-          console.log(`[MODAL] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}, scaledValue=${scaledValue}, valueInput.value=${valueInput.value}`);
-          controller.sendParameter(parseInt(param.sysex_adress), value);
-          if (param.method) executeMethod(param.method, value);
-          input.dispatchEvent(new Event('input'));
-        });
+valueInput.addEventListener("change", (e) => {
+  // Get the current value as a fallback
+  const currentValue = tempValues[param.sysex_adress] !== undefined
+    ? tempValues[param.sysex_adress]
+    : currentValues[param.sysex_adress] !== undefined
+      ? currentValues[param.sysex_adress]
+      : param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value;
+
+  // Parse the new value, fallback to current value if invalid
+  let value = parseFloat(e.target.value);
+  if (isNaN(value)) {
+    console.warn(`[MODAL VALUE INPUT] Invalid input for sysex=${param.sysex_adress}, name=${param.name}, reverting to currentValue=${currentValue}`);
+    value = currentValue / (param.data_type === "float" ? floatMultiplier : 1);
+    valueInput.value = param.data_type === "float" ? Number(value.toFixed(2)) : Math.round(value);
+    input.value = param.data_type === "float" ? value * floatMultiplier : value; // Scale for slider
+    return;
+  }
+
+  // Clamp the value to min/max
+  value = Math.max(param.min_value, Math.min(param.max_value, value));
+  if (param.data_type === "float") {
+    value *= floatMultiplier; // Scale for device
+  }
+
+  // Update tempValues and UI
+  tempValues[param.sysex_adress] = value;
+  const scaledValue = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)) : value;
+  input.value = param.data_type === "float" ? value : scaledValue; // Set slider to device value
+  valueInput.value = scaledValue;
+
+  console.log(`[MODAL VALUE INPUT] Sending sysex=${param.sysex_adress}, value=${value}, name=${param.name}, scaledValue=${scaledValue}, valueInput.value=${valueInput.value}, slider.value=${input.value}`);
+
+  // Send to device
+  controller.sendParameter(parseInt(param.sysex_adress), value);
+
+  // Execute any associated method
+  if (param.method) {
+    executeMethod(param.method, value);
+  }
+});
 
         sliderContainer.appendChild(input);
         sliderContainer.appendChild(valueInput);
