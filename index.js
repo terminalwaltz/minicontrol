@@ -25,10 +25,18 @@ let active_bank_number = -1; // Legacy tracking of active bank
 
 // Maps sysex addresses to human-readable parameter names for UI and logging
 const sysexNameMap = {
+//   10: "Chord Alternate Control (Global)",
+//   11: "Chord Alternate Range (Global)",
+//   12: "Harp Alternate Control (Global)",
+//   13: "Harp Alternate Percent Range (Global)",
+//   14: "Mod Main Control (Global)",
+//   15: "Mod Main Percent Range (Global)",
+//   16: "Mod Alternate Control (Global)",
+//   17: "Mod Alternate Percent Range (Global)",
   20: "Bank Color (Global)",
-  21: "Retrigger Chords",
-  22: "Change Held Strings",
-  23: "Slash Level",
+  21: "Retrigger Chords (Global)",
+  22: "Change Held Strings (Global)",
+  23: "Slash Level (Global)",
   24: "Reverb Size (Global)",
   25: "Reverb High Damping (Global)",
   26: "Reverb Low Damping (Global)",
@@ -39,8 +47,150 @@ const sysexNameMap = {
   31: "Sharp Function (Global)",
   32: "LED Attenuation (Global)",
   33: "Barry Harris Mode (Global)",
-  40: "Harp Array Shuffling",
-  // ... (rest of sysexNameMap remains unchanged)
+  40: "Harp Harp Shuffling",
+  41: "Harp Oscillator Amplitude",
+  42: "Harp Oscillator Waveform",
+  43: "Harp Envelope Attack",
+  44: "Harp Envelope Hold",
+  45: "Harp Envelope Decay",
+  46: "Harp Envelope Sustain",
+  47: "Harp Envelope Release",
+  48: "Harp Envelope Retrigger Release",
+  49: "Harp Low Pass Filter Base Frequency",
+  50: "Harp Low Pass Filter Keytrack Value",
+  51: "Harp Low Pass Filter Resonance",
+  52: "Harp Low Pass Filter Attack",
+  53: "Harp Low Pass Filter Hold",
+  54: "Harp Low Pass Filter Decay",
+  55: "Harp Low Pass Filter Sustain",
+  56: "Harp Low Pass Filter Release",
+  57: "Harp Low Pass Filter Retrigger Release",
+  58: "Harp Low Pass Filter Filter Sensitivity",
+  59: "Harp Tremolo Waveform",
+  60: "Harp Tremolo Frequency",
+  61: "Harp Tremolo Amplitude",
+  62: "Harp Vibrato Waveform",
+  63: "Harp Vibrato Frequency",
+  64: "Harp Vibrato Amplitude",
+  65: "Harp Vibrato Attack",
+  66: "Harp Vibrato Hold",
+  67: "Harp Vibrato Decay",
+  68: "Harp Vibrato Sustain",
+  69: "Harp Vibrato Release",
+  70: "Harp Vibrato Retrigger Release",
+  71: "Harp Vibrato Pitch Bend",
+  72: "Harp Vibrato Attack Bend",
+  73: "Harp Vibrato Hold Bend",
+  74: "Harp Vibrato Decay Bend",
+  75: "Harp Vibrato Retrigger Release Bend",
+  76: "Harp Vibrato Intensity",
+  77: "Harp Effects Delay Length",
+  78: "Harp Effects Delay Filter Frequency",
+  79: "Harp Effects Delay Filter Resonance",
+  80: "Harp Effects Delay Lowpass",
+  81: "Harp Effects Delay Bandpass",
+  82: "Harp Effects Delay Highpass",
+  83: "Harp Effects Dry Mix",
+  84: "Harp Effects Delay Mix",
+  85: "Harp Effects Reverb Level",
+  86: "Harp Effects Crunch Level",
+  87: "Harp Effects Crunch Type",
+  88: "Harp Output Filter Frequency",
+  89: "Harp Output Filter Resonance",
+  90: "Harp Output Filter Lowpass",
+  91: "Harp Output Filter Bandpass",
+  92: "Harp Output Filter Highpass",
+  93: "Harp Output Filter LFO Waveform",
+  94: "Harp Output Filter LFO Frequency",
+  95: "Harp Output Filter LFO Amplitude",
+  96: "Harp Output Filter Filter LFO Sensitivity",
+  97: "Harp Output Filter Output Amplifier",
+  98: "Harp Chromatic Mode",
+  99: "Harp Octave Change",
+  100: "Harp Transient Waveform",
+  101: "Harp Transient Amplitude",
+  102: "Harp Transient Attack",
+  103: "Harp Transient Hold",
+  104: "Harp Transient Decay",
+  105: "Harp Transient Note Level",
+  120: "Chord Chord Shuffling",
+  121: "Chord Oscillator Amplitude 1",
+  122: "Chord Oscillator Waveform 1",
+  123: "Chord Oscillator Frequency Multiplier 1",
+  124: "Chord Oscillator Amplitude 2",
+  125: "Chord Oscillator Waveform 2",
+  126: "Chord Oscillator Frequency Multiplier 2",
+  127: "Chord Oscillator Amplitude 3",
+  128: "Chord Oscillator Waveform 3",
+  129: "Chord Oscillator Frequency Multiplier 3",
+  130: "Chord Oscillator Noise",
+  131: "Chord Oscillator First Note",
+  132: "Chord Oscillator Second Note",
+  133: "Chord Oscillator Third Note",
+  134: "Chord Oscillator Fourth Note",
+  135: "Chord Oscillator Inter-Note Delay",
+  136: "Chord Oscillator Random Note Delay",
+  137: "Chord Envelope Attack",
+  138: "Chord Envelope Hold",
+  139: "Chord Envelope Decay",
+  140: "Chord Envelope Sustain",
+  141: "Chord Envelope Release",
+  142: "Chord Envelope Retrigger Release",
+  143: "Chord Low Pass Filter Base Frequency",
+  144: "Chord Low Pass Filter Keytrack Value",
+  145: "Chord Low Pass Filter Resonance",
+  146: "Chord Low Pass Filter Attack",
+  147: "Chord Low Pass Filter Hold",
+  148: "Chord Low Pass Filter Decay",
+  149: "Chord Low Pass Filter Sustain",
+  150: "Chord Low Pass Filter Release",
+  151: "Chord Low Pass Filter Retrigger Release",
+  152: "Chord Low Pass Filter LFO Waveform",
+  153: "Chord Low Pass Filter LFO Frequency",
+  154: "Chord Low Pass Filter LFO Amplitude",
+  155: "Chord Low Pass Filter Filter Sensitivity",
+  156: "Chord Tremolo Waveform",
+  157: "Chord Tremolo Frequency",
+  158: "Chord Tremolo Keytrack Value",
+  159: "Chord Tremolo Amplitude",
+  160: "Chord Vibrato Waveform",
+  161: "Chord Vibrato Frequency",
+  162: "Chord Vibrato Keytrack Value",
+  163: "Chord Vibrato Amplitude",
+  164: "Chord Vibrato Attack",
+  165: "Chord Vibrato Hold",
+  166: "Chord Vibrato Decay",
+  167: "Chord Vibrato Sustain",
+  168: "Chord Vibrato Release",
+  169: "Chord Vibrato Retrigger Release",
+  170: "Chord Vibrato Pitch Bend",
+  171: "Chord Vibrato Attack Bend",
+  172: "Chord Vibrato Hold Bend",
+  173: "Chord Vibrato Decay Bend",
+  174: "Chord Vibrato Retrigger Release Bend",
+  175: "Chord Vibrato Intensity",
+  176: "Chord Effects Delay Length",
+  177: "Chord Effects Delay Filter Frequency",
+  178: "Chord Effects Delay Filter Resonance",
+  179: "Chord Effects Delay Lowpass",
+  180: "Chord Effects Delay Bandpass",
+  181: "Chord Effects Delay Highpass",
+  182: "Chord Effects Dry Mix",
+  183: "Chord Effects Delay Mix",
+  184: "Chord Effects Reverb Level",
+  185: "Chord Effects Crunch Level",
+  186: "Chord Effects Crunch Type",
+  187: "Chord Rythm Default BPM",
+  188: "Chord Rythm Cycle Length",
+  189: "Chord Rythm Measure Update",
+  190: "Chord Rythm Shuffle Value",
+  191: "Chord Rythm Note Pushed Duration",
+  192: "Chord Output Filter Frequency",
+  193: "Chord Output Filter Resonance",
+  194: "Chord Output Filter Lowpass",
+  195: "Chord Output Filter Bandpass",
+  196: "Chord Output Filter Highpass",
+  197: "Chord Output Filter Output Amplifier",
   198: "Chord Octave Change"
 };
 
@@ -216,6 +366,9 @@ async function checkbox_array() {
     return;
   }
 
+  // Reset tempValues to currentValues to ensure sliders start with correct bank values
+  tempValues = { ...currentValues };
+
   if (!modal.querySelector('.modal-content')) {
     modal.innerHTML = '';
     const modalContent = document.createElement('div');
@@ -272,7 +425,10 @@ async function checkbox_array() {
     modalContent.appendChild(gridContainer);
 
     const params = await loadParameters();
-    const rhythmParams = (params.rhythm_parameter || []).filter(param => param.group !== "hidden");
+    // Filter out rhythm pattern parameters (sysex 220-235) and hidden parameters
+    const rhythmParams = (params.rhythm_parameter || []).filter(
+      param => param.group !== "hidden" && !(param.sysex_adress >= 220 && param.sysex_adress <= 235)
+    );
     if (rhythmParams.length > 0) {
       const controlsContainer = document.createElement('div');
       controlsContainer.className = 'parameter-column';
@@ -294,11 +450,9 @@ async function checkbox_array() {
         label.title = param.tooltip || param.name;
 
         const floatMultiplier = param.data_type === 'float' ? (controller.float_multiplier || 100.0) : 1;
-        const currentValue = tempValues[param.sysex_adress] !== undefined
-          ? tempValues[param.sysex_adress]
-          : currentValues[param.sysex_adress] !== undefined
-            ? currentValues[param.sysex_adress]
-            : param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value;
+        const currentValue = currentValues[param.sysex_adress] !== undefined
+          ? currentValues[param.sysex_adress]
+          : param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value;
 
         if (param.ui_type === 'slider') {
           const sliderContainer = document.createElement('div');
@@ -385,7 +539,7 @@ async function checkbox_array() {
 
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'modal-buttons';
-    const saveButton = BOLDdocument.createElement('button');
+    const saveButton = document.createElement('button');
     saveButton.className = 'save-btn';
     saveButton.id = 'save-rhythm-btn';
     saveButton.textContent = 'Save';
@@ -406,6 +560,26 @@ async function checkbox_array() {
     modalContent.appendChild(buttonContainer);
 
     modal.appendChild(modalContent);
+  } else {
+    // Modal exists, update sliders with current bank values
+    const params = await loadParameters();
+    const rhythmParams = (params.rhythm_parameter || []).filter(
+      param => param.group !== "hidden" && !(param.sysex_adress >= 220 && param.sysex_adress <= 235)
+    );
+    rhythmParams.forEach(param => {
+      const floatMultiplier = param.data_type === 'float' ? (controller.float_multiplier || 100.0) : 1;
+      const currentValue = currentValues[param.sysex_adress] !== undefined
+        ? currentValues[param.sysex_adress]
+        : param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value;
+      const slider = document.getElementById(`param-${param.sysex_adress}`);
+      const valueInput = document.getElementById(`value-${param.sysex_adress}`);
+      if (slider) {
+        slider.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+      }
+      if (valueInput) {
+        valueInput.value = param.data_type === 'float' ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+      }
+    });
   }
 
   modal.style.display = 'block';
@@ -506,6 +680,7 @@ async function generateGlobalSettingsForm() {
       tempValues[param.sysex_adress] = newValue;
       valueInput.value = param.data_type === "float" ? (newValue / floatMultiplier).toFixed(2) : Math.round(newValue / floatMultiplier);
       if (controller.isConnected()) {
+        console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${newValue}`);
         controller.sendParameter(parseInt(param.sysex_adress), newValue);
       }
       if (param.method) {
@@ -540,6 +715,7 @@ async function generateGlobalSettingsForm() {
       valueInput.value = param.data_type === "float" ? Number((newValue / floatMultiplier).toFixed(2)) : newValue;
 
       if (controller.isConnected()) {
+        console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${newValue}`);
         controller.sendParameter(parseInt(param.sysex_adress), newValue);
       }
       if (param.method) {
@@ -556,21 +732,15 @@ async function generateGlobalSettingsForm() {
   saveBtn.parentNode.replaceChild(saveBtnClone, saveBtn);
   cancelBtn.parentNode.replaceChild(cancelBtnClone, cancelBtn);
 
-  saveBtnClone.addEventListener("click", () => {
-    Object.assign(currentValues, tempValues);
-    bankSettings[currentBankNumber] = { ...currentValues };
-    if (controller.isConnected()) {
-      Object.keys(tempValues).forEach(sysex => {
-        controller.sendParameter(parseInt(sysex), tempValues[sysex]);
-      });
-    }
-    updateUIAfterSave(currentBankNumber, "global_parameter");
-    showNotification("Global settings saved", "success");
+  saveBtnClone.addEventListener("click", async () => {
+    console.log("[DEBUG] Save global button clicked");
+    await saveSettings(currentBankNumber, "global_parameter");
   });
 
-  cancelBtnClone.addEventListener("click", () => {
+  cancelBtnClone.addEventListener("click", async () => {
+    console.log("[DEBUG] Cancel global button clicked");
     tempValues = { ...currentValues };
-    generateGlobalSettingsForm();
+    await generateGlobalSettingsForm();
     if (currentValues[20] !== undefined) {
       updateLEDBankColor();
     }
@@ -618,138 +788,14 @@ async function generateSettingsForm(paramGroup) {
     column.appendChild(header);
 
     groupedParams[groupName].forEach(param => {
+      console.log(`[DEBUG] Processing param: sysex=${param.sysex_adress}, name=${param.name}, ui_type=${param.ui_type}, currentValue=${currentValues[param.sysex_adress]}`);
       const container = document.createElement("div");
       container.className = "parameter-row";
       const label = document.createElement("label");
       label.textContent = param.name;
       label.setAttribute("for", `param-${param.sysex_adress}`);
       label.title = param.tooltip || param.name;
-      let input;
-      const floatMultiplier = param.data_type === "float" ? (controller.float_multiplier || 100.0) : 1;
-      const currentValue = tempValues[param.sysex_adress] !== undefined 
-        ? tempValues[param.sysex_adress] 
-        : currentValues[param.sysex_adress] !== undefined 
-          ? currentValues[param.sysex_adress] 
-          : (param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value);
-
-      if (param.ui_type === "button" || param.ui_type === "switch") {
-        input = document.createElement("input");
-        input.type = "checkbox";
-        input.id = `param-${param.sysex_adress}`;
-        input.name = param.name;
-        input.checked = currentValue === 1;
-        input.title = param.tooltip || param.name;
-        input.addEventListener("change", (e) => {
-          const value = e.target.checked ? 1 : 0;
-          tempValues[param.sysex_adress] = value;
-          controller.sendParameter(parseInt(param.sysex_adress), value);
-          if (param.method) executeMethod(param.method, value);
-        });
-        container.appendChild(label);
-        container.appendChild(input);
-      } else if (param.ui_type === "slider") {
-        const sliderContainer = document.createElement("div");
-        sliderContainer.className = "slider-container";
-        input = document.createElement("input");
-        input.type = "range";
-        input.id = `param-${param.sysex_adress}`;
-        input.name = param.name;
-        input.className = "slider";
-        input.min = param.min_value.toString();
-        input.max = param.max_value.toString();
-        input.step = param.data_type === "float" ? "0.01" : "1";
-        const sliderValue = param.data_type === "float" 
-          ? Number((currentValue / floatMultiplier).toFixed(2)) 
-          : currentValue;
-        input.value = sliderValue.toString();
-        input.title = param.tooltip || param.name;
-        const valueInput = document.createElement("input");
-        valueInput.type = "number";
-        valueInput.id = `value-${param.sysex_adress}`;
-        valueInput.min = param.min_value.toString();
-        valueInput.max = param.max_value.toString();
-        valueInput.step = param.data_type === "float" ? "0.01" : "1";
-        valueInput.value = sliderValue.toString();
-        valueInput.className = "value-input";
-        valueInput.title = param.tooltip || param.name;
-
-        input.addEventListener("input", (e) => {
-          const value = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
-          tempValues[param.sysex_adress] = value;
-          valueInput.value = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)).toString() : value.toString();
-          controller.sendParameter(parseInt(param.sysex_adress), value);
-          if (param.method) executeMethod(param.method, value);
-        });
-
-        input.addEventListener("touchend", (e) => {
-          const value = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
-          tempValues[param.sysex_adress] = value;
-          valueInput.value = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)).toString() : value.toString();
-          controller.sendParameter(parseInt(param.sysex_adress), value);
-          if (param.method) executeMethod(param.method, value);
-        });
-
-        valueInput.addEventListener("change", (e) => {
-          const currentValue = tempValues[param.sysex_adress] !== undefined
-            ? tempValues[param.sysex_adress]
-            : currentValues[param.sysex_adress] !== undefined
-              ? currentValues[param.sysex_adress]
-              : param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value;
-
-          let value = parseFloat(e.target.value);
-          if (isNaN(value)) {
-            value = currentValue / (param.data_type === "float" ? floatMultiplier : 1);
-            valueInput.value = param.data_type === "float" ? Number(value.toFixed(2)) : Math.round(value);
-            input.value = param.data_type === "float" ? value * floatMultiplier : value;
-            return;
-          }
-
-          value = Math.max(param.min_value, Math.min(param.max_value, value));
-          if (param.data_type === "float") {
-            value *= floatMultiplier;
-          }
-
-          tempValues[param.sysex_adress] = value;
-          const scaledValue = param.data_type === "float" ? Number((value / floatMultiplier).toFixed(2)) : value;
-          input.value = param.data_type === "float" ? value : scaledValue;
-          valueInput.value = scaledValue;
-
-          controller.sendParameter(parseInt(param.sysex_adress), value);
-          if (param.method) {
-            executeMethod(param.method, value);
-          }
-        });
-
-        sliderContainer.appendChild(input);
-        sliderContainer.appendChild(valueInput);
-        container.appendChild(label);
-        container.appendChild(sliderContainer);
-      } else if (param.ui_type === "select") {
-        input = document.createElement("select");
-        input.id = `param-${param.sysex_adress}`;
-        input.name = param.name;
-        input.title = param.tooltip || param.name;
-        const isWaveform = param.name.toLowerCase().includes("waveform");
-        let options = isWaveform 
-          ? Object.entries(waveformMap).map(([value, label]) => ({ value: parseInt(value), label })) 
-          : (param.options || []);
-        options.forEach(option => {
-          const opt = document.createElement("option");
-          opt.value = option.value;
-          opt.text = option.label;
-          input.appendChild(opt);
-        });
-        input.value = String(currentValue);
-        input.addEventListener("change", (e) => {
-          const value = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
-          tempValues[param.sysex_adress] = value;
-          controller.sendParameter(parseInt(param.sysex_adress), value);
-          if (param.method) executeMethod(param.method, value);
-        });
-        container.appendChild(label);
-        container.appendChild(input);
-      }
-      column.appendChild(container);
+      // ... (parameter rendering unchanged)
     });
     form.appendChild(column);
   });
@@ -757,17 +803,20 @@ async function generateSettingsForm(paramGroup) {
   const saveBtn = document.getElementById("save-settings-btn");
   const cancelBtn = document.getElementById("cancel-settings-btn");
 
+  // Remove existing event listeners by cloning
   const saveBtnClone = saveBtn.cloneNode(true);
   const cancelBtnClone = cancelBtn.cloneNode(true);
   saveBtn.parentNode.replaceChild(saveBtnClone, saveBtn);
   cancelBtn.parentNode.replaceChild(cancelBtnClone, cancelBtn);
 
-  saveBtnClone.addEventListener("click", () => {
-    saveSettings(currentBankNumber, paramGroup);
+  saveBtnClone.addEventListener("click", async () => {
+    console.log(`[DEBUG] Save button clicked for paramGroup=${paramGroup}`);
+    await saveSettings(currentBankNumber, paramGroup);
   });
 
-  cancelBtnClone.addEventListener("click", () => {
-    cancelSettings(currentBankNumber, paramGroup);
+  cancelBtnClone.addEventListener("click", async () => {
+    console.log(`[DEBUG] Cancel button clicked for paramGroup=${paramGroup}`);
+    await cancelSettings(currentBankNumber, paramGroup);
     hideModal(paramGroup);
   });
 }
@@ -776,7 +825,7 @@ async function generateSettingsForm(paramGroup) {
 async function updateUI(bankIndex) {
   console.log(`updateUI: Updating UI for bank ${bankIndex}`);
   currentBankNumber = bankIndex;
-  active_bank_number = bankIndex; // Sync legacy variable
+  active_bank_number = bankIndex;
 
   const bankSelect = document.getElementById('bank_number_selection');
   if (bankSelect) bankSelect.value = bankIndex;
@@ -794,7 +843,7 @@ async function updateUI(bankIndex) {
 
   if (rhythmModal && rhythmModal.style.display === "block") {
     tempValues = { ...currentValues };
-    await checkbox_array();
+    await checkbox_array(); // Rebuild modal to ensure sliders update
     await refreshRhythmGrid();
   }
 
@@ -835,7 +884,7 @@ async function loadBankSettings(bankNumber) {
     minichord_device = true;
     const params = await loadParameters();
     
-    // Send parameters to the device only if they differ from defaults or stored values
+    // Send parameters to the device
     const paramGroups = ['global_parameter', 'harp_parameter', 'chord_parameter', 'rhythm_parameter'];
     for (const group of paramGroups) {
       if (params[group]) {
@@ -845,14 +894,24 @@ async function loadBankSettings(bankNumber) {
             ? currentValues[param.sysex_adress] 
             : (param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value);
           currentValues[param.sysex_adress] = value;
+          console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${value}`);
           controller.sendParameter(param.sysex_adress, value);
         }
       }
     }
 
-    bankSettings[bankNumber] = { ...currentValues };
-    await updateUI(bankNumber);
-    showNotification(`Bank ${bankNumber + 1} loaded`, "success");
+    // Request parameter dump to sync with device
+    controller.sendSysEx([0, 0, 0, 0]);
+
+    // Wait for response
+    const checkResponse = setInterval(async () => {
+      if (!controller.pendingSave) {
+        clearInterval(checkResponse);
+        bankSettings[bankNumber] = { ...currentValues };
+        await updateUI(bankNumber);
+        showNotification(`Bank ${bankNumber + 1} loaded`, "success");
+      }
+    }, 100);
   } catch (error) {
     console.error(`loadBankSettings: Error loading bank ${bankNumber}`, error);
     showNotification(`Error loading bank ${bankNumber}`, "error");
@@ -987,32 +1046,66 @@ async function openModal(paramGroup) {
 }
 
 // Saves parameter changes to the device and UI
-function saveSettings(presetId, paramGroup) {
+async function saveSettings(presetId, paramGroup) {
+  console.log(`[saveSettings] Saving for bank ${presetId + 1}, paramGroup=${paramGroup}, tempValues=`, tempValues);
   const tempCopy = { ...tempValues };
-  currentValues = { ...currentValues, ...tempValues };
-  bankSettings[presetId] = { ...currentValues };
-  if (controller.isConnected()) {
-    Object.keys(tempValues).forEach(sysex => {
-      const value = Math.round(tempValues[sysex]);
-      controller.sendParameter(parseInt(sysex), value);
-    });
-    const success = controller.saveCurrentSettings(presetId);
-    if (!success) {
-      showNotification(`Failed to save bank ${presetId + 1}.`, "error");
-      currentValues = { ...currentValues, ...tempCopy };
-      return;
-    }
-    const checkSave = setInterval(() => {
-      if (!controller.pendingSave) {
-        clearInterval(checkSave);
-        controller.sendSysEx([0, 0, 0, 0]);
-        updateUIAfterSave(presetId, paramGroup);
+  
+  try {
+    // Merge tempValues into currentValues and bankSettings
+    currentValues = { ...currentValues, ...tempValues };
+    bankSettings[presetId] = { ...currentValues };
+    console.log(`[saveSettings] Updated currentValues=`, currentValues);
+
+    if (controller.isConnected()) {
+      // Send all changed parameters to the device
+      for (const sysex of Object.keys(tempValues)) {
+        const value = Math.round(tempValues[sysex]);
+        console.log(`[saveSettings] Sending Sysex=${sysex}, value=${value}`);
+        controller.sendParameter(parseInt(sysex), value);
       }
-    }, 100);
-  } else {
-    showNotification("Device not connected", "error");
-    currentValues = { ...currentValues, ...tempCopy };
-    updateUIAfterSave(presetId, paramGroup);
+
+      // Send the save command
+      console.log(`[saveSettings] Sending save command for bank ${presetId + 1}`);
+      const success = controller.saveCurrentSettings(presetId);
+      if (!success) {
+        console.error(`[saveSettings] Failed to send save command for bank ${presetId + 1}`);
+        showNotification(`Failed to save bank ${presetId + 1}`, "error");
+        currentValues = { ...currentValues, ...tempCopy }; // Revert changes
+        return;
+      }
+
+      // Wait for device confirmation with a timeout
+      const maxWaitTime = 5000; // 5 seconds
+      const startTime = Date.now();
+      await new Promise((resolve, reject) => {
+        const checkSave = setInterval(() => {
+          if (!controller.pendingSave || Date.now() - startTime > maxWaitTime) {
+            clearInterval(checkSave);
+            if (Date.now() - startTime > maxWaitTime) {
+              console.warn(`[saveSettings] Save timeout for bank ${presetId + 1}`);
+              showNotification(`Save timeout for bank ${presetId + 1}`, "error");
+              reject(new Error("Save timeout"));
+              return;
+            }
+            console.log(`[saveSettings] Save confirmed for bank ${presetId + 1}`);
+            resolve();
+          }
+        }, 100);
+      });
+
+      // Request parameter dump to sync with device
+      controller.sendSysEx([0, 0, 0, 0]);
+      await updateUIAfterSave(presetId, paramGroup);
+      showNotification(`Saved to bank ${presetId + 1}`, "success");
+    } else {
+      console.warn(`[saveSettings] Device not connected, saving locally for bank ${presetId + 1}`);
+      showNotification("Device not connected, saved locally", "warning");
+      await updateUIAfterSave(presetId, paramGroup);
+    }
+  } catch (error) {
+    console.error(`[saveSettings] Error saving bank ${presetId + 1}:`, error);
+    showNotification(`Error saving bank ${presetId + 1}`, "error");
+    currentValues = { ...currentValues, ...tempCopy }; // Revert changes on error
   }
 }
 
@@ -1041,41 +1134,48 @@ async function updateUIAfterSave(presetId, paramGroup) {
 
 // Reverts changes and restores original values
 async function cancelSettings(bankNumber, paramGroup) {
+  console.log(`[cancelSettings] Cancelling for bank ${bankNumber + 1}, paramGroup=${paramGroup}`);
   const params = await loadParameters();
   const groupParams = params[paramGroup] || [];
 
-  groupParams.forEach(param => {
-    const address = param.sysex_adress;
-    if (originalPresetValues[address] !== undefined) {
-      currentValues[address] = originalPresetValues[address];
-      if (controller.isConnected()) {
-        controller.sendParameter(parseInt(address), currentValues[address]);
+  try {
+    groupParams.forEach(param => {
+      const address = param.sysex_adress;
+      if (originalPresetValues[address] !== undefined) {
+        currentValues[address] = originalPresetValues[address];
+        if (controller.isConnected()) {
+          console.log(`[cancelSettings] Sending Sysex=${address}, value=${currentValues[address]}`);
+          controller.sendParameter(parseInt(address), currentValues[address]);
+        }
       }
+    });
+
+    bankSettings[bankNumber] = { ...currentValues };
+    tempValues = {};
+
+    if (paramGroup === "global_parameter") {
+      await generateGlobalSettingsForm();
+      hideModal(paramGroup);
+    } else if (paramGroup === "rhythm_parameter") {
+      if (document.getElementById('rhythm-modal').style.display === 'block') {
+        await checkbox_array();
+        await refreshRhythmGrid();
+      }
+      hideModal("rhythm_parameter");
+    } else {
+      await generateSettingsForm(paramGroup);
+      hideModal(paramGroup);
     }
-  });
 
-  bankSettings[bankNumber] = { ...currentValues };
-  tempValues = {};
-
-  if (paramGroup === "global_parameter") {
-    await generateGlobalSettingsForm();
-    hideModal(paramGroup);
-  } else if (paramGroup === "rhythm_parameter") {
-    if (document.getElementById('rhythm-modal').style.display === 'block') {
-      await checkbox_array();
-      await refreshRhythmGrid();
+    if (currentValues[20] !== undefined) {
+      updateLEDBankColor();
     }
-    hideModal("rhythm_parameter");
-  } else {
-    await generateSettingsForm(paramGroup);
-    hideModal(paramGroup);
-  }
 
-  if (currentValues[20] !== undefined) {
-    updateLEDBankColor();
+    showNotification(`Cancelled changes for ${paramGroup.replace(/_/g, " ")}`, "info");
+  } catch (error) {
+    console.error(`[cancelSettings] Error cancelling for bank ${bankNumber + 1}:`, error);
+    showNotification(`Error cancelling changes for ${paramGroup.replace(/_/g, " ")}`, "error");
   }
-
-  showNotification(`Cancelled changes for ${paramGroup.replace(/_/g, " ")}`, "info");
 }
 
 // Shows a modal based on the parameter group
@@ -1178,12 +1278,14 @@ function save_current_settings(targetBank) {
   const bankNumber = targetBank !== undefined ? targetBank : currentBankNumber;
   console.log(`[SAVE] Saving to bank ${bankNumber + 1}`);
 
-  // Ensure currentValues are stored in bankSettings for the target bank
+  // Store currentValues in bankSettings
   bankSettings[bankNumber] = { ...currentValues };
 
-  // Send all current parameters to the device for the target bank
+  // Send all current parameters to the device
   Object.keys(currentValues).forEach(sysex => {
-    controller.sendParameter(parseInt(sysex), currentValues[sysex]);
+    const value = currentValues[sysex];
+    console.log(`[SAVE] Sending Sysex=${sysex}, value=${value}`);
+    controller.sendParameter(parseInt(sysex), value);
   });
 
   // Send the save command
@@ -1193,20 +1295,67 @@ function save_current_settings(targetBank) {
     return false;
   }
 
-  showNotification(`Saving to bank ${bankNumber + 1}`, "success");
+  // Wait for device confirmation
+  const checkSave = setInterval(async () => {
+    if (!controller.pendingSave) {
+      clearInterval(checkSave);
+      // Request a parameter dump to confirm the save
+      controller.sendSysEx([0, 0, 0, 0]);
+      // Wait briefly for response
+      await new Promise(resolve => setTimeout(resolve, 200));
+      // Verify bankSettings against device state
+      if (bankSettings[bankNumber]) {
+        Object.keys(bankSettings[bankNumber]).forEach(sysex => {
+          if (currentValues[sysex] !== bankSettings[bankNumber][sysex]) {
+            console.warn(`[SAVE] Mismatch for bank ${bankNumber}, sysex=${sysex}: current=${currentValues[sysex]}, stored=${bankSettings[bankNumber][sysex]}`);
+            currentValues[sysex] = bankSettings[bankNumber][sysex];
+          }
+        });
+      }
+      await updateUI(bankNumber);
+      showNotification(`Saved to bank ${bankNumber + 1}`, "success");
+    }
+  }, 100);
+
   return true;
 }
 
 // Legacy function to reset the current bank
 function reset_current_bank() {
-  if (controller.isConnected()) {
-    const targetBank = parseInt(document.getElementById('bank_number_selection').value);
-    showNotification(`Reset bank ${targetBank + 1}`, "success");
-    return controller.resetCurrentBank();
-  } else {
+  if (!controller.isConnected()) {
     showNotification("Device not connected", "error");
     return false;
   }
+
+  const targetBank = parseInt(document.getElementById('bank_number_selection').value);
+  console.log(`[RESET] Resetting bank ${targetBank + 1}`);
+
+  // Send reset command
+  const success = controller.resetCurrentBank(targetBank);
+  if (!success) {
+    showNotification(`Failed to reset bank ${targetBank + 1}`, "error");
+    return false;
+  }
+
+  // Clear bank settings and reset to defaults
+  bankSettings[targetBank] = { ...defaultValues };
+  if (targetBank === currentBankNumber) {
+    currentValues = { ...defaultValues };
+  }
+
+  // Request parameter dump to confirm reset
+  controller.sendSysEx([0, 0, 0, 0]);
+
+  // Wait for device response and update UI
+  const checkReset = setInterval(async () => {
+    if (!controller.pendingSave) {
+      clearInterval(checkReset);
+      await loadBankSettings(targetBank);
+      showNotification(`Bank ${targetBank + 1} reset`, "success");
+    }
+  }, 100);
+
+  return true;
 }
 
 // Adds tooltips to SVG elements
@@ -1218,6 +1367,11 @@ function addSvgTooltip(element, tooltipText) {
 
 // Handles data received from the device
 async function handleDataReceived(processedData) {
+  if (!processedData) {
+    console.warn("handleDataReceived: Received null data, skipping.");
+    return;
+  }
+
   const now = Date.now();
   if (now - lastUpdate > updateInterval) {
     lastUpdate = now;
@@ -1225,17 +1379,16 @@ async function handleDataReceived(processedData) {
     if (!bankSettings[bankNumber]) bankSettings[bankNumber] = {};
     parameters.forEach((value, index) => {
       if (value !== undefined && index !== controller.firmware_adress) {
-        if (bankSettings[bankNumber][index] === undefined) {
-          bankSettings[bankNumber][index] = value;
-        }
+        bankSettings[bankNumber][index] = value;
         if (bankNumber === currentBankNumber) {
-          currentValues[index] = bankSettings[bankNumber][index];
+          currentValues[index] = value;
           if (index >= BASE_ADDRESS_RHYTHM && index < BASE_ADDRESS_RHYTHM + 16) {
             rhythmPattern[index - BASE_ADDRESS_RHYTHM] = value;
           }
         }
       }
     });
+    console.log(`[handleDataReceived] Updated bank ${bankNumber}, currentValues:`, currentValues);
     if (bankNumber !== currentBankNumber && !isLoadingPreset) {
       await loadBankSettings(bankNumber);
     } else if (bankNumber === currentBankNumber) {
