@@ -3,13 +3,63 @@
 <head>
   <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Minichord UI</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA/4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEREQAAAAAAEAAAEAAAAAEAAAABAAAAAQAAAAEAAAABAAAAAQAAAAEAAAABAAAAAQAAAAEAAAABAAAAAQAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .status-header { display: flex; justify-content: space-between; align-items: center; }
+    .status-header h1 { font-size: 24px; margin: 0; }
+    .connection-status { padding: 8px 12px; border-radius: 5px; display: flex; align-items: center; }
+    .connection-status.connected { background: #d4edda; color: #155724; }
+    .connection-status.disconnected { background: #f8d7da; color: #721c24; }
+    #dot { margin-right: 5px; }
+    #control { margin: 20px 0; }
+    .section { margin: 10px 0; }
+    .section h5 { margin: 5px 0; font-size: 14px; }
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; }
+    .button_div { display: flex; align-items: center; gap: 5px; }
+    .select_container { display: flex; align-items: center; gap: 5px; }
+    .label { font-size: 12px; }
+    button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; background: #007bff; color: white; }
+    button:hover { background: #0056b3; }
+    .container { display: flex; justify-content: center; position: relative; }
+    svg { max-width: 100%; height: auto; }
+    .chord-button { fill: #ccc; stroke: #333; stroke-width: 1; cursor: pointer; }
+    .chord-button:hover { fill: #aaa; }
+    .sharp-button, .rhythm-button { fill: #666; stroke: #333; stroke-width: 1; cursor: pointer; }
+    .sharp-button:hover, .rhythm-button:hover { fill: #555; }
+    .harp-plate { fill: #ddd; cursor: pointer; }
+    .harp-plate:hover { fill: #bbb; }
+    .pot { fill: #888; stroke: #333; stroke-width: 2; cursor: pointer; }
+    .pot:hover { fill: #666; }
+    .preset-button { fill: #999; stroke: #333; stroke-width: 1; cursor: pointer; }
+    .preset-button:hover { fill: #777; }
+    .led { stroke: #333; stroke-width: 1; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+    .modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 800px; max-height: 80vh; overflow-y: auto; border-radius: 8px; }
+    .close-button { float: right; cursor: pointer; font-size: 20px; }
+    .modal-buttons { margin-top: 20px; text-align: right; }
+    .parameter-group { margin-bottom: 20px; }
+    .parameter-row { display: flex; align-items: center; margin: 10px 0; gap: 10px; }
+    .parameter-row label { flex: 0 0 200px; font-size: 14px; }
+    .slider-container { display: flex; gap: 10px; }
+    .slider { width: 200px; }
+    .value-input { width: 60px; padding: 5px; }
+    select { width: 200px; padding: 5px; border-radius: 4px; }
+    .rhythm-grid { display: grid; grid-template-columns: 80px repeat(16, 40px); gap: 5px; margin-bottom: 20px; }
+    .rhythm-row { display: contents; }
+    .rhythm-cell { text-align: center; }
+    .rhythm-cell input[type="checkbox"] { margin: 0; }
+    details { margin: 20px 0; }
+    .instruction_steps { margin: 10px 0; padding-left: 20px; font-size: 14px; }
+    #instruction_zone { margin: 20px 0; font-size: 14px; }
+    #ambient-backlight { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,255,255,0.2), transparent); z-index: -1; }
+  </style>
 </head>
 <body>
   <div class="status-header">
     <h1>minicontrol</h1>
     <div id="connection-status" class="connection-status disconnected">
-      <span id="dot">●</span>
+      <span id="dot">●</span> MiniChord disconnected
     </div>
   </div>
   <div id="control">
@@ -21,7 +71,7 @@
         <div class="button_div">
           <div class="select_container">
             <span class="label active small">target bank:</span>
-            <select id="bank_number_selection" class="active small">
+            <select id="bank_number_selection">
               <option value="0">1</option>
               <option value="1">2</option>
               <option value="2">3</option>
@@ -75,12 +125,11 @@
         <strong id="information_text"></strong>
       </div>
     </details>
-    
     <div id="instruction_zone">
       For instruction on how to use this tool, please refer to the 
       <a href="../user_manual/#custom-presets">minichord documentation.</a><br><br>
-            To test and load user-submitted presets, visit the 
-            <a href="https://minichord.com/minicontrol/minishop.html">minishop.</a>
+      To test and load user-submitted presets, visit the 
+      <a href="https://minichord.com/minicontrol/minishop.html">minishop.</a>
     </div>
   </div>
   <div id="ambient-backlight"></div>
@@ -127,32 +176,10 @@
       <polygon class="preset-button" id="preset-up" points="610,310 630,310 620,290" />
       <polygon class="preset-button" id="preset-down" points="610,330 630,330 620,350" />
       <!-- Power LED -->
-      <circle class="led" id="power_led" cx="450" cy="275" r="10" fill="red" />
+      <circle class="led" id="power_led" cx="450" cy="275" r="10" />
     </svg>
-
+    <div class="modal" id="settings-modal" style="display: none;"></div>
     <div class="modal" id="rhythm-modal" style="display: none;"></div>
-    <!-- Settings Modal -->
-    <div class="global-settings-section" id="global-settings">
-  <div class="settings-buttons">
-    <button id="save-global-btn" class="save-btn">Save</button>
-    <button id="cancel-global-btn" class="cancel-btn">Cancel</button>
-  </div>
-  <h2>Global Settings</h2>
-  <div id="global-settings-form"></div>
-  <div id="output_zone" style="margin-top: 10px; font-size: 0.8em; color: #666;"></div>
-</div>
-<div class="modal" id="rhythm-modal" style="display: none;"></div>
-<div id="settings-modal" class="settings-modal" style="display: none;">
-  <div class="modal-content">
-    <span class="close-button">×</span>
-    <div class="modal-buttons">
-      <button id="save-settings-btn" class="save-btn">Save</button>
-      <button id="cancel-settings-btn" class="cancel-btn">Cancel</button>
-    </div>
-    <h2 id="settings-title"></h2>
-    <div id="settings-form"></div>
-  </div>
-</div>
   </div>
   <script src="minichordcontroller.js"></script>
   <script src="index.js"></script>
