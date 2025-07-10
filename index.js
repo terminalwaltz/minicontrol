@@ -23,7 +23,7 @@ const updateInterval = 50; // Throttle UI updates to every 50ms
 let minichord_device = false; // Tracks device connection status (legacy)
 let active_bank_number = -1; // Legacy tracking of active bank
 
-const waveformSysexAddresses = [42, 122, 125, 128, 59, 62, 93, 152, 156, 160]; // Waveform-related sysex from sysexNameMap
+const waveformSysexAddresses = [42, 122, 125, 128, 59, 62, 93, 152, 156, 160, 100]; // Waveform-related sysex from sysexNameMap
 
 // Maps sysex addresses to human-readable parameter names for UI and logging
 const sysexNameMap = {
