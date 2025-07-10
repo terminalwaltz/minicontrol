@@ -880,72 +880,92 @@ async function generateSettingsForm(paramGroup) {
       const scaledValue = param.data_type === "float" ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
 
       if (param.ui_type === "slider") {
-        const sliderContainer = document.createElement("div");
-        sliderContainer.className = "slider-container";
-        const input = document.createElement("input");
-        input.type = "range";
-        input.className = "slider";
-        input.id = `param-${param.sysex_adress}`;
-        input.min = param.min_value * floatMultiplier;
-        input.max = param.max_value * floatMultiplier;
-        input.value = currentValue;
-        input.step = param.step * floatMultiplier || (param.data_type === "float" ? 1 : 1);
+  const sliderContainer = document.createElement("div");
+  sliderContainer.className = "slider-container";
+  const input = document.createElement("input");
+  input.type = "range";
+  input.className = "slider";
+  input.id = `param-${param.sysex_adress}`;
+  
+  // Determine float multiplier and scaling
+  const floatMultiplier = param.sysex_adress === 20 ? 1 : (param.data_type === "float" ? (controller.float_multiplier || 100.0) : 1);
+  const minValue = param.min_value * floatMultiplier;
+  const maxValue = param.max_value * floatMultiplier;
+  const stepValue = (param.step || (param.data_type === "float" ? 0.01 : 1)) * floatMultiplier;
 
-        const valueInput = document.createElement("input");
-        valueInput.type = "number";
-        valueInput.className = "value-input";
-        valueInput.value = param.data_type === "float" ? scaledValue.toFixed(2) : scaledValue;
-        valueInput.step = param.step || (param.data_type === "float" ? 0.01 : 1);
-        valueInput.min = param.min_value;
-        valueInput.max = param.max_value;
+  // Get current value, falling back to tempValues or default
+  const currentValue = currentValues[param.sysex_adress] !== undefined
+    ? currentValues[param.sysex_adress]
+    : tempValues[param.sysex_adress] !== undefined
+      ? tempValues[param.sysex_adress]
+      : param.default_value * floatMultiplier;
 
-        input.addEventListener("input", () => {
-          const newValue = parseFloat(input.value);
-          tempValues[param.sysex_adress] = newValue;
-          valueInput.value = param.data_type === "float" ? (newValue / floatMultiplier).toFixed(2) : Math.round(newValue / floatMultiplier);
-          if (controller.isConnected()) {
-            console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${newValue}`);
-            controller.sendParameter(parseInt(param.sysex_adress), newValue);
-          }
-          if (param.method) {
-            executeMethod(param.method, newValue);
-          }
-        });
+  // Ensure value is within bounds
+  const clampedValue = Math.max(minValue, Math.min(maxValue, currentValue));
+  const displayValue = param.data_type === "float" ? Number((clampedValue / floatMultiplier).toFixed(2)) : Math.round(clampedValue);
 
-        valueInput.addEventListener("change", (e) => {
-          let newValue = parseFloat(e.target.value);
-          if (isNaN(newValue)) {
-            newValue = currentValue / (param.data_type === "float" ? floatMultiplier : 1);
-            valueInput.value = param.data_type === "float" ? Number(newValue.toFixed(2)) : Math.round(newValue);
-            input.value = param.data_type === "float" ? newValue * floatMultiplier : newValue;
-            return;
-          }
+  // Set slider attributes
+  input.min = minValue;
+  input.max = maxValue;
+  input.step = stepValue;
+  input.value = clampedValue;
 
-          newValue = Math.max(param.min_value, Math.min(param.max_value, newValue));
-          if (param.data_type === "float") {
-            newValue *= floatMultiplier;
-          } else {
-            newValue = Math.round(newValue);
-          }
+  const valueInput = document.createElement("input");
+  valueInput.type = "number";
+  valueInput.className = "value-input";
+  valueInput.value = displayValue;
+  valueInput.step = param.step || (param.data_type === "float" ? 0.01 : 1);
+  valueInput.min = param.min_value;
+  valueInput.max = param.max_value;
 
-          tempValues[param.sysex_adress] = newValue;
-          input.value = newValue;
-          valueInput.value = param.data_type === "float" ? Number((newValue / floatMultiplier).toFixed(2)) : newValue;
+  // Log for debugging
+  console.log(`[DEBUG] Rendering slider: sysex=${param.sysex_adress}, name=${param.name}, ui_type=${param.ui_type}, currentValue=${currentValue}, displayValue=${displayValue}, min=${input.min}, max=${input.max}, step=${input.step}`);
 
-          if (controller.isConnected()) {
-            console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${newValue}`);
-            controller.sendParameter(parseInt(param.sysex_adress), newValue);
-          }
-          if (param.method) {
-            executeMethod(param.method, newValue);
-          }
-        });
+  // Slider input event
+  input.addEventListener("input", () => {
+    const newValue = parseFloat(input.value);
+    tempValues[param.sysex_adress] = newValue;
+    valueInput.value = param.data_type === "float" ? (newValue / floatMultiplier).toFixed(2) : Math.round(newValue);
+    if (controller.isConnected()) {
+      console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${newValue}`);
+      controller.sendParameter(parseInt(param.sysex_adress), newValue);
+    }
+    if (param.method) {
+      executeMethod(param.method, newValue);
+    }
+  });
 
-        sliderContainer.appendChild(input);
-        sliderContainer.appendChild(valueInput);
-        container.appendChild(label);
-        container.appendChild(sliderContainer);
-      } else if (param.ui_type === "select") {
+  // Number input event
+  valueInput.addEventListener("change", (e) => {
+    let newValue = parseFloat(e.target.value);
+    if (isNaN(newValue)) {
+      newValue = displayValue;
+      valueInput.value = newValue;
+      input.value = clampedValue;
+      return;
+    }
+
+    newValue = Math.max(param.min_value, Math.min(param.max_value, newValue));
+    const scaledValue = param.data_type === "float" ? newValue * floatMultiplier : Math.round(newValue);
+
+    tempValues[param.sysex_adress] = scaledValue;
+    input.value = scaledValue;
+    valueInput.value = param.data_type === "float" ? Number(newValue.toFixed(2)) : newValue;
+
+    if (controller.isConnected()) {
+      console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${scaledValue}`);
+      controller.sendParameter(parseInt(param.sysex_adress), scaledValue);
+    }
+    if (param.method) {
+      executeMethod(param.method, scaledValue);
+    }
+  });
+
+  sliderContainer.appendChild(input);
+  sliderContainer.appendChild(valueInput);
+  container.appendChild(label);
+  container.appendChild(sliderContainer);
+} else if (param.ui_type === "select") {
         const selectContainer = document.createElement("div");
         selectContainer.className = "select-container";
         const input = document.createElement("select");
@@ -1045,34 +1065,37 @@ async function generateSettingsForm(paramGroup) {
 }
 
 // Updates the entire UI for a given bank
-async function updateUI(bankIndex) {
-  console.log(`updateUI: Updating UI for bank ${bankIndex}`);
-  currentBankNumber = bankIndex;
-  active_bank_number = bankIndex;
+async function updateUI(bankNumber) {
+  console.log(`updateUI: Updating UI for bank ${bankNumber}`);
+  try {
+    currentBankNumber = bankNumber;
+    const bankSelect = document.getElementById("bank-select");
+    if (bankSelect) {
+      bankSelect.value = bankNumber;
+    }
 
-  const bankSelect = document.getElementById('bank_number_selection');
-  if (bankSelect) bankSelect.value = bankIndex;
+    // Update bank color
+    if (currentValues[20] !== undefined) {
+      updateLEDBankColor(currentValues[20]);
+    }
 
-  await generateGlobalSettingsForm();
-  updateLEDBankColor();
+    // Re-render global settings
+    await generateGlobalSettingsForm();
 
-  const modal = document.getElementById("settings-modal");
-  const rhythmModal = document.getElementById("rhythm-modal");
+    // Re-render the active modal if it’s open
+    const modal = document.getElementById("settings-modal");
+    if (modal && modal.style.display === "block") {
+      const settingsTitle = document.getElementById("settings-title").textContent.toLowerCase().replace(/ /g, "_");
+      if (settingsTitle && settingsTitle !== "global_parameter") {
+        await generateSettingsForm(settingsTitle);
+      }
+    }
 
-  if (modal && modal.style.display === "block" && openParamGroup && openParamGroup !== "global_parameter") {
-    tempValues = { ...currentValues };
-    await generateSettingsForm(openParamGroup);
-  }
-
-  if (rhythmModal && rhythmModal.style.display === "block") {
-    tempValues = { ...currentValues };
-    await checkbox_array(); // Rebuild modal to ensure sliders update
-    await refreshRhythmGrid();
-  }
-
-  const bankValue = document.getElementById('current-bank-value');
-  if (bankValue) {
-    bankValue.textContent = (bankIndex + 1).toString();
+    // Update other UI elements as needed
+    updateBankName(bankNumber);
+  } catch (error) {
+    console.error(`updateUI: Error updating UI for bank ${bankNumber}`, error);
+    showNotification("Error updating UI", "error");
   }
 }
 
