@@ -1101,43 +1101,58 @@ async function loadBankSettings(bankNumber) {
     if (!controller.isConnected()) {
       minichord_device = false;
       await updateUI(bankNumber);
+      showNotification(`Bank ${bankNumber + 1} loaded (device not connected)`, "warning");
       return;
     }
 
     minichord_device = true;
-    const params = await loadParameters();
-    
-    // Send parameters to the device
-    const paramGroups = ['global_parameter', 'harp_parameter', 'chord_parameter', 'rhythm_parameter'];
-    for (const group of paramGroups) {
-      if (params[group]) {
-        for (const param of params[group]) {
-          const floatMultiplier = param.sysex_adress === 20 ? 1 : (controller.float_multiplier || 100.0);
-          const value = currentValues[param.sysex_adress] !== undefined 
-            ? currentValues[param.sysex_adress] 
-            : (param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value);
-          currentValues[param.sysex_adress] = value;
-          console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${value}`);
-          controller.sendParameter(param.sysex_adress, value);
-        }
-      }
-    }
 
     // Request parameter dump to sync with device
     controller.sendSysEx([0, 0, 0, 0]);
 
     // Wait for response
-    const checkResponse = setInterval(async () => {
-      if (!controller.pendingSave) {
-        clearInterval(checkResponse);
-        bankSettings[bankNumber] = { ...currentValues };
-        await updateUI(bankNumber);
-        showNotification(`Bank ${bankNumber + 1} loaded`, "success");
+    const maxWaitTime = 5000; // 5 seconds
+    const startTime = Date.now();
+    await new Promise((resolve, reject) => {
+      const checkResponse = setInterval(async () => {
+        if (!controller.pendingSave || Date.now() - startTime > maxWaitTime) {
+          clearInterval(checkResponse);
+          if (Date.now() - startTime > maxWaitTime) {
+            console.warn(`loadBankSettings: Timeout waiting for device response for bank ${bankNumber}`);
+            showNotification(`Timeout loading bank ${bankNumber + 1}`, "error");
+            reject(new Error("Timeout waiting for device response"));
+            return;
+          }
+          // Update bankSettings with currentValues after device response
+          bankSettings[bankNumber] = { ...currentValues };
+          await updateUI(bankNumber);
+          showNotification(`Bank ${bankNumber + 1} loaded`, "success");
+          resolve();
+        }
+      }, 100);
+    });
+
+    // Only send parameters to the device if they differ from the received values
+    const params = await loadParameters();
+    const paramGroups = ['global_parameter', 'harp_parameter', 'chord_parameter', 'rhythm_parameter'];
+    for (const group of paramGroups) {
+      if (params[group]) {
+        for (const param of params[group]) {
+          const floatMultiplier = param.sysex_adress === 20 ? 1 : (controller.float_multiplier || 100.0);
+          const storedValue = currentValues[param.sysex_adress] !== undefined 
+            ? currentValues[param.sysex_adress] 
+            : (param.data_type === "float" ? param.default_value * floatMultiplier : param.default_value);
+          // Only send if the value differs (to avoid overwriting device state)
+          if (bankSettings[bankNumber][param.sysex_adress] !== storedValue) {
+            console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${storedValue}`);
+            controller.sendParameter(param.sysex_adress, storedValue);
+          }
+        }
       }
-    }, 100);
+    }
   } catch (error) {
     console.error(`loadBankSettings: Error loading bank ${bankNumber}`, error);
-    showNotification(`Error loading bank ${bankNumber}`, "error");
+    showNotification(`Error loading bank ${bankNumber + 1}`, "error");
   }
 }
 
@@ -1173,13 +1188,28 @@ async function init() {
     
     if (!isInitialized || !controller.isConnected()) {
       showNotification("Failed to connect to MiniChord device", "error");
+      // Use bank 0 with defaults or stored settings if available
       currentBankNumber = 0;
       active_bank_number = 0;
-      currentValues = { ...defaultValues };
+      bankSettings[0] = bankSettings[0] || { ...defaultValues };
+      currentValues = { ...defaultValues, ...bankSettings[0] };
       await updateUI(0);
     } else {
       midiResponseQueue = [];
-      const activeBankNumber = controller.active_bank_number !== undefined ? controller.active_bank_number : 0;
+      // Wait for the device to provide the active bank number
+      const activeBankNumber = await new Promise((resolve) => {
+        const checkBank = setInterval(() => {
+          if (controller.active_bank_number !== undefined && controller.active_bank_number >= 0 && controller.active_bank_number <= 11) {
+            clearInterval(checkBank);
+            resolve(controller.active_bank_number);
+          }
+        }, 100);
+        // Timeout after 2 seconds, default to 0
+        setTimeout(() => {
+          clearInterval(checkBank);
+          resolve(0);
+        }, 2000);
+      });
       active_bank_number = activeBankNumber;
       await loadBankSettings(activeBankNumber);
     }
@@ -1188,12 +1218,14 @@ async function init() {
     showNotification("Initialization failed.", "error");
     currentBankNumber = 0;
     active_bank_number = 0;
-    currentValues = { ...defaultValues };
+    bankSettings[0] = bankSettings[0] || { ...defaultValues };
+    currentValues = { ...defaultValues, ...bankSettings[0] };
     await updateUI(0);
   } finally {
     isInitializing = false;
   }
 }
+
 
 // Updates the connection status display
 function updateConnectionStatus(connected, message) {
