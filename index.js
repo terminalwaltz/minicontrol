@@ -1072,6 +1072,9 @@ async function updateUI(bankNumber) {
     const bankSelect = document.getElementById("bank-select");
     if (bankSelect) {
       bankSelect.value = bankNumber;
+      console.log(`[DEBUG] updateUI: Set bank-select to bank ${bankNumber}`);
+    } else {
+      console.warn("Bank select element not found: #bank-select");
     }
 
     // Update bank color
@@ -1090,9 +1093,6 @@ async function updateUI(bankNumber) {
         await generateSettingsForm(settingsTitle);
       }
     }
-
-    // Update other UI elements as needed
-    updateBankName(bankNumber);
   } catch (error) {
     console.error(`updateUI: Error updating UI for bank ${bankNumber}`, error);
     showNotification("Error updating UI", "error");
