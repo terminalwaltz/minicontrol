@@ -868,7 +868,7 @@ svg {
 
 .toggle-switch {
   position: relative;
-  width: 50px;
+  width: 10px;
   height: 24px;
   order: 2;
   margin-left: auto;
@@ -886,9 +886,10 @@ svg {
 .toggle-switch .toggle-label {
   position: absolute;
   top: 0;
-  left: 0;
+  left: 1;
   right: 0;
   bottom: 0;
+  max-width: 50px;
   background-color: #ccc;
   border: 1px solid #ccc;
   border-radius: 12px;

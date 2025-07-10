@@ -824,7 +824,6 @@ async function generateGlobalSettingsForm() {
 }
 
 // Creates modals for chord, harp, or potentiometer parameters
-// Creates modals for chord, harp, or potentiometer parameters
 async function generateSettingsForm(paramGroup) {
   if (paramGroup === "global_parameter") return;
   if (paramGroup === "rhythm_parameter") {
@@ -863,7 +862,7 @@ async function generateSettingsForm(paramGroup) {
     column.appendChild(header);
 
     groupedParams[groupName].forEach(param => {
-      console.log(`[DEBUG] Processing param: sysex=${param.sysex_adress}, name=${param.name}, ui_type=${param.ui_type}, currentValue=${currentValues[param.sysex_adress]}`);
+      console.log(`[DEBUG] Processing param: sysex=${param.sysex_adress}, name=${param.name}, ui_type=${param.ui_type}, currentValue=${currentValues[param.sysex_adress]}, group=${paramGroup}, paramGroup=${param.group}`);
       const container = document.createElement("div");
       container.className = "parameter-row";
       const label = document.createElement("label");
@@ -880,92 +879,68 @@ async function generateSettingsForm(paramGroup) {
       const scaledValue = param.data_type === "float" ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
 
       if (param.ui_type === "slider") {
-  const sliderContainer = document.createElement("div");
-  sliderContainer.className = "slider-container";
-  const input = document.createElement("input");
-  input.type = "range";
-  input.className = "slider";
-  input.id = `param-${param.sysex_adress}`;
-  
-  // Determine float multiplier and scaling
-  const floatMultiplier = param.sysex_adress === 20 ? 1 : (param.data_type === "float" ? (controller.float_multiplier || 100.0) : 1);
-  const minValue = param.min_value * floatMultiplier;
-  const maxValue = param.max_value * floatMultiplier;
-  const stepValue = (param.step || (param.data_type === "float" ? 0.01 : 1)) * floatMultiplier;
+        const sliderContainer = document.createElement("div");
+        sliderContainer.className = "slider-container";
+        const input = document.createElement("input");
+        input.type = "range";
+        input.className = "slider";
+        input.id = `param-${param.sysex_adress}`;
+        input.min = param.min_value * floatMultiplier;
+        input.max = param.max_value * floatMultiplier;
+        input.step = (param.step || (param.data_type === "float" ? 0.01 : 1)) * floatMultiplier;
+        input.value = currentValue;
 
-  // Get current value, falling back to tempValues or default
-  const currentValue = currentValues[param.sysex_adress] !== undefined
-    ? currentValues[param.sysex_adress]
-    : tempValues[param.sysex_adress] !== undefined
-      ? tempValues[param.sysex_adress]
-      : param.default_value * floatMultiplier;
+        const valueInput = document.createElement("input");
+        valueInput.type = "number";
+        valueInput.className = "value-input";
+        valueInput.value = param.data_type === "float" ? Number((currentValue / floatMultiplier).toFixed(2)) : currentValue;
+        valueInput.step = param.step || (param.data_type === "float" ? 0.01 : 1);
+        valueInput.min = param.min_value;
+        valueInput.max = param.max_value;
 
-  // Ensure value is within bounds
-  const clampedValue = Math.max(minValue, Math.min(maxValue, currentValue));
-  const displayValue = param.data_type === "float" ? Number((clampedValue / floatMultiplier).toFixed(2)) : Math.round(clampedValue);
+        input.addEventListener("input", () => {
+          const newValue = parseFloat(input.value);
+          tempValues[param.sysex_adress] = newValue;
+          valueInput.value = param.data_type === "float" ? (newValue / floatMultiplier).toFixed(2) : Math.round(newValue);
+          if (controller.isConnected()) {
+            console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${newValue}`);
+            controller.sendParameter(parseInt(param.sysex_adress), newValue);
+          }
+          if (param.method) {
+            executeMethod(param.method, newValue);
+          }
+        });
 
-  // Set slider attributes
-  input.min = minValue;
-  input.max = maxValue;
-  input.step = stepValue;
-  input.value = clampedValue;
+        valueInput.addEventListener("change", (e) => {
+          let newValue = parseFloat(e.target.value);
+          if (isNaN(newValue)) {
+            newValue = param.data_type === "float" ? currentValue / floatMultiplier : currentValue;
+            valueInput.value = newValue;
+            input.value = currentValue;
+            return;
+          }
 
-  const valueInput = document.createElement("input");
-  valueInput.type = "number";
-  valueInput.className = "value-input";
-  valueInput.value = displayValue;
-  valueInput.step = param.step || (param.data_type === "float" ? 0.01 : 1);
-  valueInput.min = param.min_value;
-  valueInput.max = param.max_value;
+          newValue = Math.max(param.min_value, Math.min(param.max_value, newValue));
+          const scaledValue = param.data_type === "float" ? newValue * floatMultiplier : Math.round(newValue);
 
-  // Log for debugging
-  console.log(`[DEBUG] Rendering slider: sysex=${param.sysex_adress}, name=${param.name}, ui_type=${param.ui_type}, currentValue=${currentValue}, displayValue=${displayValue}, min=${input.min}, max=${input.max}, step=${input.step}`);
+          tempValues[param.sysex_adress] = scaledValue;
+          input.value = scaledValue;
+          valueInput.value = param.data_type === "float" ? Number(newValue.toFixed(2)) : newValue;
 
-  // Slider input event
-  input.addEventListener("input", () => {
-    const newValue = parseFloat(input.value);
-    tempValues[param.sysex_adress] = newValue;
-    valueInput.value = param.data_type === "float" ? (newValue / floatMultiplier).toFixed(2) : Math.round(newValue);
-    if (controller.isConnected()) {
-      console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${newValue}`);
-      controller.sendParameter(parseInt(param.sysex_adress), newValue);
-    }
-    if (param.method) {
-      executeMethod(param.method, newValue);
-    }
-  });
+          if (controller.isConnected()) {
+            console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${scaledValue}`);
+            controller.sendParameter(parseInt(param.sysex_adress), scaledValue);
+          }
+          if (param.method) {
+            executeMethod(param.method, scaledValue);
+          }
+        });
 
-  // Number input event
-  valueInput.addEventListener("change", (e) => {
-    let newValue = parseFloat(e.target.value);
-    if (isNaN(newValue)) {
-      newValue = displayValue;
-      valueInput.value = newValue;
-      input.value = clampedValue;
-      return;
-    }
-
-    newValue = Math.max(param.min_value, Math.min(param.max_value, newValue));
-    const scaledValue = param.data_type === "float" ? newValue * floatMultiplier : Math.round(newValue);
-
-    tempValues[param.sysex_adress] = scaledValue;
-    input.value = scaledValue;
-    valueInput.value = param.data_type === "float" ? Number(newValue.toFixed(2)) : newValue;
-
-    if (controller.isConnected()) {
-      console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${scaledValue}`);
-      controller.sendParameter(parseInt(param.sysex_adress), scaledValue);
-    }
-    if (param.method) {
-      executeMethod(param.method, scaledValue);
-    }
-  });
-
-  sliderContainer.appendChild(input);
-  sliderContainer.appendChild(valueInput);
-  container.appendChild(label);
-  container.appendChild(sliderContainer);
-} else if (param.ui_type === "select") {
+        sliderContainer.appendChild(input);
+        sliderContainer.appendChild(valueInput);
+        container.appendChild(label);
+        container.appendChild(sliderContainer);
+      } else if (param.ui_type === "select") {
         const selectContainer = document.createElement("div");
         selectContainer.className = "select-container";
         const input = document.createElement("select");
@@ -973,19 +948,14 @@ async function generateSettingsForm(paramGroup) {
         input.name = param.name;
         input.title = param.description || param.tooltip || param.name;
 
-        // Determine options based on parameter group
         let options;
         if (["chord_potentiometer", "harp_potentiometer", "modulation_potentiometer"].includes(paramGroup)) {
-          // For potentiometer parameters, use sysexNameMap for options
-          options = Object.entries(sysexNameMap)
-            .map(([value, label]) => ({ value: parseInt(value), label }));
+          options = Object.entries(sysexNameMap).map(([value, label]) => ({ value: parseInt(value), label }));
           console.log(`[DEBUG] Potentiometer select options for sysex=${param.sysex_adress}, group=${paramGroup}:`, options);
         } else if (waveformSysexAddresses.includes(param.sysex_adress)) {
-          // For waveform-related parameters, use waveformMap
           options = Object.entries(waveformMap).map(([value, label]) => ({ value, label }));
           console.log(`[DEBUG] Waveform select options for sysex=${param.sysex_adress}:`, options);
         } else {
-          // Fallback to param.options
           options = param.options || [];
           console.log(`[DEBUG] Select options for sysex=${param.sysex_adress}:`, options);
         }
@@ -1005,7 +975,6 @@ async function generateSettingsForm(paramGroup) {
           });
         }
 
-        // Ensure the current value is set, defaulting to 0 if undefined
         input.value = String(currentValue !== undefined ? currentValue : 0);
 
         input.addEventListener("change", (e) => {
@@ -1023,6 +992,38 @@ async function generateSettingsForm(paramGroup) {
         selectContainer.appendChild(input);
         container.appendChild(label);
         container.appendChild(selectContainer);
+      } else if (param.ui_type === "switch") {
+        const switchContainer = document.createElement("div");
+        switchContainer.className = "toggle-switch";
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.id = `param-${param.sysex_adress}`;
+        input.name = param.name;
+        input.title = param.description || param.tooltip || param.name;
+        input.checked = currentValue === 1; // Assume 1 is "on" and 0 is "off"
+
+        const toggleLabel = document.createElement("label");
+        toggleLabel.className = "toggle-label";
+        toggleLabel.setAttribute("for", `param-${param.sysex_adress}`);
+        toggleLabel.setAttribute("data-flat", "On"); // Displayed when checked
+        toggleLabel.setAttribute("data-sharp", "Off"); // Displayed when unchecked
+
+        input.addEventListener("change", (e) => {
+          const newValue = e.target.checked ? 1 : 0;
+          tempValues[param.sysex_adress] = newValue;
+          if (controller.isConnected()) {
+            console.log(`[SEND PARAMETER] Sysex=${param.sysex_adress}, value=${newValue}`);
+            controller.sendParameter(parseInt(param.sysex_adress), newValue);
+          }
+          if (param.method) {
+            executeMethod(param.method, newValue);
+          }
+        });
+
+        switchContainer.appendChild(input);
+        switchContainer.appendChild(toggleLabel);
+        container.appendChild(label);
+        container.appendChild(switchContainer);
       } else {
         console.warn(`Unsupported ui_type for param ${param.name}: ${param.ui_type}`);
       }
@@ -1041,7 +1042,6 @@ async function generateSettingsForm(paramGroup) {
     return;
   }
 
-  // Remove existing event listeners by cloning
   const saveBtnClone = saveBtn.cloneNode(true);
   const cancelBtnClone = cancelBtn.cloneNode(true);
   saveBtn.parentNode.replaceChild(saveBtnClone, saveBtn);
