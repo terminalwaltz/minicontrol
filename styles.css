@@ -774,15 +774,39 @@ svg {
   margin-top: 0;
 }
 
+/* Update .parameter-row to ensure consistent label/control layout */
 .parameter-row {
   display: flex;
   align-items: center;
-  flex-direction: row; /* Horizontal layout for desktop */
+  flex-direction: row;
   justify-content: flex-start; /* Align items to the start */
   gap: 0.5rem;
   margin: 0.5rem 0;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Ensure labels are consistently on the left */
+.parameter-row label {
+  flex: 0 0 auto;
+  width: 150px;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Changed from 'none' to 'ellipsis' for better overflow handling */
+  order: 1;
+}
+
+/* Style for checkbox container to match slider/select */
+.parameter-row .switch-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 200px;
+  order: 2; /* Ensure switch follows label */
 }
 
 .slider-container {
@@ -866,14 +890,17 @@ svg {
    3.7 Toggle Switch
    -------------------------------------------------------------------------- */
 
+
+/* Adjust toggle-switch to fit within switch-container */
 .toggle-switch {
   position: relative;
-  width: 10px;
+  width: 50px; /* Match max-width of slider/select for consistency */
   height: 24px;
-  order: 2;
-  margin-left: auto;
+  order: unset; /* Remove order from toggle-switch to avoid conflicts */
+  margin-left: 0; /* Remove auto margin to align properly */
 }
 
+/* Ensure checkbox input remains hidden */
 .toggle-switch input[type="checkbox"] {
   opacity: 0;
   width: 0;
@@ -883,10 +910,11 @@ svg {
   pointer-events: auto;
 }
 
+/* Style the toggle label (visual toggle) */
 .toggle-switch .toggle-label {
   position: absolute;
   top: 0;
-  left: 1;
+  left: 0;
   right: 0;
   bottom: 0;
   max-width: 50px;
