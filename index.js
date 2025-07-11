@@ -840,13 +840,14 @@ async function generateSettingsForm(paramGroup) {
   document.getElementById("settings-title").textContent = paramGroup.replace(/_/g, " ").toUpperCase();
 
   const groupParams = (params[paramGroup] || []).filter(param => param.group !== "hidden");
-  console.log(`[generateSettingsForm] Rendering ${groupParams.length} parameters for ${paramGroup}:`, groupParams.map(p => ({ sysex: p.sysex_adress, name: p.name })));
+  console.log(`[generateSettingsForm] Rendering ${groupParams.length} parameters for ${paramGroup}:`, groupParams.map(p => ({ sysex: p.sysex_adress, name: p.name, ui_type: p.ui_type })));
 
-  if (groupParams.length === 0) {
-    console.warn(`No parameters found for ${paramGroup}`);
-    form.innerHTML = "<p>No parameters available for this group.</p>";
-    return;
-  }
+  // Log waveform parameters specifically
+  groupParams.forEach(param => {
+    if (waveformSysexAddresses.includes(param.sysex_adress)) {
+      console.log(`[DEBUG] Waveform param: sysex=${param.sysex_adress}, name=${param.name}, ui_type=${param.ui_type}, options=${JSON.stringify(param.options)}`);
+    }
+  });
 
   const groupedParams = {};
   groupParams.forEach(param => {
@@ -871,7 +872,6 @@ async function generateSettingsForm(paramGroup) {
       label.setAttribute("for", `param-${param.sysex_adress}`);
       label.title = param.tooltip || param.name;
 
-      // Apply floatMultiplier only for float parameters
       const floatMultiplier = param.data_type === "float" ? (controller.float_multiplier || 100.0) : 1;
       const currentValue = currentValues[param.sysex_adress] !== undefined
         ? currentValues[param.sysex_adress]
@@ -889,7 +889,6 @@ async function generateSettingsForm(paramGroup) {
         input.id = `param-${param.sysex_adress}`;
         input.min = param.min_value;
         input.max = param.max_value;
-        // Set step: 1 for integers, 0.01 for floats
         input.step = param.step || (param.data_type === "float" ? 0.01 : 1);
         input.value = scaledValue;
 
@@ -903,7 +902,6 @@ async function generateSettingsForm(paramGroup) {
         valueInput.max = param.max_value;
 
         input.addEventListener("input", () => {
-          // Ensure integer values for int parameters
           let newValue = param.data_type === "float" ? parseFloat(input.value) * floatMultiplier : Math.round(parseFloat(input.value));
           newValue = Math.max(param.min_value, Math.min(param.max_value, newValue));
           tempValues[param.sysex_adress] = newValue;
@@ -946,7 +944,7 @@ async function generateSettingsForm(paramGroup) {
         container.appendChild(label);
         container.appendChild(sliderContainer);
       } else if (param.ui_type === "select") {
-        // Existing select handling
+        console.log(`[DEBUG] Processing select param: sysex=${param.sysex_adress}, name=${param.name}, isWaveform=${waveformSysexAddresses.includes(param.sysex_adress)}`);
         const selectContainer = document.createElement("div");
         selectContainer.className = "select-container";
         const input = document.createElement("select");
@@ -954,14 +952,28 @@ async function generateSettingsForm(paramGroup) {
         input.name = param.name;
         input.title = param.tooltip || param.name;
 
-        const options = param.options || [];
-        options.forEach(option => {
+        const options = waveformSysexAddresses.includes(param.sysex_adress)
+          ? Object.entries(waveformMap).map(([value, label]) => ({ value, label }))
+          : param.options || [];
+        console.log(`[DEBUG] Generated options for sysex=${param.sysex_adress}:`, options);
+
+        if (options.length === 0) {
+          console.warn(`No options defined for select parameter ${param.name} (sysex=${param.sysex_adress})`);
           const opt = document.createElement("option");
-          opt.value = option.value;
-          opt.text = option.label;
+          opt.value = "";
+          opt.text = "No options available";
           input.appendChild(opt);
-        });
+        } else {
+          options.forEach(option => {
+            const opt = document.createElement("option");
+            opt.value = option.value;
+            opt.text = option.label;
+            input.appendChild(opt);
+          });
+        }
+
         input.value = String(currentValue);
+        console.log(`[DEBUG] Set select value for sysex=${param.sysex_adress} to ${input.value}, currentValue=${currentValue}`);
 
         input.addEventListener("change", (e) => {
           const newValue = param.data_type === "float" ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
@@ -980,7 +992,6 @@ async function generateSettingsForm(paramGroup) {
         container.appendChild(label);
         container.appendChild(selectContainer);
       } else if (param.ui_type === "switch") {
-        // Existing switch handling
         const switchContainer = document.createElement("div");
         switchContainer.className = "switch-container";
         const input = document.createElement("input");
@@ -1002,6 +1013,8 @@ async function generateSettingsForm(paramGroup) {
         switchContainer.appendChild(input);
         container.appendChild(label);
         container.appendChild(switchContainer);
+      } else {
+        console.warn(`[DEBUG] Unsupported ui_type for param ${param.name}: ${param.ui_type}, sysex=${param.sysex_adress}`);
       }
 
       column.appendChild(container);
@@ -1009,7 +1022,6 @@ async function generateSettingsForm(paramGroup) {
     form.appendChild(column);
   });
 
-  // Save and cancel button handling (unchanged)
   const saveBtn = document.getElementById("save-settings-btn");
   const cancelBtn = document.getElementById("cancel-settings-btn");
 
