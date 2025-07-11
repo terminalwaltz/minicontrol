@@ -599,6 +599,7 @@ svg {
 #global-settings select,
 #settings-form select {
   padding: 5px;
+  width: 300px;
 }
 
 #settings-form {
@@ -625,11 +626,11 @@ svg {
   margin: 0;
   font-size: 0.9rem;
   flex: 0 0 auto;
-  width: 100px;
+  width: 150px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: nowrap;
-  order: 1;
+  order: 0;
 }
 
 .parameter-column input[type="checkbox"] {
@@ -647,7 +648,7 @@ svg {
   display: flex;
   align-items: center;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: none;
   gap: 0.5rem;
   width: 95%;
   box-sizing: border-box;
@@ -727,7 +728,7 @@ svg {
   display: flex;
   align-items: center;
   flex-direction: row; /* Horizontal layout for desktop */
-  justify-content: space-between;
+  justify-content: none;
   gap: 0.5rem;
   margin: 0.5rem 0;
   width: 100%;
@@ -737,7 +738,7 @@ svg {
 #global-settings label,
 #settings-modal label {
   flex: 0 0 auto;
-  width: 150px;
+  width: 200px;
   margin: 0;
   font-size: 0.9rem;
   font-weight: bold;
@@ -792,12 +793,13 @@ svg {
 }
 
 .slider {
-  flex-grow: 1;
+  flex-grow: 0.5;
   margin: 0 10px;
 }
 
 .value-input {
   width: 60px;
+  order:3;
 }
 /* Settings Modal */
 #settings-modal .modal-content {
