@@ -38,7 +38,7 @@
             "sysex_adress": 30,
             "curve": "linear",
             "min_value": 0,
-            "max_value": 12,
+            "max_value": 11,
             "tooltip": "transpose all sounds by a number of semitones",
             "iterate": 1,
             "method": "transpose_semitones=value;midi_base_note_transposed=midi_base_note+transpose_semitones;",
