@@ -774,39 +774,15 @@ svg {
   margin-top: 0;
 }
 
-/* Update .parameter-row to ensure consistent label/control layout */
 .parameter-row {
   display: flex;
   align-items: center;
-  flex-direction: row;
+  flex-direction: row; /* Horizontal layout for desktop */
   justify-content: flex-start; /* Align items to the start */
   gap: 0.5rem;
   margin: 0.5rem 0;
   width: 100%;
   box-sizing: border-box;
-}
-
-/* Ensure labels are consistently on the left */
-.parameter-row label {
-  flex: 0 0 auto;
-  width: 150px;
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: #333;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis; /* Changed from 'none' to 'ellipsis' for better overflow handling */
-  order: 1;
-}
-
-/* Style for checkbox container to match slider/select */
-.parameter-row .switch-container {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  max-width: 200px;
-  order: 2; /* Ensure switch follows label */
 }
 
 .slider-container {
