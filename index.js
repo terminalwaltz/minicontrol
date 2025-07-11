@@ -5,6 +5,7 @@ var controller = new MiniChordController(); // Instance of MiniChordController t
 var tempValues = {}; // Temporary values for parameters being edited before saving (e.g., { "32": 54 })
 var bankSettings = {}; // Stores settings for each bank (e.g., bankSettings[1] = { "32": 54, ... })
 let currentBankNumber = -1; // Tracks the currently active bank (0-11, or -1 if none)
+let targetBank = -1; // Tracks the target bank selected in the dropdown
 const bankNames = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"]; // Names for banks 1-12
 let defaultValues = {}; // Default parameter values from parameters.json
 let originalPresetValues = {}; // Stores original values before editing in a modal
@@ -1069,16 +1070,18 @@ async function generateSettingsForm(paramGroup) {
 
 // Updates the entire UI for a given bank
 async function updateUI(bankNumber) {
-  console.log(`updateUI: Updating UI for bank ${bankNumber}`);
+  console.log(`updateUI: Updating UI for bank ${bankNumber + 1}, targetBank=${targetBank + 1}`);
   try {
     currentBankNumber = bankNumber;
     active_bank_number = bankNumber;
+    
+    // Only update bankSelect if it doesn't match targetBank
     const bankSelect = document.getElementById("bank_number_selection");
-    if (bankSelect) {
-      bankSelect.value = bankNumber;
-      console.log(`[DEBUG] updateUI: Set bank-select to bank ${bankNumber}`);
+    if (bankSelect && parseInt(bankSelect.value) !== targetBank) {
+      bankSelect.value = targetBank;
+      console.log(`[DEBUG] updateUI: Set bankSelect.value to targetBank=${targetBank}`);
     } else {
-      console.warn("Bank select element not found: #bank_number_selection");
+      console.log(`[DEBUG] updateUI: bankSelect.value already matches targetBank=${targetBank}`);
     }
 
     updateBankIndicator();
@@ -1108,7 +1111,7 @@ async function updateUI(bankNumber) {
 // Loads settings for a specific bank
 async function loadBankSettings(bankNumber) {
   try {
-    console.log(`loadBankSettings: bankNumber=${bankNumber}`);
+    console.log(`loadBankSettings: bankNumber=${bankNumber + 1}, targetBank=${targetBank + 1}`);
     
     if (bankNumber < 0 || bankNumber > 11) {
       console.warn(`Invalid bank number ${bankNumber}, defaulting to 0`);
@@ -1142,7 +1145,7 @@ async function loadBankSettings(bankNumber) {
         if (!controller.pendingSave || Date.now() - startTime > maxWaitTime) {
           clearInterval(checkResponse);
           if (Date.now() - startTime > maxWaitTime) {
-            console.warn(`loadBankSettings: Timeout waiting for device response for bank ${bankNumber}`);
+            console.warn(`loadBankSettings: Timeout waiting for device response for bank ${bankNumber + 1}`);
             showNotification(`Timeout loading bank ${bankNumber + 1}`, "error");
             reject(new Error("Timeout waiting for device response"));
             return;
@@ -1187,13 +1190,14 @@ async function init() {
     }
     await initializeDefaultValues();
     
-    // Set default bank to 0 immediately to avoid -1
+    // Set default bank to 0
     currentBankNumber = 0;
     active_bank_number = 0;
+    targetBank = 0; // Initialize targetBank
     const bankSelect = document.getElementById("bank_number_selection");
     if (bankSelect) {
       bankSelect.value = 0;
-      console.log(`[init] Set bankSelect.value to 0 at start`);
+      console.log(`[init] Set bankSelect.value and targetBank to 0 at start`);
     }
 
     const isInitialized = await controller.initialize();
@@ -1221,9 +1225,10 @@ async function init() {
       });
       currentBankNumber = activeBankNumber;
       active_bank_number = activeBankNumber;
+      targetBank = activeBankNumber; // Set targetBank to active bank
       if (bankSelect) {
         bankSelect.value = activeBankNumber;
-        console.log(`[init] Set bankSelect.value to ${activeBankNumber}`);
+        console.log(`[init] Set bankSelect.value and targetBank to ${activeBankNumber}`);
       }
       await loadBankSettings(activeBankNumber);
     }
@@ -1232,16 +1237,16 @@ async function init() {
     showNotification("Initialization failed.", "error");
     currentBankNumber = 0;
     active_bank_number = 0;
+    targetBank = 0; // Set targetBank on error
     bankSettings[0] = bankSettings[0] || { ...defaultValues };
     currentValues = { ...defaultValues, ...bankSettings[0] };
     if (bankSelect) {
       bankSelect.value = 0;
-      console.log(`[init] Set bankSelect.value to 0 due to error`);
+      console.log(`[init] Set bankSelect.value and targetBank to 0 due to error`);
     }
     await updateUI(0);
   } finally {
     isInitializing = false;
-    // Process any queued MIDI data after initialization
     await processMidiQueue();
   }
 }
@@ -1302,12 +1307,12 @@ async function openModal(paramGroup) {
 
 // Saves parameter changes to the device and UI
 async function saveSettings(presetId, paramGroup) {
-  console.log(`[saveSettings] Saving for bank ${presetId + 1}, paramGroup=${paramGroup}, currentBankNumber=${currentBankNumber + 1}, tempValues=`, tempValues);
+  console.log(`[saveSettings] Saving for bank ${presetId + 1}, paramGroup=${paramGroup}, currentBankNumber=${currentBankNumber + 1}, targetBank=${targetBank + 1}, tempValues=`, tempValues);
   const tempCopy = { ...tempValues };
 
   if (presetId < 0 || presetId > 11 || isNaN(presetId)) {
-    console.warn(`[saveSettings] Invalid presetId ${presetId}, using currentBankNumber=${currentBankNumber}`);
-    presetId = currentBankNumber;
+    console.warn(`[saveSettings] Invalid presetId ${presetId}, using targetBank=${targetBank}`);
+    presetId = targetBank;
   }
 
   try {
@@ -1355,6 +1360,16 @@ async function saveSettings(presetId, paramGroup) {
       controller.sendSysEx([0, 0, 0, 0]);
 
       await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Update currentBankNumber and targetBank after successful save
+      currentBankNumber = presetId;
+      active_bank_number = presetId;
+      targetBank = presetId;
+      const bankSelect = document.getElementById("bank_number_selection");
+      if (bankSelect) {
+        bankSelect.value = presetId;
+        console.log(`[saveSettings] Set bankSelect.value and targetBank to ${presetId}`);
+      }
 
       if (paramGroup !== "global_parameter") {
         const modal = paramGroup === "rhythm_parameter"
@@ -1770,27 +1785,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const bankSelect = document.getElementById("bank_number_selection");
-  if (bankSelect) {
-    bankSelect.addEventListener("change", async (e) => {
-      const newBank = parseInt(e.target.value);
-      console.log(`[DEBUG] Bank select changed to bank ${newBank + 1}`);
-      await loadBankSettings(newBank);
-    });
-  }
+const bankSelect = document.getElementById("bank_number_selection");
+if (bankSelect) {
+  bankSelect.addEventListener("change", async (e) => {
+    const newBank = parseInt(e.target.value);
+    console.log(`[DEBUG] Bank select changed to bank ${newBank + 1}, currentBankNumber=${currentBankNumber + 1}`);
+    if (newBank >= 0 && newBank <= 11 && !isNaN(newBank)) {
+      targetBank = newBank;
+      console.log(`[DEBUG] Set targetBank to ${newBank + 1}`);
+    } else {
+      console.warn(`[DEBUG] Invalid bank selected: ${newBank}, reverting to currentBankNumber=${currentBankNumber}`);
+      bankSelect.value = currentBankNumber;
+      targetBank = currentBankNumber;
+    }
+  });
+}
 
-  const saveToBankBtn = document.getElementById("save-to-bank-btn");
-  if (saveToBankBtn) {
-    saveToBankBtn.addEventListener("click", async () => {
-      const targetBank = parseInt(bankSelect.value);
-      console.log(`[save-to-bank] Save to bank button clicked, targetBank=${targetBank + 1}, currentBankNumber=${currentBankNumber + 1}`);
-      if (targetBank < 0 || targetBank > 11 || isNaN(targetBank)) {
-        console.warn(`[save-to-bank] Invalid targetBank ${targetBank}, using currentBankNumber=${currentBankNumber}`);
+const saveToBankBtn = document.getElementById("save-to-bank-btn");
+if (saveToBankBtn) {
+  saveToBankBtn.addEventListener("click", async () => {
+    console.log(`[save-to-bank] Save to bank button clicked, targetBank=${targetBank + 1}, currentBankNumber=${currentBankNumber + 1}`);
+    if (targetBank < 0 || targetBank > 11 || isNaN(targetBank)) {
+      console.warn(`[save-to-bank] Invalid targetBank ${targetBank}, using currentBankNumber=${currentBankNumber}`);
+      targetBank = currentBankNumber;
+      const bankSelect = document.getElementById("bank_number_selection");
+      if (bankSelect) {
         bankSelect.value = currentBankNumber;
       }
-      await saveSettings(currentBankNumber, "all");
-    });
-  }
+    }
+    await saveSettings(targetBank, "all");
+  });
+}
 
   const resetBankBtn = document.getElementById("reset-bank-btn");
   if (resetBankBtn) {
