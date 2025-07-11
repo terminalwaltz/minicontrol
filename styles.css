@@ -798,7 +798,7 @@ svg {
 }
 
 .value-input {
-  width: 60px;
+  width: 30px;
   order:3;
 }
 /* Settings Modal */
@@ -1046,7 +1046,7 @@ svg {
     z-index: 1000;
   }
 
-  .modal-content,
+/*   .modal-content,
   #global-settings,
   #settings-form {
     width: 95%;
@@ -1054,7 +1054,7 @@ svg {
     min-width: 0;
     margin: 2% auto;
     padding: 0.5rem;
-  }
+  } */
 
   #global-settings .slider,
   #settings-modal .slider {
@@ -1086,7 +1086,7 @@ svg {
     flex-direction: column;
     width: 100%;
     max-width: 95vw;
-    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-x: visible; /* Prevent horizontal scrolling */
     box-sizing: border-box;
     margin-top: 10px;
   }
