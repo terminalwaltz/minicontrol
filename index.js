@@ -1186,13 +1186,20 @@ async function init() {
     }
     await initializeDefaultValues();
     
+    // Set default bank to 0 immediately to avoid -1
+    currentBankNumber = 0;
+    active_bank_number = 0;
+    const bankSelect = document.getElementById("bank_number_selection");
+    if (bankSelect) {
+      bankSelect.value = 0;
+      console.log(`[init] Set bankSelect.value to 0 at start`);
+    }
+
     const isInitialized = await controller.initialize();
     minichord_device = controller.isConnected();
     
     if (!isInitialized || !controller.isConnected()) {
       showNotification("Failed to connect to MiniChord device", "error");
-      currentBankNumber = 0;
-      active_bank_number = 0;
       bankSettings[0] = bankSettings[0] || { ...defaultValues };
       currentValues = { ...defaultValues, ...bankSettings[0] };
       await updateUI(0);
@@ -1207,10 +1214,16 @@ async function init() {
         }, 100);
         setTimeout(() => {
           clearInterval(checkBank);
+          console.warn(`[init] Timeout waiting for active_bank_number, defaulting to 0`);
           resolve(0);
         }, 2000);
       });
+      currentBankNumber = activeBankNumber;
       active_bank_number = activeBankNumber;
+      if (bankSelect) {
+        bankSelect.value = activeBankNumber;
+        console.log(`[init] Set bankSelect.value to ${activeBankNumber}`);
+      }
       await loadBankSettings(activeBankNumber);
     }
   } catch (error) {
@@ -1220,9 +1233,15 @@ async function init() {
     active_bank_number = 0;
     bankSettings[0] = bankSettings[0] || { ...defaultValues };
     currentValues = { ...defaultValues, ...bankSettings[0] };
+    if (bankSelect) {
+      bankSelect.value = 0;
+      console.log(`[init] Set bankSelect.value to 0 due to error`);
+    }
     await updateUI(0);
   } finally {
     isInitializing = false;
+    // Process any queued MIDI data after initialization
+    await processMidiQueue();
   }
 }
 
@@ -1282,11 +1301,12 @@ async function openModal(paramGroup) {
 
 // Saves parameter changes to the device and UI
 async function saveSettings(presetId, paramGroup) {
-  console.log(`[saveSettings] Saving for bank ${presetId}, paramGroup=${paramGroup}, tempValues=`, tempValues);
+  console.log(`[saveSettings] Saving for bank ${presetId + 1}, paramGroup=${paramGroup}, currentBankNumber=${currentBankNumber + 1}, tempValues=`, tempValues);
   const tempCopy = { ...tempValues };
 
-  if (presetId !== currentBankNumber) {
-    console.warn(`[saveSettings] Bank mismatch: saving to bank ${presetId}, but currentBankNumber=${currentBankNumber}`);
+  if (presetId < 0 || presetId > 11 || isNaN(presetId)) {
+    console.warn(`[saveSettings] Invalid presetId ${presetId}, using currentBankNumber=${currentBankNumber}`);
+    presetId = currentBankNumber;
   }
 
   try {
@@ -1295,27 +1315,23 @@ async function saveSettings(presetId, paramGroup) {
     console.log(`[saveSettings] Updated currentValues=`, currentValues);
 
     if (controller.isConnected()) {
-      // Send parameters and collect promises
       const sendPromises = Object.keys(tempValues).map(sysex => {
         const value = Math.round(tempValues[sysex]);
         console.log(`[saveSettings] Sending Sysex=${sysex}, value=${value}`);
         return controller.sendParameter(parseInt(sysex), value);
       });
 
-      // Wait for all parameters to be sent
       await Promise.all(sendPromises);
 
-      // Send save command
-      console.log(`[saveSettings] Sending save command for bank ${presetId}`);
+      console.log(`[saveSettings] Sending save command for bank ${presetId + 1}`);
       const success = controller.saveCurrentSettings(presetId);
       if (!success) {
-        console.error(`[saveSettings] Failed to send save command for bank ${presetId}`);
-        showNotification(`Failed to save bank ${presetId}`, "error");
+        console.error(`[saveSettings] Failed to send save command for bank ${presetId + 1}`);
+        showNotification(`Failed to save bank ${presetId + 1}`, "error");
         currentValues = { ...currentValues, ...tempCopy };
         return;
       }
 
-      // Wait for save confirmation
       const maxWaitTime = 5000;
       const startTime = Date.now();
       await new Promise((resolve, reject) => {
@@ -1323,48 +1339,49 @@ async function saveSettings(presetId, paramGroup) {
           if (!controller.pendingSave || Date.now() - startTime > maxWaitTime) {
             clearInterval(checkSave);
             if (Date.now() - startTime > maxWaitTime) {
-              console.warn(`[saveSettings] Save timeout for bank ${presetId}`);
-              showNotification(`Save timeout for bank ${presetId}`, "error");
+              console.warn(`[saveSettings] Save timeout for bank ${presetId + 1}`);
+              showNotification(`Save timeout for bank ${presetId + 1}`, "error");
               reject(new Error("Save timeout"));
               return;
             }
-            console.log(`[saveSettings] Save confirmed for bank ${presetId}`);
+            console.log(`[saveSettings] Save confirmed for bank ${presetId + 1}`);
             resolve();
           }
         }, 100);
       });
 
-      // Request and wait for updated parameters
-      console.log(`[saveSettings] Requesting settings for bank ${presetId}`);
+      console.log(`[saveSettings] Requesting settings for bank ${presetId + 1}`);
       controller.sendSysEx([0, 0, 0, 0]);
 
-      // Wait for device response
-      await new Promise(resolve => setTimeout(resolve, 500)); // Adjust delay as needed
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Close the modal
-      const modal = paramGroup === "global_parameter"
-        ? document.getElementById("global-settings")
-        : document.getElementById("settings-modal");
-      if (modal) {
-        modal.style.display = "none";
-        openParamGroup = null; // Clear openParamGroup
-        tempValues = {}; // Clear tempValues
-        console.log(`[saveSettings] Cleared openParamGroup, closed modal for paramGroup=${paramGroup}`);
+      if (paramGroup !== "global_parameter") {
+        const modal = paramGroup === "rhythm_parameter"
+          ? document.getElementById("rhythm-modal")
+          : document.getElementById("settings-modal");
+        if (modal) {
+          modal.style.display = "none";
+          openParamGroup = null;
+          tempValues = {};
+          console.log(`[saveSettings] Cleared openParamGroup, closed modal for paramGroup=${paramGroup}`);
+        } else {
+          console.error(`[saveSettings] Modal element not found: #${paramGroup === "rhythm_parameter" ? "rhythm-modal" : "settings-modal"}`);
+          showNotification("Modal not found, cannot close", "error");
+        }
       } else {
-        console.error(`[saveSettings] Modal element not found: #${paramGroup === "global_parameter" ? "global-settings" : "settings-modal"}`);
-        showNotification("Modal not found, cannot close", "error");
+        await generateGlobalSettingsForm();
       }
 
       await updateUI(presetId);
-      showNotification(`Saved to bank ${presetId}`, "success");
+      showNotification(`Saved to bank ${presetId + 1}`, "success");
     } else {
-      console.warn(`[saveSettings] Device not connected, cannot save to bank ${presetId}`);
+      console.warn(`[saveSettings] Device not connected, cannot save to bank ${presetId + 1}`);
       showNotification("Device not connected, cannot save", "error");
       currentValues = { ...currentValues, ...tempCopy };
     }
   } catch (error) {
-    console.error(`[saveSettings] Error saving bank ${presetId}:`, error);
-    showNotification(`Error saving bank ${presetId}`, "error");
+    console.error(`[saveSettings] Error saving bank ${presetId + 1}:`, error);
+    showNotification(`Error saving bank ${presetId + 1}`, "error");
     currentValues = { ...currentValues, ...tempCopy };
   }
 }
@@ -1391,8 +1408,7 @@ async function cancelSettings(bankNumber, paramGroup) {
     tempValues = {};
 
     if (paramGroup === "global_parameter") {
-      await generateGlobalSettingsForm();
-      hideModal(paramGroup);
+      await generateGlobalSettingsForm(); // Refresh form without closing
     } else if (paramGroup === "rhythm_parameter") {
       await checkbox_array();
       await refreshRhythmGrid();
@@ -1580,7 +1596,19 @@ function addSvgTooltip(element, tooltipText) {
 // Handles data received from the device
 async function handleDataReceived(processedData) {
   if (!processedData) {
-    console.warn("handleDataReceived: Received null data, skipping.");
+    console.warn("[handleDataReceived] Received null data, skipping.");
+    return;
+  }
+
+  const { bankNumber, parameters } = processedData;
+  if (bankNumber < 0 || bankNumber > 11) {
+    console.warn(`[handleDataReceived] Invalid bankNumber ${bankNumber}, skipping update`);
+    return;
+  }
+
+  if (isInitializing || currentBankNumber === -1) {
+    console.log(`[handleDataReceived] Queuing data for bank ${bankNumber} as initialization incomplete or currentBankNumber=-1`);
+    midiResponseQueue.push(processedData);
     return;
   }
 
@@ -1591,7 +1619,6 @@ async function handleDataReceived(processedData) {
   }
   lastUpdate = now;
 
-  const { bankNumber, parameters } = processedData;
   if (!bankSettings[bankNumber]) bankSettings[bankNumber] = {};
 
   parameters.forEach((value, index) => {
@@ -1610,7 +1637,7 @@ async function handleDataReceived(processedData) {
           rhythmPattern[index - BASE_ADDRESS_RHYTHM] = value;
         }
       }
-      console.log(`[handleDataReceived] Sysex=${index}, value=${value}, bank=${bankNumber}, currentBank=${currentBankNumber}`);
+      console.log(`[handleDataReceived] Sysex=${index}, value=${value}, bank=${bankNumber}, currentBankNumber=${currentBankNumber}`);
     }
   });
 
@@ -1755,8 +1782,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (saveToBankBtn) {
     saveToBankBtn.addEventListener("click", async () => {
       const targetBank = parseInt(bankSelect.value);
-      console.log(`[DEBUG] Save to bank button clicked, targetBank=${targetBank + 1}`);
-      await saveSettings(targetBank, "all");
+      console.log(`[save-to-bank] Save to bank button clicked, targetBank=${targetBank + 1}, currentBankNumber=${currentBankNumber + 1}`);
+      if (targetBank < 0 || targetBank > 11 || isNaN(targetBank)) {
+        console.warn(`[save-to-bank] Invalid targetBank ${targetBank}, using currentBankNumber=${currentBankNumber}`);
+        bankSelect.value = currentBankNumber;
+      }
+      await saveSettings(currentBankNumber, "all");
     });
   }
 
