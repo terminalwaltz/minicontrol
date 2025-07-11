@@ -91,11 +91,11 @@ class MiniChordController {
     }
   }
 
-  processCurrentData(midiMessage) {
+processCurrentData(midiMessage) {
   const data = midiMessage.data.slice(1);
   const expectedLength = this.parameter_size * 2 + 1;
   if (data.length !== expectedLength) {
-    console.warn(`processCurrentData: Invalid data length, got ${data.length}, expected ${expectedLength}`);
+    console.warn(`[processCurrentData] Invalid data length, got ${data.length}, expected ${expectedLength}`);
     this.isProcessingData = false;
     return;
   }
@@ -121,14 +121,28 @@ class MiniChordController {
     } else {
       processedData.parameters[i] = sysex_value;
     }
-    if (i === 32 || i === 20 || (i >= 187 && i <= 191)) {
-      console.log(`[PROCESS DATA] Sysex=${i}, value=${sysex_value}`);
+    if (i === 32 || i === 20 || (i >= 187 && i <= 191) || i === 99 || i === 30) {
+      console.log(`[PROCESS DATA] Sysex=${i}, value=${sysex_value}, bank=${processedData.bankNumber}`);
     }
   }
   this.active_bank_number = processedData.bankNumber;
+  if (this.pendingSave) {
+    console.log(`[processCurrentData] Received settings for bank ${processedData.bankNumber} after save, verifying...`);
+    // Assuming index.js has a global currentValues
+    if (typeof currentValues !== 'undefined') {
+      for (let i = 2; i < this.parameter_size; i++) {
+        if (processedData.parameters[i] !== undefined && currentValues[i] !== undefined) {
+          if (processedData.parameters[i] !== currentValues[i]) {
+            console.warn(`[processCurrentData] Mismatch for Sysex=${i}, device=${processedData.parameters[i]}, currentValues=${currentValues[i]}`);
+          }
+        }
+      }
+    }
+  }
   if (this.onDataReceived) {
     this.onDataReceived(processedData);
   }
+  this.isProcessingData = false;
 }
 
 

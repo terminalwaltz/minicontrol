@@ -599,6 +599,7 @@ svg {
 #global-settings select,
 #settings-form select {
   padding: 5px;
+  width: 300px;
 }
 
 #settings-form {
@@ -625,11 +626,11 @@ svg {
   margin: 0;
   font-size: 0.9rem;
   flex: 0 0 auto;
-  width: 100px;
+  width: 150px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: nowrap;
-  order: 1;
+  order: 0;
 }
 
 .parameter-column input[type="checkbox"] {
@@ -647,7 +648,7 @@ svg {
   display: flex;
   align-items: center;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: none;
   gap: 0.5rem;
   width: 95%;
   box-sizing: border-box;
@@ -727,7 +728,7 @@ svg {
   display: flex;
   align-items: center;
   flex-direction: row; /* Horizontal layout for desktop */
-  justify-content: space-between;
+  justify-content: none;
   gap: 0.5rem;
   margin: 0.5rem 0;
   width: 100%;
@@ -745,7 +746,7 @@ svg {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: none;
-  order: 1;
+  order: 0;
 }
 
 /* Ensure select elements in parameter-row follow label */
@@ -774,39 +775,15 @@ svg {
   margin-top: 0;
 }
 
-/* Update .parameter-row to ensure consistent label/control layout */
 .parameter-row {
   display: flex;
   align-items: center;
-  flex-direction: row;
+  flex-direction: row; /* Horizontal layout for desktop */
   justify-content: flex-start; /* Align items to the start */
   gap: 0.5rem;
   margin: 0.5rem 0;
   width: 100%;
   box-sizing: border-box;
-}
-
-/* Ensure labels are consistently on the left */
-.parameter-row label {
-  flex: 0 0 auto;
-  width: 150px;
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: #333;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis; /* Changed from 'none' to 'ellipsis' for better overflow handling */
-  order: 1;
-}
-
-/* Style for checkbox container to match slider/select */
-.parameter-row .switch-container {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  max-width: 200px;
-  order: 2; /* Ensure switch follows label */
 }
 
 .slider-container {
@@ -816,12 +793,13 @@ svg {
 }
 
 .slider {
-  flex-grow: 1;
+  flex-grow: 0.5;
   margin: 0 10px;
 }
 
 .value-input {
   width: 60px;
+  order:3;
 }
 /* Settings Modal */
 #settings-modal .modal-content {
