@@ -821,7 +821,7 @@ async function generateGlobalSettingsForm() {
   }
 
   saveBtn.onclick = async () => {
-    console.log(`[DEBUG] Save global button clicked, bankNumber=${currentBankNumber}`);
+    console.log(`[DEBUG] Save global button clicked, bankNumber=${currentBankNumber}, paramGroup=global_parameter`);
     await saveSettings(currentBankNumber, "global_parameter");
   };
 
@@ -1285,24 +1285,25 @@ async function saveSettings(presetId, paramGroup) {
   console.log(`[saveSettings] Saving for bank ${presetId}, paramGroup=${paramGroup}, tempValues=`, tempValues);
   const tempCopy = { ...tempValues };
 
-  // Verify bank consistency
   if (presetId !== currentBankNumber) {
     console.warn(`[saveSettings] Bank mismatch: saving to bank ${presetId}, but currentBankNumber=${currentBankNumber}`);
   }
 
   try {
-    // Update currentValues and bankSettings
     currentValues = { ...currentValues, ...tempValues };
     bankSettings[presetId] = { ...currentValues };
     console.log(`[saveSettings] Updated currentValues=`, currentValues);
 
     if (controller.isConnected()) {
-      // Send parameters
-      for (const sysex of Object.keys(tempValues)) {
+      // Send parameters and collect promises
+      const sendPromises = Object.keys(tempValues).map(sysex => {
         const value = Math.round(tempValues[sysex]);
         console.log(`[saveSettings] Sending Sysex=${sysex}, value=${value}`);
-        controller.sendParameter(parseInt(sysex), value);
-      }
+        return controller.sendParameter(parseInt(sysex), value);
+      });
+
+      // Wait for all parameters to be sent
+      await Promise.all(sendPromises);
 
       // Send save command
       console.log(`[saveSettings] Sending save command for bank ${presetId}`);
@@ -1333,9 +1334,12 @@ async function saveSettings(presetId, paramGroup) {
         }, 100);
       });
 
-      // Request settings to verify
+      // Request and wait for updated parameters
       console.log(`[saveSettings] Requesting settings for bank ${presetId}`);
       controller.sendSysEx([0, 0, 0, 0]);
+
+      // Wait for device response
+      await new Promise(resolve => setTimeout(resolve, 500)); // Adjust delay as needed
 
       // Close the modal
       const modal = paramGroup === "global_parameter"
@@ -1343,20 +1347,20 @@ async function saveSettings(presetId, paramGroup) {
         : document.getElementById("settings-modal");
       if (modal) {
         modal.style.display = "none";
-        console.log(`[saveSettings] Closed ${paramGroup === "global_parameter" ? "global-settings" : "settings-modal"} for paramGroup=${paramGroup}`);
+        openParamGroup = null; // Clear openParamGroup
+        tempValues = {}; // Clear tempValues
+        console.log(`[saveSettings] Cleared openParamGroup, closed modal for paramGroup=${paramGroup}`);
       } else {
         console.error(`[saveSettings] Modal element not found: #${paramGroup === "global_parameter" ? "global-settings" : "settings-modal"}`);
         showNotification("Modal not found, cannot close", "error");
       }
 
-      // Update UI
       await updateUI(presetId);
       showNotification(`Saved to bank ${presetId}`, "success");
     } else {
       console.warn(`[saveSettings] Device not connected, cannot save to bank ${presetId}`);
       showNotification("Device not connected, cannot save", "error");
       currentValues = { ...currentValues, ...tempCopy };
-      return;
     }
   } catch (error) {
     console.error(`[saveSettings] Error saving bank ${presetId}:`, error);
@@ -1589,12 +1593,15 @@ async function handleDataReceived(processedData) {
 
   const { bankNumber, parameters } = processedData;
   if (!bankSettings[bankNumber]) bankSettings[bankNumber] = {};
-  
+
   parameters.forEach((value, index) => {
     if (value !== undefined && index !== controller.firmware_adress) {
       if (openParamGroup && tempValues[index] !== undefined) {
         console.log(`[handleDataReceived] Skipping Sysex=${index} update (user editing, tempValues=${tempValues[index]})`);
         return;
+      }
+      if (bankNumber === currentBankNumber && tempValues[index] !== undefined && tempValues[index] !== value) {
+        console.warn(`[handleDataReceived] Mismatch for Sysex=${index}: sent=${tempValues[index]}, received=${value}`);
       }
       bankSettings[bankNumber][index] = value;
       if (bankNumber === currentBankNumber) {
