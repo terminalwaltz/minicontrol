@@ -41,6 +41,7 @@ const sysexNameMap = {
   31: "Sharp Function (Global)",
   32: "LED Attenuation (Global)",
   33: "Barry Harris Mode (Global)",
+  34: "Chord Frame Shift",
   40: "Harp Harp Shuffling",
   41: "Harp Oscillator Amplitude",
   42: "Harp Oscillator Waveform",
