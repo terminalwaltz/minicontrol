@@ -738,7 +738,7 @@ svg {
 #global-settings label,
 #settings-modal label {
   flex: 0 0 auto;
-  width: 200px;
+  width: 150px;
   margin: 0;
   font-size: 0.9rem;
   font-weight: bold;
@@ -746,7 +746,7 @@ svg {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: none;
-  order: 1;
+  order: 0;
 }
 
 /* Ensure select elements in parameter-row follow label */
