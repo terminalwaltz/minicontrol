@@ -920,10 +920,10 @@ async function generateSettingsForm(paramGroup) {
 
       const floatMultiplier = param.ui_type === 'discrete_slider' ? 1 : 
                              param.data_type === "float" ? (controller.float_multiplier || 100.0) : 1;
-      const currentValue = currentValues[param.sysex_adress] !== undefined
-        ? currentValues[param.sysex_adress]
-        : tempValues[param.sysex_adress] !== undefined
-          ? tempValues[param.sysex_adress]
+      const currentValue = tempValues[param.sysex_adress] !== undefined
+        ? tempValues[param.sysex_adress]
+        : currentValues[param.sysex_adress] !== undefined
+          ? currentValues[param.sysex_adress]
           : param.data_type === "float" || param.ui_type === "discrete_slider" ? param.default_value * floatMultiplier : param.default_value;
       const scaledValue = param.ui_type === 'discrete_slider' ? Math.round(currentValue) : 
                           param.data_type === "float" ? parseFloat((currentValue / floatMultiplier).toFixed(3)) : Math.round(currentValue);
@@ -939,6 +939,7 @@ async function generateSettingsForm(paramGroup) {
         input.max = param.max_value;
         input.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : param.step || (param.data_type === 'float' ? 0.01 : 1);
         input.value = scaledValue;
+        input.title = param.tooltip || param.name;
 
         const valueInput = document.createElement("input");
         valueInput.type = "number";
@@ -1163,8 +1164,17 @@ async function loadBankSettings(bankNumber) {
       bankNumber = 0;
     }
 
+    // Clear tempValues for harp_potentiometer parameters to ensure modal uses currentValues
+    if (openParamGroup === "harp_potentiometer") {
+      const params = await loadParameters();
+      const harpPotParams = (params.harp_potentiometer || []).map(p => p.sysex_adress);
+      harpPotParams.forEach(sysex => delete tempValues[sysex]);
+      console.log(`[loadBankSettings] Cleared tempValues for harp_potentiometer:`, tempValues);
+    }
+
     currentBankNumber = bankNumber;
     active_bank_number = bankNumber;
+    targetBank = bankNumber;
 
     if (!bankSettings[bankNumber]) {
       bankSettings[bankNumber] = { ...defaultValues };
@@ -1271,7 +1281,7 @@ async function init() {
           clearInterval(checkBank);
           console.warn(`[init] Timeout waiting for active_bank_number, defaulting to 0`);
           resolve(0);
-        }, 5000);
+        }, 6000);
       });
       currentBankNumber = activeBankNumber;
       active_bank_number = activeBankNumber;
@@ -1675,6 +1685,14 @@ async function handleDataReceived(processedData) {
     return;
   }
 
+    // Handle bank desync
+  if (bankNumber !== targetBank && !isInitializing && !isLoadingPreset) {
+    console.log(`[handleDataReceived] Bank mismatch: received ${bankNumber}, expected ${targetBank}. Retrying...`);
+    controller.sendSysEx([0, 0, 0, targetBank]);
+    midiResponseQueue.push(processedData); // Re-queue data to process after correct bank load
+    return;
+  }
+
   if (isInitializing || currentBankNumber === -1) {
     console.log(`[handleDataReceived] Queuing data for bank ${bankNumber} as initialization incomplete or currentBankNumber=-1`);
     midiResponseQueue.push(processedData);
@@ -1688,11 +1706,15 @@ async function handleDataReceived(processedData) {
   }
   lastUpdate = now;
 
+  // Detect bank switch
+  const isBankSwitch = bankNumber !== currentBankNumber;
+
   if (!bankSettings[bankNumber]) bankSettings[bankNumber] = {};
 
   parameters.forEach((value, index) => {
     if (value !== undefined && index !== controller.firmware_adress) {
-      if (openParamGroup && tempValues[index] !== undefined) {
+      // Allow updates during bank switch, skip only for user edits in same bank
+      if (openParamGroup && tempValues[index] !== undefined && !isBankSwitch) {
         console.log(`[handleDataReceived] Skipping Sysex=${index} update (user editing, tempValues=${tempValues[index]})`);
         return;
       }
