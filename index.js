@@ -340,6 +340,14 @@ function decodePresetData(encodedData) {
   }
 }
 
+// Returns arrays of parameters based on their groups e.g. harp_parameter
+async function getParameterSysexAddresses(paramGroup) {
+  const params = await loadParameters();
+  const addresses = (params[paramGroup] || []).map(param => param.sysex_adress);
+  console.log(`[getParameterSysexAddresses] paramGroup=${paramGroup}, addresses=`, addresses);
+  return addresses;
+}
+
 const BASE_ADDRESS_RHYTHM = 220;
 
 // Creates the rhythm settings modal with a checkbox grid and sliders
@@ -1362,6 +1370,7 @@ async function openModal(paramGroup) {
 async function saveSettings(presetId, paramGroup) {
   console.log(`[saveSettings] Saving for bank ${presetId + 1}, paramGroup=${paramGroup}, currentBankNumber=${currentBankNumber + 1}, targetBank=${targetBank + 1}, tempValues=`, tempValues);
   const tempCopy = { ...tempValues };
+  const originalBankNumber = currentBankNumber;
 
   if (presetId < 0 || presetId > 11 || isNaN(presetId)) {
     console.warn(`[saveSettings] Invalid presetId ${presetId}, using targetBank=${targetBank}`);
@@ -1369,28 +1378,87 @@ async function saveSettings(presetId, paramGroup) {
   }
 
   try {
-    currentValues = { ...currentValues, ...tempValues };
-    bankSettings[presetId] = { ...currentValues };
-    console.log(`[saveSettings] Updated currentValues=`, currentValues);
+    // Define sysex ranges directly to avoid issues with getParameterSysexAddresses
+    const harpSysexAddresses = Array.from({ length: 106 - 40 }, (_, i) => 40 + i); // 40–105
+    const chordSysexAddresses = Array.from({ length: 199 - 120 }, (_, i) => 120 + i); // 120–198
+
+    // Determine which parameters to save
+    let sysexAddresses = [];
+    if (paramGroup === 'harp_only') {
+      sysexAddresses = harpSysexAddresses;
+    } else if (paramGroup === 'chord_only') {
+      sysexAddresses = chordSysexAddresses;
+    } else if (paramGroup === 'all') {
+      sysexAddresses = Object.keys(tempValues).map(s => parseInt(s));
+    } else {
+      const params = await loadParameters();
+      sysexAddresses = (params[paramGroup] || []).map(param => param.sysex_adress);
+    }
+    console.log(`[saveSettings] sysexAddresses for ${paramGroup}:`, sysexAddresses);
 
     if (controller.isConnected()) {
-      const sendPromises = Object.keys(tempValues).map(sysex => {
-        const value = Math.round(tempValues[sysex]);
-        console.log(`[saveSettings] Sending Sysex=${sysex}, value=${value}`);
-        return controller.sendParameter(parseInt(sysex), value);
+      // Load the target bank's settings with retry
+      console.log(`[saveSettings] Loading target bank ${presetId + 1}`);
+      let loadSuccess = false;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        loadSuccess = controller.loadBank(presetId);
+        if (loadSuccess) {
+          controller.sendSysEx([0, 0, 0, 0]);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for device response
+          if (controller.active_bank_number === presetId) {
+            console.log(`[saveSettings] Successfully loaded bank ${presetId + 1}`);
+            break;
+          }
+          console.warn(`[saveSettings] Bank ${presetId + 1} not loaded, active_bank_number=${controller.active_bank_number}, retrying (${attempt}/3)`);
+        }
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      if (!loadSuccess || controller.active_bank_number !== presetId) {
+        console.error(`[saveSettings] Failed to load bank ${presetId + 1} after retries`);
+        showNotification(`Failed to load bank ${presetId + 1}`, "error");
+        return;
+      }
+
+      // Ensure bankSettings[presetId] is initialized
+      bankSettings[presetId] = bankSettings[presetId] || { ...defaultValues };
+      let targetPreset = { ...bankSettings[presetId] };
+
+      // Update only the relevant parameters
+      sysexAddresses.forEach(sysex => {
+        if (tempValues[sysex] !== undefined) {
+          targetPreset[sysex] = tempValues[sysex];
+        } else if (currentValues[sysex] !== undefined) {
+          targetPreset[sysex] = currentValues[sysex];
+        }
+      });
+
+      // Update bankSettings
+      bankSettings[presetId] = { ...targetPreset };
+      console.log(`[saveSettings] Updated targetPreset for bank ${presetId + 1}, sysexAddresses=${sysexAddresses}, targetPreset=`, targetPreset);
+
+      // Send only the relevant parameters
+      const sendPromises = sysexAddresses.map(sysex => {
+        if (targetPreset[sysex] !== undefined) {
+          const value = Math.round(targetPreset[sysex]);
+          console.log(`[saveSettings] Sending Sysex=${sysex}, value=${value}`);
+          return controller.sendParameter(parseInt(sysex), value);
+        }
+        return Promise.resolve();
       });
 
       await Promise.all(sendPromises);
 
+      // Save the preset
       console.log(`[saveSettings] Sending save command for bank ${presetId + 1}`);
-      const success = controller.saveCurrentSettings(presetId);
-      if (!success) {
+      const saveSuccess = controller.saveCurrentSettings(presetId);
+      if (!saveSuccess) {
         console.error(`[saveSettings] Failed to send save command for bank ${presetId + 1}`);
         showNotification(`Failed to save bank ${presetId + 1}`, "error");
         currentValues = { ...currentValues, ...tempCopy };
         return;
       }
 
+      // Wait for save confirmation
       const maxWaitTime = 5000;
       const startTime = Date.now();
       await new Promise((resolve, reject) => {
@@ -1409,40 +1477,56 @@ async function saveSettings(presetId, paramGroup) {
         }, 100);
       });
 
-      console.log(`[saveSettings] Requesting settings for bank ${presetId + 1}`);
-      controller.sendSysEx([0, 0, 0, 0]);
-
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Update currentBankNumber and targetBank after successful save
-      currentBankNumber = presetId;
-      active_bank_number = presetId;
-      targetBank = presetId;
-      const bankSelect = document.getElementById("bank_number_selection");
-      if (bankSelect) {
-        bankSelect.value = presetId;
-        console.log(`[saveSettings] Set bankSelect.value and targetBank to ${presetId}`);
+      // Restore the original bank
+      if (presetId !== originalBankNumber) {
+        console.log(`[saveSettings] Restoring original bank ${originalBankNumber + 1}`);
+        loadSuccess = false;
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          loadSuccess = controller.loadBank(originalBankNumber);
+          if (loadSuccess) {
+            controller.sendSysEx([0, 0, 0, 0]);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (controller.active_bank_number === originalBankNumber) {
+              console.log(`[saveSettings] Successfully restored bank ${originalBankNumber + 1}`);
+              break;
+            }
+            console.warn(`[saveSettings] Restore to bank ${originalBankNumber + 1} failed, active_bank_number=${controller.active_bank_number}, retrying (${attempt}/3)`);
+          }
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        if (!loadSuccess || controller.active_bank_number !== originalBankNumber) {
+          console.error(`[saveSettings] Failed to restore bank ${originalBankNumber + 1}`);
+          showNotification(`Failed to restore bank ${originalBankNumber + 1}`, "error");
+        }
       }
 
-      if (paramGroup !== "global_parameter") {
-        const modal = paramGroup === "rhythm_parameter"
-          ? document.getElementById("rhythm-modal")
-          : document.getElementById("settings-modal");
+      // Update UI variables
+      currentBankNumber = originalBankNumber;
+      active_bank_number = originalBankNumber;
+      targetBank = originalBankNumber;
+      const bankSelect = document.getElementById("bank_number_selection");
+      if (bankSelect) {
+        bankSelect.value = originalBankNumber;
+        console.log(`[saveSettings] Restored bankSelect.value to ${originalBankNumber + 1}`);
+      }
+
+      // Update UI and close modal
+      if (paramGroup !== "global_parameter" && paramGroup !== "rhythm_parameter") {
+        const modal = document.getElementById("settings-modal");
         if (modal) {
           modal.style.display = "none";
           openParamGroup = null;
           tempValues = {};
           console.log(`[saveSettings] Cleared openParamGroup, closed modal for paramGroup=${paramGroup}`);
-        } else {
-          console.error(`[saveSettings] Modal element not found: #${paramGroup === "rhythm_parameter" ? "rhythm-modal" : "settings-modal"}`);
-          showNotification("Modal not found, cannot close", "error");
         }
-      } else {
+      } else if (paramGroup === "global_parameter") {
         await generateGlobalSettingsForm();
+      } else if (paramGroup === "rhythm_parameter") {
+        await checkbox_array();
       }
 
-      await updateUI(presetId);
-      showNotification(`Saved to bank ${presetId + 1}`, "success");
+      await updateUI(originalBankNumber);
+      showNotification(`Saved ${paramGroup === 'harp_only' ? 'Harp' : paramGroup === 'chord_only' ? 'Chord' : paramGroup.replace(/_/g, " ")} to bank ${presetId + 1}`, "success");
     } else {
       console.warn(`[saveSettings] Device not connected, cannot save to bank ${presetId + 1}`);
       showNotification("Device not connected, cannot save", "error");
@@ -1867,6 +1951,38 @@ if (saveToBankBtn) {
       }
     }
     await saveSettings(targetBank, "all");
+  });
+}
+
+const saveHarpOnlyBtn = document.getElementById("save-harp-only-btn");
+if (saveHarpOnlyBtn) {
+  saveHarpOnlyBtn.addEventListener("click", async () => {
+    console.log(`[save-harp-only] Save Harp Only button clicked, targetBank=${targetBank + 1}, currentBankNumber=${currentBankNumber + 1}`);
+    if (targetBank < 0 || targetBank > 11 || isNaN(targetBank)) {
+      console.warn(`[save-harp-only] Invalid targetBank ${targetBank}, using currentBankNumber=${currentBankNumber}`);
+      targetBank = currentBankNumber;
+      const bankSelect = document.getElementById("bank_number_selection");
+      if (bankSelect) {
+        bankSelect.value = currentBankNumber;
+      }
+    }
+    await saveSettings(targetBank, "harp_only");
+  });
+}
+
+const saveChordOnlyBtn = document.getElementById("save-chord-only-btn");
+if (saveChordOnlyBtn) {
+  saveChordOnlyBtn.addEventListener("click", async () => {
+    console.log(`[save-chord-only] Save Chord Only button clicked, targetBank=${targetBank + 1}, currentBankNumber=${currentBankNumber + 1}`);
+    if (targetBank < 0 || targetBank > 11 || isNaN(targetBank)) {
+      console.warn(`[save-chord-only] Invalid targetBank ${targetBank}, using currentBankNumber=${currentBankNumber}`);
+      targetBank = currentBankNumber;
+      const bankSelect = document.getElementById("bank_number_selection");
+      if (bankSelect) {
+        bankSelect.value = currentBankNumber;
+      }
+    }
+    await saveSettings(targetBank, "chord_only");
   });
 }
 

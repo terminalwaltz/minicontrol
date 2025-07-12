@@ -88,6 +88,25 @@ class MiniChordController {
     }
   }
 
+loadBank(bankNumber) {
+  if (!this.device) {
+    console.warn(`[loadBank] No device connected for bank ${bankNumber}`);
+    return false;
+  }
+  if (bankNumber < 0 || bankNumber > 11) {
+    console.warn(`[loadBank] Invalid bank number ${bankNumber}`);
+    return false;
+  }
+  try {
+    this.sendSysEx([0, 0, 4, bankNumber]);
+    console.log(`[loadBank] Sent sysex=[0, 0, 4, ${bankNumber}] to load bank ${bankNumber}`);
+    return true;
+  } catch (error) {
+    console.error(`[loadBank] Failed to load bank ${bankNumber}:`, error);
+    return false;
+  }
+}
+
 processCurrentData(midiMessage) {
   const data = midiMessage.data.slice(1);
   const expectedLength = this.parameter_size * 2 + 1;
