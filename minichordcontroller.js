@@ -31,51 +31,48 @@ class MiniChordController {
     }
   }
 
-  async handleMIDIAccess(midiAccess) { // Make handleMIDIAccess async
-    let foundOutput = false;
-    let foundInput = false;
+  async handleMIDIAccess(midiAccess) {
+  let foundOutput = false;
+  let foundInput = false;
 
-    for (const output of midiAccess.outputs.values()) {
-      if (output.name.toLowerCase().includes("minichord")) {
-        this.device = output;
-        try {
-          this.device.send([0xF0, 0, 0, 0, 0, 0xF7]); // Send initial message
-          foundOutput = true;
-        } catch (sendError) {
-          console.error("Error sending initial SysEx:", sendError);
-          this.device = false; // Reset device if send fails
-          if (this.onConnectionChange) {
-            this.onConnectionChange(false, "Error sending initial SysEx: " + sendError.message);
-          }
-          return false; // Indicate failure
+  for (const output of midiAccess.outputs.values()) {
+    if (output.name.toLowerCase().includes("minichord")) {
+      this.device = output;
+      try {
+        this.device.send([0xF0, 0, 0, 0, 0, 0xF7]); // Initial message
+        this.sendSysEx([0, 0, 0, 0]); // Request current bank settings
+        foundOutput = true;
+      } catch (sendError) {
+        console.error("Error sending initial SysEx:", sendError);
+        this.device = false;
+        if (this.onConnectionChange) {
+          this.onConnectionChange(false, "Error sending initial SysEx: " + sendError.message);
         }
-        break; // Stop searching after finding the first output
+        return false;
       }
+      break;
     }
-
-    for (const input of midiAccess.inputs.values()) {
-      if (input.name.toLowerCase().includes("minichord")) {
-        input.onmidimessage = (msg) => this.processCurrentData(msg);
-        foundInput = true;
-        break; // Stop searching after finding the first input
-      }
-    }
-
-    if (!foundOutput || !foundInput) {
-      this.device = false; // Ensure device is reset if not found
-      if (this.onConnectionChange) {
-        this.onConnectionChange(false, "Minichord not found.");
-      }
-      return false; // Indicate failure
-    }
-
-    midiAccess.onstatechange = (e) => this.handleStateChange(e);
-
-    if (this.onConnectionChange) {
-      this.onConnectionChange(true, "Minichord connected"); // Notify connection
-    }
-    return true; // Indicate success
   }
+  for (const input of midiAccess.inputs.values()) {
+    if (input.name.toLowerCase().includes("minichord")) {
+      input.onmidimessage = (msg) => this.processCurrentData(msg);
+      foundInput = true;
+      break;
+    }
+  }
+  if (!foundOutput || !foundInput) {
+    this.device = false;
+    if (this.onConnectionChange) {
+      this.onConnectionChange(false, "Minichord not found.");
+    }
+    return false;
+  }
+  midiAccess.onstatechange = (e) => this.handleStateChange(e);
+  if (this.onConnectionChange) {
+    this.onConnectionChange(true, "Minichord connected");
+  }
+  return true;
+}
 
   handleStateChange(event) {
     const name = event.port.name.toLowerCase();
@@ -105,6 +102,7 @@ processCurrentData(midiMessage) {
     bankNumber: data[2 * 1],
     firmwareVersion: 0
   };
+  console.log(`[processCurrentData] Received data for bank ${processedData.bankNumber}, timestamp=${Date.now()}`);
   for (let i = 2; i < this.parameter_size; i++) {
     const sysex_value = data[2 * i] + 128 * data[2 * i + 1];
     if (i === this.firmware_adress) {

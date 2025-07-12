@@ -1190,23 +1190,21 @@ async function init() {
     }
     await initializeDefaultValues();
     
-    // Set default bank to 0
-    currentBankNumber = 0;
-    active_bank_number = 0;
-    targetBank = 0; // Initialize targetBank
-    const bankSelect = document.getElementById("bank_number_selection");
-    if (bankSelect) {
-      bankSelect.value = 0;
-      console.log(`[init] Set bankSelect.value and targetBank to 0 at start`);
-    }
-
     const isInitialized = await controller.initialize();
     minichord_device = controller.isConnected();
     
     if (!isInitialized || !controller.isConnected()) {
       showNotification("Failed to connect to MiniChord device", "error");
+      currentBankNumber = 0;
+      active_bank_number = 0;
+      targetBank = 0;
       bankSettings[0] = bankSettings[0] || { ...defaultValues };
       currentValues = { ...defaultValues, ...bankSettings[0] };
+      const bankSelect = document.getElementById("bank_number_selection");
+      if (bankSelect) {
+        bankSelect.value = 0;
+        console.log(`[init] Set bankSelect.value and targetBank to 0 at start`);
+      }
       await updateUI(0);
     } else {
       midiResponseQueue = [];
@@ -1215,21 +1213,30 @@ async function init() {
           if (controller.active_bank_number !== undefined && controller.active_bank_number >= 0 && controller.active_bank_number <= 11) {
             clearInterval(checkBank);
             resolve(controller.active_bank_number);
+          } else if (midiResponseQueue.length > 0) {
+            const queuedData = midiResponseQueue[0];
+            if (queuedData.bankNumber >= 0 && queuedData.bankNumber <= 11) {
+              clearInterval(checkBank);
+              controller.active_bank_number = queuedData.bankNumber;
+              resolve(queuedData.bankNumber);
+            }
           }
         }, 100);
         setTimeout(() => {
           clearInterval(checkBank);
           console.warn(`[init] Timeout waiting for active_bank_number, defaulting to 0`);
           resolve(0);
-        }, 2000);
+        }, 5000);
       });
       currentBankNumber = activeBankNumber;
       active_bank_number = activeBankNumber;
-      targetBank = activeBankNumber; // Set targetBank to active bank
+      targetBank = activeBankNumber;
+      const bankSelect = document.getElementById("bank_number_selection");
       if (bankSelect) {
         bankSelect.value = activeBankNumber;
         console.log(`[init] Set bankSelect.value and targetBank to ${activeBankNumber}`);
       }
+      await processMidiQueue(); // Process queued data before UI update
       await loadBankSettings(activeBankNumber);
     }
   } catch (error) {
@@ -1237,9 +1244,10 @@ async function init() {
     showNotification("Initialization failed.", "error");
     currentBankNumber = 0;
     active_bank_number = 0;
-    targetBank = 0; // Set targetBank on error
+    targetBank = 0;
     bankSettings[0] = bankSettings[0] || { ...defaultValues };
     currentValues = { ...defaultValues, ...bankSettings[0] };
+    const bankSelect = document.getElementById("bank_number_selection");
     if (bankSelect) {
       bankSelect.value = 0;
       console.log(`[init] Set bankSelect.value and targetBank to 0 due to error`);
