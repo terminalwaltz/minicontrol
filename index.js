@@ -439,6 +439,8 @@ async function checkbox_array() {
       const currentValue = currentValues[param.sysex_adress] !== undefined
         ? currentValues[param.sysex_adress]
         : param.data_type === 'float' || param.ui_type === 'discrete_slider' ? param.default_value * floatMultiplier : param.default_value;
+      const scaledValue = param.ui_type === 'discrete_slider' ? Math.round(currentValue) : 
+                          param.data_type === "float" ? parseFloat((currentValue / floatMultiplier).toFixed(3)) : Math.round(currentValue);
 
       if (param.ui_type === 'slider' || param.ui_type === 'discrete_slider') {
         const sliderContainer = document.createElement('div');
@@ -450,8 +452,8 @@ async function checkbox_array() {
         input.className = 'slider';
         input.min = param.min_value;
         input.max = param.max_value;
-        input.value = param.ui_type === 'discrete_slider' ? Math.round(currentValue) : Number((currentValue / floatMultiplier).toFixed(2));
-        input.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : (param.data_type === 'float' ? 0.01 : 1);
+        input.value = scaledValue;
+        input.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : param.step || (param.data_type === 'float' ? 0.01 : 1);
         input.title = param.tooltip || param.name;
 
         const valueInput = document.createElement('input');
@@ -459,34 +461,65 @@ async function checkbox_array() {
         valueInput.id = `value-${param.sysex_adress}`;
         valueInput.min = param.min_value;
         valueInput.max = param.max_value;
-        valueInput.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : (param.data_type === 'float' ? 0.01 : 1);
-        valueInput.value = param.ui_type === 'discrete_slider' ? Math.round(currentValue) : Number((currentValue / floatMultiplier).toFixed(2));
+        valueInput.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : param.step || (param.data_type === 'float' ? 0.01 : 1);
+        const step = param.step || (param.data_type === 'float' ? 0.01 : 1);
+        const decimals = (step < 1 && step !== 0) ? Math.ceil(-Math.log10(step)) : 0;
+        valueInput.value = Number(scaledValue).toFixed(decimals);
         valueInput.className = 'value-input';
         valueInput.title = param.tooltip || param.name;
 
-        input.addEventListener('input', (e) => {
-          const value = param.ui_type === 'discrete_slider' ? Math.round(parseFloat(e.target.value)) : 
-                        param.data_type === 'float' ? parseFloat(e.target.value) * floatMultiplier : parseInt(e.target.value);
-          tempValues[param.sysex_adress] = value;
-          valueInput.value = param.ui_type === 'discrete_slider' ? value : Number((value / floatMultiplier).toFixed(2));
+        input.addEventListener("input", () => {
+          let uiValue = param.ui_type === 'discrete_slider' ? parseInt(input.value) : parseFloat(input.value);
+          if (isNaN(uiValue)) uiValue = param.min_value;
+          uiValue = Math.max(param.min_value, Math.min(param.max_value, uiValue));
+          
+          const deviceValue = param.ui_type === 'discrete_slider' ? Math.round(uiValue) : 
+                             param.data_type === "float" ? uiValue * floatMultiplier : Math.round(uiValue);
+          
+          const step = param.step || (param.data_type === 'float' ? 0.01 : 1);
+          const decimals = (step < 1 && step !== 0) ? Math.ceil(-Math.log10(step)) : 0;
+          const displayValue = param.ui_type === 'discrete_slider' ? deviceValue : uiValue.toFixed(decimals);
+          
+          console.log(`[SLIDER] Sysex=${param.sysex_adress}, uiValue=${uiValue}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}, step=${input.step}, displayValue=${displayValue}`);
+          
+          tempValues[param.sysex_adress] = deviceValue;
+          valueInput.value = displayValue;
+          input.value = displayValue;
+          
           if (controller.isConnected()) {
-            controller.sendParameter(parseInt(param.sysex_adress), value);
+            controller.sendParameter(parseInt(param.sysex_adress), deviceValue);
           }
-          executeMethod(param.method, value);
+          executeMethod(param.method, deviceValue);
         });
 
-        valueInput.addEventListener('change', (e) => {
-          let value = parseFloat(e.target.value) || 0;
-          value = Math.max(param.min_value, Math.min(param.max_value, value));
-          if (param.ui_type === 'discrete_slider') value = Math.round(value);
-          else if (param.data_type === 'float') value *= floatMultiplier;
-          tempValues[param.sysex_adress] = value;
-          input.value = param.ui_type === 'discrete_slider' ? value : Number((value / floatMultiplier).toFixed(2));
-          valueInput.value = param.ui_type === 'discrete_slider' ? value : Number((value / floatMultiplier).toFixed(2));
-          if (controller.isConnected()) {
-            controller.sendParameter(parseInt(param.sysex_adress), value);
+        valueInput.addEventListener("input", (e) => {
+          let uiValue = param.ui_type === 'discrete_slider' ? parseInt(e.target.value) : parseFloat(e.target.value);
+          if (isNaN(uiValue)) {
+            uiValue = scaledValue;
+            valueInput.value = param.ui_type === 'discrete_slider' ? Math.round(uiValue) : uiValue.toFixed(decimals);
+            input.value = uiValue;
+            console.log(`[NUMBER] Sysex=${param.sysex_adress}, invalid input, reverting to ${uiValue}`);
+            return;
           }
-          executeMethod(param.method, value);
+          uiValue = Math.max(param.min_value, Math.min(param.max_value, uiValue));
+          
+          const deviceValue = param.ui_type === 'discrete_slider' ? Math.round(uiValue) : 
+                             param.data_type === "float" ? uiValue * floatMultiplier : Math.round(uiValue);
+          
+          const step = param.step || (param.data_type === 'float' ? 0.01 : 1);
+          const decimals = (step < 1 && step !== 0) ? Math.ceil(-Math.log10(step)) : 0;
+          const displayValue = param.ui_type === 'discrete_slider' ? deviceValue : uiValue.toFixed(decimals);
+          
+          console.log(`[NUMBER] Sysex=${param.sysex_adress}, uiValue=${uiValue}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}, step=${valueInput.step}, displayValue=${displayValue}`);
+          
+          tempValues[param.sysex_adress] = deviceValue;
+          input.value = displayValue;
+          valueInput.value = displayValue;
+          
+          if (controller.isConnected()) {
+            controller.sendParameter(parseInt(param.sysex_adress), deviceValue);
+          }
+          executeMethod(param.method, deviceValue);
         });
 
         sliderContainer.appendChild(input);
@@ -632,16 +665,13 @@ async function generateGlobalSettingsForm() {
   globalParams.forEach((param) => {
     console.log(`[DEBUG] Rendering global param: sysex=${param.sysex_adress}, name=${param.name}, ui_type=${param.ui_type}, data_type=${param.data_type}, default_value=${param.default_value}, step=${param.step || 'N/A'}`);
 
-    // Determine floatMultiplier based on parameter type
     const floatMultiplier = param.ui_type === 'discrete_slider' ? 1 : 
                            param.data_type === "float" ? (controller.float_multiplier || 100.0) : 1;
     
-    // Get current value, falling back to default
     const currentValue = currentValues[param.sysex_adress] !== undefined
       ? currentValues[param.sysex_adress]
       : param.data_type === "float" || param.ui_type === "discrete_slider" ? param.default_value * floatMultiplier : param.default_value;
     
-    // Scale value for UI display (integers for discrete_slider)
     const scaledValue = param.ui_type === 'discrete_slider' ? Math.round(currentValue) : 
                         param.data_type === "float" ? parseFloat((currentValue / floatMultiplier).toFixed(3)) : Math.round(currentValue);
 
@@ -661,7 +691,7 @@ async function generateGlobalSettingsForm() {
       input.id = `param-${param.sysex_adress}`;
       input.min = param.min_value;
       input.max = param.max_value;
-      input.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : 0.01;
+      input.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : param.step || (param.data_type === 'float' ? 0.01 : 1);
       input.value = scaledValue;
       input.title = param.tooltip || param.name;
 
@@ -671,26 +701,31 @@ async function generateGlobalSettingsForm() {
       valueInput.id = `value-${param.sysex_adress}`;
       valueInput.min = param.min_value;
       valueInput.max = param.max_value;
-      valueInput.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : 0.01;
-      valueInput.value = param.ui_type === 'discrete_slider' ? Math.round(scaledValue) : scaledValue;
+      valueInput.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : param.step || (param.data_type === 'float' ? 0.01 : 1);
+      const step = param.step || (param.data_type === 'float' ? 0.01 : 1);
+      const decimals = (step < 1 && step !== 0) ? Math.ceil(-Math.log10(step)) : 0;
+      valueInput.value = Number(scaledValue).toFixed(decimals);
       if (param.ui_type === 'discrete_slider') {
-        valueInput.pattern = "\\d*"; // Restrict to integers
+        valueInput.pattern = "\\d*";
       }
 
-      // Slider input handler
       input.addEventListener("input", () => {
         let uiValue = param.ui_type === 'discrete_slider' ? parseInt(input.value) : parseFloat(input.value);
         if (isNaN(uiValue)) uiValue = param.min_value;
         uiValue = Math.max(param.min_value, Math.min(param.max_value, uiValue));
         
-        // Calculate device value (integers for discrete_slider)
         const deviceValue = param.ui_type === 'discrete_slider' ? Math.round(uiValue) : 
-                           param.data_type === "float" ? parseFloat((uiValue * floatMultiplier).toFixed(0)) : Math.round(uiValue);
+                           param.data_type === "float" ? uiValue * floatMultiplier : Math.round(uiValue);
         
-        console.log(`[SLIDER] Sysex=${param.sysex_adress}, uiValue=${uiValue}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}, step=${input.step}`);
+        const step = param.step || (param.data_type === 'float' ? 0.01 : 1);
+        const decimals = (step < 1 && step !== 0) ? Math.ceil(-Math.log10(step)) : 0;
+        const displayValue = param.ui_type === 'discrete_slider' ? deviceValue : uiValue.toFixed(decimals);
+        
+        console.log(`[SLIDER] Sysex=${param.sysex_adress}, uiValue=${uiValue}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}, step=${input.step}, displayValue=${displayValue}`);
         
         tempValues[param.sysex_adress] = deviceValue;
-        valueInput.value = param.ui_type === 'discrete_slider' ? deviceValue : parseFloat((deviceValue / floatMultiplier).toFixed(3));
+        valueInput.value = displayValue;
+        input.value = displayValue;
         
         if (controller.isConnected()) {
           controller.sendParameter(parseInt(param.sysex_adress), deviceValue);
@@ -703,27 +738,29 @@ async function generateGlobalSettingsForm() {
         }
       });
 
-      // Number input handler
       valueInput.addEventListener("input", (e) => {
         let uiValue = param.ui_type === 'discrete_slider' ? parseInt(e.target.value) : parseFloat(e.target.value);
         if (isNaN(uiValue)) {
           uiValue = scaledValue;
-          valueInput.value = param.ui_type === 'discrete_slider' ? Math.round(uiValue) : uiValue;
+          valueInput.value = param.ui_type === 'discrete_slider' ? Math.round(uiValue) : uiValue.toFixed(decimals);
           input.value = uiValue;
           console.log(`[NUMBER] Sysex=${param.sysex_adress}, invalid input, reverting to ${uiValue}`);
           return;
         }
         uiValue = Math.max(param.min_value, Math.min(param.max_value, uiValue));
         
-        // Calculate device value
         const deviceValue = param.ui_type === 'discrete_slider' ? Math.round(uiValue) : 
-                           param.data_type === "float" ? parseFloat((uiValue * floatMultiplier).toFixed(0)) : Math.round(uiValue);
+                           param.data_type === "float" ? uiValue * floatMultiplier : Math.round(uiValue);
         
-        console.log(`[NUMBER] Sysex=${param.sysex_adress}, uiValue=${uiValue}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}, step=${valueInput.step}`);
+        const step = param.step || (param.data_type === 'float' ? 0.01 : 1);
+        const decimals = (step < 1 && step !== 0) ? Math.ceil(-Math.log10(step)) : 0;
+        const displayValue = param.ui_type === 'discrete_slider' ? deviceValue : uiValue.toFixed(decimals);
+        
+        console.log(`[NUMBER] Sysex=${param.sysex_adress}, uiValue=${uiValue}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}, step=${valueInput.step}, displayValue=${displayValue}`);
         
         tempValues[param.sysex_adress] = deviceValue;
-        input.value = param.ui_type === 'discrete_slider' ? deviceValue : parseFloat((deviceValue / floatMultiplier).toFixed(3));
-        valueInput.value = param.ui_type === 'discrete_slider' ? deviceValue : parseFloat((deviceValue / floatMultiplier).toFixed(3));
+        input.value = displayValue;
+        valueInput.value = displayValue;
         
         if (controller.isConnected()) {
           controller.sendParameter(parseInt(param.sysex_adress), deviceValue);
@@ -900,7 +937,7 @@ async function generateSettingsForm(paramGroup) {
         input.id = `param-${param.sysex_adress}`;
         input.min = param.min_value;
         input.max = param.max_value;
-        input.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : 0.01;
+        input.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : param.step || (param.data_type === 'float' ? 0.01 : 1);
         input.value = scaledValue;
 
         const valueInput = document.createElement("input");
@@ -909,11 +946,10 @@ async function generateSettingsForm(paramGroup) {
         valueInput.id = `value-${param.sysex_adress}`;
         valueInput.min = param.min_value;
         valueInput.max = param.max_value;
-        valueInput.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : 0.01;
-        valueInput.value = param.ui_type === 'discrete_slider' ? Math.round(scaledValue) : scaledValue;
-        if (param.ui_type === 'discrete_slider') {
-          valueInput.pattern = "\\d*"; // Restrict to integers
-        }
+        valueInput.step = param.ui_type === 'discrete_slider' ? (param.step || 1) : param.step || (param.data_type === 'float' ? 0.01 : 1);
+        const step = param.step || (param.data_type === 'float' ? 0.01 : 1);
+        const decimals = (step < 1 && step !== 0) ? Math.ceil(-Math.log10(step)) : 0;
+        valueInput.value = Number(scaledValue).toFixed(decimals);
 
         input.addEventListener("input", () => {
           let uiValue = param.ui_type === 'discrete_slider' ? parseInt(input.value) : parseFloat(input.value);
@@ -921,12 +957,17 @@ async function generateSettingsForm(paramGroup) {
           uiValue = Math.max(param.min_value, Math.min(param.max_value, uiValue));
           
           const deviceValue = param.ui_type === 'discrete_slider' ? Math.round(uiValue) : 
-                             param.data_type === "float" ? parseFloat((uiValue * floatMultiplier).toFixed(0)) : Math.round(uiValue);
+                             param.data_type === "float" ? uiValue * floatMultiplier : Math.round(uiValue);
           
-          console.log(`[SLIDER] Sysex=${param.sysex_adress}, uiValue=${uiValue}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}, step=${input.step}`);
+          const step = param.step || (param.data_type === 'float' ? 0.01 : 1);
+          const decimals = (step < 1 && step !== 0) ? Math.ceil(-Math.log10(step)) : 0;
+          const displayValue = param.ui_type === 'discrete_slider' ? deviceValue : uiValue.toFixed(decimals);
+          
+          console.log(`[SLIDER] Sysex=${param.sysex_adress}, uiValue=${uiValue}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}, step=${input.step}, displayValue=${displayValue}`);
           
           tempValues[param.sysex_adress] = deviceValue;
-          valueInput.value = param.ui_type === 'discrete_slider' ? deviceValue : parseFloat((deviceValue / floatMultiplier).toFixed(3));
+          valueInput.value = displayValue;
+          input.value = displayValue;
           
           if (controller.isConnected()) {
             controller.sendParameter(parseInt(param.sysex_adress), deviceValue);
@@ -940,7 +981,7 @@ async function generateSettingsForm(paramGroup) {
           let uiValue = param.ui_type === 'discrete_slider' ? parseInt(e.target.value) : parseFloat(e.target.value);
           if (isNaN(uiValue)) {
             uiValue = scaledValue;
-            valueInput.value = param.ui_type === 'discrete_slider' ? Math.round(uiValue) : uiValue;
+            valueInput.value = param.ui_type === 'discrete_slider' ? Math.round(uiValue) : uiValue.toFixed(decimals);
             input.value = uiValue;
             console.log(`[NUMBER] Sysex=${param.sysex_adress}, invalid input, reverting to ${uiValue}`);
             return;
@@ -948,13 +989,17 @@ async function generateSettingsForm(paramGroup) {
           uiValue = Math.max(param.min_value, Math.min(param.max_value, uiValue));
           
           const deviceValue = param.ui_type === 'discrete_slider' ? Math.round(uiValue) : 
-                             param.data_type === "float" ? parseFloat((uiValue * floatMultiplier).toFixed(0)) : Math.round(uiValue);
+                             param.data_type === "float" ? uiValue * floatMultiplier : Math.round(uiValue);
           
-          console.log(`[NUMBER] Sysex=${param.sysex_adress}, uiValue=${uiValue}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}, step=${valueInput.step}`);
+          const step = param.step || (param.data_type === 'float' ? 0.01 : 1);
+          const decimals = (step < 1 && step !== 0) ? Math.ceil(-Math.log10(step)) : 0;
+          const displayValue = param.ui_type === 'discrete_slider' ? deviceValue : uiValue.toFixed(decimals);
+          
+          console.log(`[NUMBER] Sysex=${param.sysex_adress}, uiValue=${uiValue}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}, step=${valueInput.step}, displayValue=${displayValue}`);
           
           tempValues[param.sysex_adress] = deviceValue;
-          input.value = param.ui_type === 'discrete_slider' ? deviceValue : parseFloat((deviceValue / floatMultiplier).toFixed(3));
-          valueInput.value = param.ui_type === 'discrete_slider' ? deviceValue : parseFloat((deviceValue / floatMultiplier).toFixed(3));
+          input.value = displayValue;
+          valueInput.value = displayValue;
           
           if (controller.isConnected()) {
             controller.sendParameter(parseInt(param.sysex_adress), deviceValue);
@@ -1053,9 +1098,9 @@ async function generateSettingsForm(paramGroup) {
   }
 
   saveBtn.onclick = async () => {
-  console.log(`[DEBUG] Save button clicked for paramGroup=${paramGroup}, bankNumber=${currentBankNumber}`);
-  await saveSettings(currentBankNumber, paramGroup);
-};
+    console.log(`[DEBUG] Save button clicked for paramGroup=${paramGroup}, bankNumber=${currentBankNumber}`);
+    await saveSettings(currentBankNumber, paramGroup);
+  };
 
   cancelBtn.onclick = async () => {
     console.log(`[DEBUG] Cancel button clicked for paramGroup=${paramGroup}`);
