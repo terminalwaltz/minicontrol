@@ -1909,13 +1909,13 @@ if (saveToBankBtn) {
 });
 
 // Handles window resize to adjust UI layout
-window.addEventListener("resize", () => {
+/* window.addEventListener("resize", () => {
   const container = document.querySelector(".container");
   if (container) {
     const width = window.innerWidth;
     container.style.transform = width < 600 ? "scale(0.8)" : "scale(1)";
   }
-});
+}); */
 
 // Ensures modals close when clicking outside
 document.addEventListener("click", (e) => {
