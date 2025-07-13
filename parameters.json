@@ -365,7 +365,7 @@
       "name": "delay filter frequency",
       "group": "Delay",
       "default_value": 0.5,
-      "data_type": "int",
+      "data_type": "float",
       "sysex_adress": 177,
       "curve": "linear",
       "min_value": 0,
@@ -508,7 +508,7 @@
     {
       "name": "crunch type",
       "group": "Crunch",
-      "default_value": 0.5,
+      "default_value": 0,
       "data_type": "int",
       "sysex_adress": 186,
       "curve": "linear",
@@ -864,12 +864,12 @@
     {
       "name": "frequency multiplier 1",
       "group": "Oscillator",
-      "default_value": 0,
+      "default_value": 1.0,
       "data_type": "float",
       "sysex_adress": 123,
       "curve": "linear",
       "min_value": 0.5,
-      "max_value": 2,
+      "max_value": 2.0,
       "tooltip": "frequency multiplier for the first oscillator. 1 is normal, 0.5 an octave below and 1 an octave above",
       "iterate": 1,
       "method": "osc_1_freq_multiplier=value;",
@@ -880,12 +880,12 @@
     {
       "name": "frequency multiplier 2",
       "group": "Oscillator",
-      "default_value": 0,
+      "default_value": 1.0,
       "data_type": "float",
       "sysex_adress": 126,
       "curve": "linear",
       "min_value": 0.5,
-      "max_value": 2,
+      "max_value": 2.0,
       "tooltip": "frequency multiplier for the second oscillator. 1 is normal, 0.5 an octave below and 1 an octave above",
       "iterate": 1,
       "method": "osc_2_freq_multiplier=value;",
@@ -896,12 +896,12 @@
     {
       "name": "frequency multiplier 3",
       "group": "Oscillator",
-      "default_value": 0,
+      "default_value": 1.0,
       "data_type": "float",
       "sysex_adress": 129,
       "curve": "linear",
       "min_value": 0.5,
-      "max_value": 2,
+      "max_value": 2.0,
       "tooltip": "frequency multiplier for the third oscillator. 1 is normal, 0.5 an octave below and 1 an octave above",
       "iterate": 1,
       "method": "osc_3_freq_multiplier=value;",
@@ -955,7 +955,7 @@
       "method": "chord_envelope_array[i]->attack(value);",
       "introduction_version": 2,
       "ui_type": "slider",
-      "step": 0.1
+      "step": 1
     },
     {
       "name": "hold",
@@ -971,7 +971,7 @@
       "method": "chord_envelope_array[i]->hold(value);",
       "introduction_version": 2,
       "ui_type": "slider",
-      "step": 0.1
+      "step": 1
     },
     {
       "name": "decay",
@@ -987,7 +987,7 @@
       "method": "chord_envelope_array[i]->decay(value);",
       "introduction_version": 2,
       "ui_type": "slider",
-      "step": 0.1
+      "step": 1
     },
     {
       "name": "sustain",
@@ -1000,7 +1000,7 @@
       "max_value": 1,
       "tooltip": "sustain level of the envelope",
       "iterate": 4,
-      "method": "    chord_envelope_array[i]->sustain(value);",
+      "method": "chord_envelope_array[i]->sustain(value);",
       "introduction_version": 2,
       "ui_type": "slider",
       "step": 0.1
@@ -1019,7 +1019,7 @@
       "method": "chord_envelope_array[i]->release(value);",
       "introduction_version": 2,
       "ui_type": "slider",
-      "step": 0.1
+      "step": 1
     },
     {
       "name": "retrigger release",
@@ -1035,7 +1035,7 @@
       "method": "chord_envelope_array[i]->releaseNoteOn(value); chord_retrigger_release=value;",
       "introduction_version": 2,
       "ui_type": "slider",
-      "step": 0.1
+      "step": 1
     },
     {
       "name": "base frequency",
@@ -1099,7 +1099,7 @@
       "method": "chord_envelope_filter_array[i]->attack(value);",
       "introduction_version": 2,
       "ui_type": "slider",
-      "step": 0.1
+      "step": 1
     },
     {
       "name": "hold",
@@ -1115,7 +1115,7 @@
       "method": "chord_envelope_filter_array[i]->hold(value);",
       "introduction_version": 2,
       "ui_type": "slider",
-      "step": 0.1
+      "step": 1
     },
     {
       "name": "decay",
@@ -1131,7 +1131,7 @@
       "method": "chord_envelope_filter_array[i]->decay(value);",
       "introduction_version": 2,
       "ui_type": "slider",
-      "step": 0.1
+      "step": 1
     },
     {
       "name": "sustain",
@@ -1163,7 +1163,7 @@
       "method": "chord_envelope_filter_array[i]->release(value);",
       "introduction_version": 2,
       "ui_type": "slider",
-      "step": 0.1
+      "step": 1
     },
     {
       "name": "retrigger release",
