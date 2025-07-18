@@ -347,7 +347,7 @@ def generate_details_html(group_name, params):
     display_name = group_name.replace('_parameter', '').replace('_', ' ').title() + ' Parameters'
     return f'''
         <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-            <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">{display_name}</summary>
+            <summary style="font-size: 1.6em; font-weight: bold; cursor: pointer;">{display_name}</summary>
             <div style="padding: 10px;">
                 {''.join(param_html)}
             </div>
@@ -479,7 +479,7 @@ html_template = '''<!DOCTYPE html>
     </div>
   </div>
   <details>
-    <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">Connection instruction</summary>
+    <summary style="font-size: 1.6em; font-weight: bold; cursor: pointer;">Connection instruction</summary>
     <ul style="padding-left: 20px;">
       <li>provide the system authorization for MIDI control</li>
       <li>use a recent version of Chrome</li>
@@ -545,7 +545,7 @@ for group_name in group_order:
                 param_html.append(generate_rhythm_grid_html())
             parameter_sections.append(f'''
                 <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-                    <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">Rhythm Parameters</summary>
+                    <summary style="font-size: 1.6em; font-weight: bold; cursor: pointer;">Rhythm Parameters</summary>
                     <div style="padding: 10px;">
                         {''.join(param_html)}
                     </div>
