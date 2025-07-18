@@ -191,7 +191,8 @@ async function updateUI(bankNumber) {
   console.log(`[updateUI] Bank ${bankNumber + 1}, targetBank=${targetBank + 1}`);
   currentBankNumber = bankNumber;
   const bankSelect = document.getElementById("bank_number_selection");
-  if (bankSelect && parseInt(bankSelect.value) !== targetBank) bankSelect.value = targetBank;
+  // Only update dropdown if it doesn't match the current bank
+  if (bankSelect && parseInt(bankSelect.value) !== bankNumber) bankSelect.value = bankNumber;
   const params = await loadParameters();
   Object.keys(params).forEach(group => {
     if (group === 'sysex_name_map') return;
@@ -356,7 +357,7 @@ async function initialize() {
 
 document.getElementById("bank_number_selection")?.addEventListener("change", (e) => {
   targetBank = parseInt(e.target.value);
-  loadBankSettings(targetBank);
+  console.log(`[bank_number_selection] Selected target bank ${targetBank + 1}`);
 });
 
 document.getElementById("save-to-bank-btn")?.addEventListener("click", () => {
@@ -365,9 +366,33 @@ document.getElementById("save-to-bank-btn")?.addEventListener("click", () => {
     document.getElementById("information_zone")?.focus();
     return;
   }
-  console.log(`[save-to-bank-btn] Saving to bank ${targetBank}`);
-  controller.saveCurrentSettings(targetBank);
-  showNotification(`Saved to bank ${targetBank + 1}`, "success");
+  const bankSelect = document.getElementById("bank_number_selection");
+  const saveBank = parseInt(bankSelect.value);
+  console.log(`[save-to-bank-btn] Saving to bank ${saveBank + 1}`);
+  controller.saveCurrentSettings(saveBank);
+  showNotification(`Saved to bank ${saveBank + 1}`, "success");
+});
+
+document.getElementById("reset-bank-btn")?.addEventListener("click", () => {
+  if (!controller.isConnected()) {
+    console.warn("[reset-bank-btn] No device connected");
+    document.getElementById("information_zone")?.focus();
+    return;
+  }
+  console.log(`[reset-bank-btn] Resetting bank ${currentBankNumber + 1}`);
+  controller.resetCurrentBank();
+  showNotification(`Reset bank ${currentBankNumber + 1}`, "success");
+});
+
+document.getElementById("reset-all-banks-btn")?.addEventListener("click", () => {
+  if (!controller.isConnected()) {
+    console.warn("[reset-all-banks-btn] No device connected");
+    document.getElementById("information_zone")?.focus();
+    return;
+  }
+  console.log("[reset-all-banks-btn] Resetting all banks");
+  controller.resetMemory();
+  showNotification("Reset all banks", "success");
 });
 
 document.getElementById("randomise_btn")?.addEventListener("click", generateRandomPreset);
