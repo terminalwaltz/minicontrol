@@ -339,7 +339,7 @@ def generate_details_html(group_name, params):
             grouped_params[param_group],
             key=lambda p: param_order.index(p['sysex_adress']) if p['sysex_adress'] in param_order else len(param_order) + p['sysex_adress']
         )
-        param_html.append(f'<h3 style="margin: 10px 0; font-size: 1.1em;">{param_group}</h3>')
+        param_html.append(f'<h3 style="margin: 30px 0 10px; font-size: 1.5em;">{param_group}</h3>')
         param_html.extend([generate_param_html(param) for param in sorted_params])
     
     if not param_html:
@@ -397,7 +397,7 @@ html_template = '''<!DOCTYPE html>
   </div>
   <div id="header">
     <div class="section">
-      <h5 style="margin: 0; font-size: 1.1em;">saving:</h5>
+      <h5 style="margin: 0; font-size: 1.5em;">saving:</h5>
     </div>
     <div class="controls">
       <div class="button_div">
@@ -424,7 +424,7 @@ html_template = '''<!DOCTYPE html>
       </div>
     </div>
     <div class="section">
-      <h5 style="margin: 0; font-size: 1.1em;">sharing:</h5>
+      <h5 style="margin: 0; font-size: 1.5em;">sharing:</h5>
     </div>
     <div class="controls">
       <div class="button_div">
@@ -435,7 +435,7 @@ html_template = '''<!DOCTYPE html>
       </div>
     </div>
     <div class="section">
-      <h5 style="margin: 0; font-size: 1.1em;">resetting:</h5>
+      <h5 style="margin: 0; font-size: 1.5em;">resetting:</h5>
     </div>
     <div class="controls">
       <div class="button_div">
@@ -446,7 +446,7 @@ html_template = '''<!DOCTYPE html>
       </div>
     </div>
     <div class="section">
-      <h5 style="margin: 0; font-size: 1.1em;">randomising:</h5>
+      <h5 style="margin: 0; font-size: 1.5em;">randomising:</h5>
     </div>
     <div class="controls">
       <div class="button_div">
@@ -514,10 +514,10 @@ for group_name in group_order:
                         grouped_rhythm_params[param_group],
                         key=lambda p: param_order.index(p['sysex_adress']) if p['sysex_adress'] in param_order else len(param_order) + p['sysex_adress']
                     )
-                    param_html.append(f'<h3 style="margin: 10px 0; font-size: 1.1em;">{param_group}</h3>')
+                    param_html.append(f'<h3 style="margin: 30px 0 10px; font-size: 1.5em;">{param_group}</h3>')
                     param_html.extend([generate_param_html(param) for param in sorted_params])
             if rhythm_params:
-                param_html.append('<h3 style="margin: 10px 0; font-size: 1.1em;">Rhythm Pattern</h3>')
+                param_html.append('<h3 style="margin: 30px 0 10px; font-size: 1.5em;">Rhythm Pattern</h3>')
                 param_html.append(generate_rhythm_grid_html())
             parameter_sections.append(f'''
                 <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
