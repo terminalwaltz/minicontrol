@@ -346,8 +346,8 @@ def generate_details_html(group_name, params):
     
     display_name = group_name.replace('_parameter', '').replace('_', ' ').title() + ' Parameters'
     return f'''
-        <details style="margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
-            <summary style="font-size: 1.6em; font-weight: bold; cursor: pointer;">{display_name}</summary>
+        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+            <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">{display_name}</summary>
             <div style="padding: 10px;">
                 {''.join(param_html)}
             </div>
@@ -366,7 +366,7 @@ html_template = '''<!DOCTYPE html>
       --text-color: #ffffff; 
     }}
     body {{ font-family: Arial, sans-serif; margin: 20px; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); }}
-    .status-header {{ display: flex; justify-content: space-between; align-items: center; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); color: #333; padding: 10px; border-radius: 5px; }}
+    .status-header {{ display: flex; justify-content: none; align-items: center; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); color: #333; padding: 10px; border-radius: 5px; }}
     .connection-status {{ display: flex; align-items: center; }}
     #dot {{ margin-left: 2px; margin-right: 4px; font-size: 1.2em; color: green; }}
     .disconnected #dot {{ color: red; }}
@@ -499,7 +499,7 @@ html_template = '''<!DOCTYPE html>
       </div>
     </div>
     <details>
-      <summary style="font-size: 1.6em; font-weight: bold; cursor: pointer;">Connection instruction</summary>
+      <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">Connection instruction</summary>
       <ul style="padding-left: 20px;">
         <li>provide the system authorization for MIDI control</li>
         <li>use a recent version of Chrome</li>
@@ -565,8 +565,8 @@ for group_name in group_order:
                 param_html.append('<h3 style="margin: 30px 0 10px; font-size: 1.5em;">Rhythm Pattern</h3>')
                 param_html.append(generate_rhythm_grid_html())
             parameter_sections.append(f'''
-                <details style="margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
-                    <summary style="font-size: 1.6em; font-weight: bold; cursor: pointer;">Rhythm Parameters</summary>
+                <details style="width: fit-content; margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                    <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">Rhythm Parameters</summary>
                     <div style="padding: 10px;">
                         {''.join(param_html)}
                     </div>
