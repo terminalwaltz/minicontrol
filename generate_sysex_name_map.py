@@ -10,16 +10,22 @@ sysex_name_map = {}
 for group_name, params in parameters.items():
     if group_name in ('hidden'):
         continue
+    readable_group = group_name.replace('_parameter', '')
     for param in params:
         sysex = param.get('sysex_adress')
         name = param.get('name')
+        group = param.get('group')
         if (
             isinstance(sysex, int) and
             20 <= sysex <= 219 and
             name and name.strip()
         ):
-            readable_group = group_name.replace('_parameter', '')
-            sysex_name_map[str(sysex)] = f"{readable_group}: {name}"
+            # Use group if available; fallback to sysex address
+            if group and group.lower() != 'hidden':
+                label = f"{readable_group}: {group.lower()}: {name}"
+            else:
+                label = f"{readable_group}: {name} ({sysex})"
+            sysex_name_map[str(sysex)] = label
 
 # Sort sysex_name_map by value (label) alphabetically
 sorted_sysex_name_map = dict(sorted(sysex_name_map.items(), key=lambda x: x[1].lower()))
