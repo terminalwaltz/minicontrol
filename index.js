@@ -101,7 +101,8 @@ function updateUIColor() {
   document.documentElement.style.setProperty('--text-color', textColor);
   document.querySelectorAll('input[type="range"]').forEach(slider => {
     const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
-    slider.style.background = `linear-gradient(to right, hsl(${hue}, 70%, 50%) 0%, hsl(${hue}, 70%, 50%) ${value}%, #ccc ${value}%, #ccc 100%)`;
+    slider.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${value}%, #ccc ${value}%, #ccc 100%)`;
+    console.log(`[updateUIColor] Slider ${slider.id}, Hue=${hue}, Value=${value}%`);
   });
 }
 
@@ -161,6 +162,10 @@ async function setupParameterControls() {
           currentValues[sysex] = deviceValue;
           if (valueDisplay) valueDisplay.value = param.data_type === 'float' ? uiValue.toFixed(2) : deviceValue;
           controller.sendParameter(sysex, deviceValue);
+          const valuePercent = ((element.value - element.min) / (element.max - element.min)) * 100;
+          const hue = (currentValues[20] ?? defaultValues[20] ?? 0) % 360;
+          element.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${valuePercent}%, #ccc ${valuePercent}%, #ccc 100%)`;
+          if (sysex === 20) updateUIColor(); // Update all sliders' colors when bank color changes
         });
       } else if (param.ui_type === 'select') {
         element.addEventListener('change', () => {
@@ -168,6 +173,7 @@ async function setupParameterControls() {
           tempValues[sysex] = value;
           currentValues[sysex] = value;
           controller.sendParameter(sysex, value);
+          if (sysex === 20) updateUIColor(); // Update colors for select-based bank color
         });
       } else if (param.ui_type === 'switch') {
         element.addEventListener('input', () => {

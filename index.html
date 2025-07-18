@@ -3,32 +3,57 @@
 <head>
   <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Minichord UI</title>
-  <style>
-    :root {
-      --primary-color: hsl(0, 70%, 50%);
-      --text-color: #ffffff;
-    }
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); }
-    .status-header { display: flex; justify-content: space-between; align-items: center; background-color: #333; color: #ffffff; padding: 10px; border-radius: 5px; }
-    .connection-status { display: flex; align-items: center; }
-    #dot { margin-left: 5px; font-size: 1.2em; color: var(--primary-color); }
-    .disconnected #dot { color: red; }
-    #header { margin: 20px 0; padding: 10px; background-color: #e0e0e0; border-radius: 5px; }
-    .section { margin-bottom: 10px; }
-    .controls { display: flex; flex-wrap: wrap; gap: 10px; }
-    .button_div { margin-right: 10px; }
-    button { padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }
-    button:hover { background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }
-    #bank_number_selection { padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }
-    #bank_number_selection:hover { background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }
-    input[type="range"] {
-      background: linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) 50%, #ccc 50%, #ccc 100%);
-    }
-    a { color: var(--primary-color); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    details summary:hover { color: var(--primary-color); }
-    input[type="text"][readonly] { border: none; background: transparent; }
-  </style>
+   <style>
+ :root {
+ --primary-color: hsl(0, 70%, 50%);
+ --text-color: #ffffff; 
+ }
+ body { font-family: Arial, sans-serif; margin: 20px; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); }
+ .status-header { display: flex; justify-content: space-between; align-items: center; background-color: #333; color: #ffffff; padding: 10px; border-radius: 5px; }
+ .connection-status { display: flex; align-items: center; }
+ #dot { margin-left: 5px; font-size: 1.2em; color: var(--primary-color); }
+ .disconnected #dot { color: red; }
+ #header { margin: 20px 0; padding: 10px; background-color: #e0e0e0; border-radius: 5px; }
+ .section { margin-bottom: 10px; }
+ .controls { display: flex; flex-wrap: wrap; gap: 10px; }
+ .button_div { margin-right: 10px; }
+ button { padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }
+ button:hover { background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }
+ #bank_number_selection { padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }
+ #bank_number_selection:hover { background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }
+ input[type="range"] {
+ -webkit-appearance: none;
+ width: 100%;
+ height: 8px;
+ border-radius: 5px;
+ background: linear-gradient(to right, var(--primary-color, hsl(0, 70%, 50%)) 0%, var(--primary-color, hsl(0, 70%, 50%)) 0%, #ccc 0%, #ccc 100%);
+ outline: none;
+ }
+ input[type="range"]::-webkit-slider-thumb {
+ -webkit-appearance: none;
+ width: 16px;
+ height: 16px;
+ border-radius: 50%;
+ background: var(--primary-color);
+ cursor: pointer;
+ }
+ input[type="range"]::-moz-range-track {
+ height: 8px;
+ border-radius: 5px;
+ background: linear-gradient(to right, var(--primary-color, hsl(0, 70%, 50%)) 0%, var(--primary-color, hsl(0, 70%, 50%)) 0%, #ccc 0%, #ccc 100%);
+ }
+ input[type="range"]::-moz-range-thumb {
+ width: 16px;
+ height: 16px;
+ border-radius: 50%;
+ background: var(--primary-color);
+ cursor: pointer;
+ }
+ a { color: var(--primary-color); text-decoration: none; }
+ a:hover { text-decoration: underline; }
+ details summary:hover { color: var(--primary-color); }
+ input[type="text"][readonly ] { border: none; background: transparent; }
+ </style>
 </head>
 <body>
   <div class="status-header">
