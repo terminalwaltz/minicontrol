@@ -130,6 +130,8 @@ function applyUIValue(param, value) {
     if (valueDisplay) valueDisplay.value = displayValue;
   } else if (param.ui_type === 'select') {
     element.value = value;
+  } else if (param.ui_type === 'switch') {
+    element.checked = value === 1;
   }
 }
 
@@ -163,6 +165,13 @@ async function setupParameterControls() {
       } else if (param.ui_type === 'select') {
         element.addEventListener('change', () => {
           const value = parseInt(element.value);
+          tempValues[sysex] = value;
+          currentValues[sysex] = value;
+          controller.sendParameter(sysex, value);
+        });
+      } else if (param.ui_type === 'switch') {
+        element.addEventListener('input', () => {
+          const value = element.checked ? 1 : 0;
           tempValues[sysex] = value;
           currentValues[sysex] = value;
           controller.sendParameter(sysex, value);
@@ -346,9 +355,32 @@ async function generateRandomPreset() {
   showNotification("Random preset applied", "success");
 }
 
+function setupRhythmGridControls() {
+  for (let step = 0; step < 16; step++) {
+    for (let voice = 0; voice < 7; voice++) {
+      const checkbox = document.getElementById(`rhythm-checkbox-${step}-${voice}`);
+      if (checkbox) {
+        checkbox.addEventListener('input', () => {
+          const sysexAddress = BASE_ADDRESS_RHYTHM + step;
+          let patternValue = currentValues[sysexAddress] ?? 0;
+          if (checkbox.checked) {
+            patternValue |= (1 << voice); // Set bit
+          } else {
+            patternValue &= ~(1 << voice); // Clear bit
+          }
+          rhythmPattern[step] = patternValue;
+          currentValues[sysexAddress] = patternValue;
+          controller.sendParameter(sysexAddress, patternValue);
+        });
+      }
+    }
+  }
+}
+
 async function initialize() {
   await initializeDefaultValues();
   await setupParameterControls();
+  setupRhythmGridControls(); // Add this line
   controller.onConnectionChange = updateConnectionStatus;
   controller.onDataReceived = handleDataReceived;
   const connected = await controller.initialize();
