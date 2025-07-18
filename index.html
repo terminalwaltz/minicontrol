@@ -118,7 +118,49 @@
         <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
             <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">Global Parameters</summary>
             <div style="padding: 10px;">
-                <h3 style="margin: 10px 0; font-size: 1.5em;">Effects</h3>
+                <h3 style="margin: 10px 0; font-size: 1.1em;">General</h3>
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-20" style="width: 200px; font-weight: bold;">bank color</label>
+                <input type="range" id="param-20" name="bank color"
+                       min="0" max="360" 
+                       step="1" 
+                       value="0"
+                       
+                       data-sysex-address="20" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="color of the preset"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-20" 
+                       value="0"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-32" style="width: 200px; font-weight: bold;">led attenuation</label>
+                <input type="range" id="param-32" name="led attenuation"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="0.0"
+                       
+                       data-sysex-address="32" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="attenuation of the brightness of the led"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-32" 
+                       value="0.00"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-30" style="width: 200px; font-weight: bold;">transpose</label>
+                <input type="range" id="param-30" name="transpose"
+                       min="0" max="11" 
+                       step="1" 
+                       value="0"
+                       data-discrete='true'
+                       data-sysex-address="30" data-ui-type="discrete_slider" data-data-type="int" data-float-multiplier="1" title="transpose all sounds by a number of semitones"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-30" 
+                       value="0"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Effects</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-29" style="width: 200px; font-weight: bold;">pan</label>
                 <input type="range" id="param-29" name="pan"
@@ -202,48 +244,6 @@
                        value="0.01"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">General</h3>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-20" style="width: 200px; font-weight: bold;">bank color</label>
-                <input type="range" id="param-20" name="bank color"
-                       min="0" max="360" 
-                       step="1" 
-                       value="0"
-                       
-                       data-sysex-address="20" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="color of the preset"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-20" 
-                       value="0"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-32" style="width: 200px; font-weight: bold;">led attenuation</label>
-                <input type="range" id="param-32" name="led attenuation"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="0.0"
-                       
-                       data-sysex-address="32" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="attenuation of the brightness of the led"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-32" 
-                       value="0.00"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-30" style="width: 200px; font-weight: bold;">transpose</label>
-                <input type="range" id="param-30" name="transpose"
-                       min="0" max="11" 
-                       step="1" 
-                       value="0"
-                       data-discrete='true'
-                       data-sysex-address="30" data-ui-type="discrete_slider" data-data-type="int" data-float-multiplier="1" title="transpose all sounds by a number of semitones"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-30" 
-                       value="0"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
         
             </div>
         </details>
@@ -251,225 +251,7 @@
         <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
             <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">Chord Parameters</summary>
             <div style="padding: 10px;">
-                <h3 style="margin: 10px 0; font-size: 1.5em;">Crunch</h3>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-185" style="width: 200px; font-weight: bold;">crunch level</label>
-                <input type="range" id="param-185" name="crunch level"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="185" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="level of crunch applied to the chord signal"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-185" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-186" style="width: 200px; font-weight: bold;">crunch type</label>
-                <select id="param-186" name="crunch type" data-sysex-address="186" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="selects the waveshaper transfert function, with more and more distorted shape"
-                        style="flex: 1; padding: 5px; margin: 0 10px;">
-                    <option value="0">1</option><option value="1">2</option><option value="2">3</option>
-                </select>
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Delay</h3>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-176" style="width: 200px; font-weight: bold;">delay length</label>
-                <input type="range" id="param-176" name="delay length"
-                       min="0" max="600" 
-                       step="1" 
-                       value="1"
-                       
-                       data-sysex-address="176" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="length in ms of the delay"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-176" 
-                       value="1"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-177" style="width: 200px; font-weight: bold;">delay filter frequency</label>
-                <input type="range" id="param-177" name="delay filter frequency"
-                       min="0" max="5000" 
-                       step="1" 
-                       value="0.5"
-                       
-                       data-sysex-address="177" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="corner frequency of the filter in the delay loop"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-177" 
-                       value="0.5"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-178" style="width: 200px; font-weight: bold;">delay filter resonance</label>
-                <input type="range" id="param-178" name="delay filter resonance"
-                       min="70.0" max="500.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="178" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="resonance of the filter in the delay loop"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-178" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-179" style="width: 200px; font-weight: bold;">delay lowpass</label>
-                <input type="range" id="param-179" name="delay lowpass"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="179" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="lowpass component feedback into the delay"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-179" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-180" style="width: 200px; font-weight: bold;">delay bandpass</label>
-                <input type="range" id="param-180" name="delay bandpass"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="180" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="bandpass component feedback into the delay"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-180" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-181" style="width: 200px; font-weight: bold;">delay highpass</label>
-                <input type="range" id="param-181" name="delay highpass"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="181" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="highpass component feedback into the delay"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-181" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-182" style="width: 200px; font-weight: bold;">dry mix</label>
-                <input type="range" id="param-182" name="dry mix"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="182" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="intensity of the dry signal in the output"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-182" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-183" style="width: 200px; font-weight: bold;">delay mix</label>
-                <input type="range" id="param-183" name="delay mix"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="183" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="intensity of the delayed signal in the output"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-183" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Envelope</h3>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-137" style="width: 200px; font-weight: bold;">attack</label>
-                <input type="range" id="param-137" name="attack"
-                       min="0" max="5000" 
-                       step="1" 
-                       value="15"
-                       
-                       data-sysex-address="137" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="attack time of the envelope"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-137" 
-                       value="15"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-138" style="width: 200px; font-weight: bold;">hold</label>
-                <input type="range" id="param-138" name="hold"
-                       min="0" max="5000" 
-                       step="1" 
-                       value="2"
-                       
-                       data-sysex-address="138" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="hold time of the envelope"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-138" 
-                       value="2"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-139" style="width: 200px; font-weight: bold;">decay</label>
-                <input type="range" id="param-139" name="decay"
-                       min="0" max="5000" 
-                       step="1" 
-                       value="1000"
-                       
-                       data-sysex-address="139" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="decay time of the envelope"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-139" 
-                       value="1000"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-140" style="width: 200px; font-weight: bold;">sustain</label>
-                <input type="range" id="param-140" name="sustain"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="140" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="sustain level of the envelope"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-140" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-141" style="width: 200px; font-weight: bold;">release</label>
-                <input type="range" id="param-141" name="release"
-                       min="0" max="5000" 
-                       step="1" 
-                       value="1000"
-                       
-                       data-sysex-address="141" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="release time of the envelope"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-141" 
-                       value="1000"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-142" style="width: 200px; font-weight: bold;">retrigger release</label>
-                <input type="range" id="param-142" name="retrigger release"
-                       min="0" max="100" 
-                       step="1" 
-                       value="5"
-                       
-                       data-sysex-address="142" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="retrigger time of the envelope"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-142" 
-                       value="5"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">General</h3>
+                <h3 style="margin: 10px 0; font-size: 1.1em;">General</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-198" style="width: 200px; font-weight: bold;">octave change</label>
                 <input type="range" id="param-198" name="octave change"
@@ -575,7 +357,269 @@
                        value="10"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Low pass filter</h3>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Oscillator</h3>
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-122" style="width: 200px; font-weight: bold;">waveform 1</label>
+                <select id="param-122" name="waveform 1" data-sysex-address="122" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the first oscillator. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
+                        style="flex: 1; padding: 5px; margin: 0 10px;">
+                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
+                </select>
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-121" style="width: 200px; font-weight: bold;">amplitude 1</label>
+                <input type="range" id="param-121" name="amplitude 1"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="121" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the first oscillator"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-121" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-123" style="width: 200px; font-weight: bold;">frequency multiplier 1</label>
+                <input type="range" id="param-123" name="frequency multiplier 1"
+                       min="50.0" max="200.0" 
+                       step="1.0" 
+                       value="0.0"
+                       
+                       data-sysex-address="123" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency multiplier for the first oscillator. 1 is normal, 0.5 an octave below and 1 an octave above"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-123" 
+                       value="0.00"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-125" style="width: 200px; font-weight: bold;">waveform 2</label>
+                <select id="param-125" name="waveform 2" data-sysex-address="125" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the second oscillator. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
+                        style="flex: 1; padding: 5px; margin: 0 10px;">
+                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
+                </select>
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-124" style="width: 200px; font-weight: bold;">amplitude 2</label>
+                <input type="range" id="param-124" name="amplitude 2"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="124" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the second oscillator"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-124" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-126" style="width: 200px; font-weight: bold;">frequency multiplier 2</label>
+                <input type="range" id="param-126" name="frequency multiplier 2"
+                       min="50.0" max="200.0" 
+                       step="1.0" 
+                       value="0.0"
+                       
+                       data-sysex-address="126" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency multiplier for the second oscillator. 1 is normal, 0.5 an octave below and 1 an octave above"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-126" 
+                       value="0.00"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-128" style="width: 200px; font-weight: bold;">waveform 3</label>
+                <select id="param-128" name="waveform 3" data-sysex-address="128" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the third oscillator. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
+                        style="flex: 1; padding: 5px; margin: 0 10px;">
+                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
+                </select>
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-127" style="width: 200px; font-weight: bold;">amplitude 3</label>
+                <input type="range" id="param-127" name="amplitude 3"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="127" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the third oscillator"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-127" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-129" style="width: 200px; font-weight: bold;">frequency multiplier 3</label>
+                <input type="range" id="param-129" name="frequency multiplier 3"
+                       min="50.0" max="200.0" 
+                       step="1.0" 
+                       value="0.0"
+                       
+                       data-sysex-address="129" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency multiplier for the third oscillator. 1 is normal, 0.5 an octave below and 1 an octave above"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-129" 
+                       value="0.00"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-130" style="width: 200px; font-weight: bold;">noise</label>
+                <input type="range" id="param-130" name="noise"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="130" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the noise oscillator"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-130" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-131" style="width: 200px; font-weight: bold;">first note</label>
+                <input type="range" id="param-131" name="first note"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="131" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the first chord note"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-131" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-132" style="width: 200px; font-weight: bold;">second note</label>
+                <input type="range" id="param-132" name="second note"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="132" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the second chord note"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-132" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-133" style="width: 200px; font-weight: bold;">third note</label>
+                <input type="range" id="param-133" name="third note"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="133" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the third chord note"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-133" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-134" style="width: 200px; font-weight: bold;">fourth note</label>
+                <input type="range" id="param-134" name="fourth note"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="134" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the fourht chord note"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-134" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Envelope</h3>
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-137" style="width: 200px; font-weight: bold;">attack</label>
+                <input type="range" id="param-137" name="attack"
+                       min="0" max="5000" 
+                       step="1" 
+                       value="15"
+                       
+                       data-sysex-address="137" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="attack time of the envelope"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-137" 
+                       value="15"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-138" style="width: 200px; font-weight: bold;">hold</label>
+                <input type="range" id="param-138" name="hold"
+                       min="0" max="5000" 
+                       step="1" 
+                       value="2"
+                       
+                       data-sysex-address="138" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="hold time of the envelope"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-138" 
+                       value="2"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-139" style="width: 200px; font-weight: bold;">decay</label>
+                <input type="range" id="param-139" name="decay"
+                       min="0" max="5000" 
+                       step="1" 
+                       value="1000"
+                       
+                       data-sysex-address="139" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="decay time of the envelope"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-139" 
+                       value="1000"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-140" style="width: 200px; font-weight: bold;">sustain</label>
+                <input type="range" id="param-140" name="sustain"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="140" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="sustain level of the envelope"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-140" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-141" style="width: 200px; font-weight: bold;">release</label>
+                <input type="range" id="param-141" name="release"
+                       min="0" max="5000" 
+                       step="1" 
+                       value="1000"
+                       
+                       data-sysex-address="141" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="release time of the envelope"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-141" 
+                       value="1000"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-142" style="width: 200px; font-weight: bold;">retrigger release</label>
+                <input type="range" id="param-142" name="retrigger release"
+                       min="0" max="100" 
+                       step="1" 
+                       value="5"
+                       
+                       data-sysex-address="142" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="retrigger time of the envelope"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-142" 
+                       value="5"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Low pass filter</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-143" style="width: 200px; font-weight: bold;">base frequency</label>
                 <input type="range" id="param-143" name="base frequency"
@@ -587,6 +631,56 @@
                        style="flex: 1; margin: 0 10px;">
                 <input type="text" readonly id="value-143" 
                        value="0.5"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-152" style="width: 200px; font-weight: bold;">LFO waveform</label>
+                <select id="param-152" name="LFO waveform" data-sysex-address="152" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the low pass filter control LFO. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
+                        style="flex: 1; padding: 5px; margin: 0 10px;">
+                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
+                </select>
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-153" style="width: 200px; font-weight: bold;">LFO frequency</label>
+                <input type="range" id="param-153" name="LFO frequency"
+                       min="0.0" max="2000.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="153" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency of the low pass filter control LFO"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-153" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-154" style="width: 200px; font-weight: bold;">LFO amplitude</label>
+                <input type="range" id="param-154" name="LFO amplitude"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="154" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the low pass filter control LFO"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-154" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-155" style="width: 200px; font-weight: bold;">filter sensitivity</label>
+                <input type="range" id="param-155" name="filter sensitivity"
+                       min="0.0" max="500.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="155" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="sensitivity of the low pass filter to control envelope and LFO"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-155" 
+                       value="0.01"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
         
@@ -701,333 +795,7 @@
                        value="5"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-152" style="width: 200px; font-weight: bold;">LFO waveform</label>
-                <select id="param-152" name="LFO waveform" data-sysex-address="152" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the low pass filter control LFO. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
-                        style="flex: 1; padding: 5px; margin: 0 10px;">
-                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
-                </select>
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-153" style="width: 200px; font-weight: bold;">LFO frequency</label>
-                <input type="range" id="param-153" name="LFO frequency"
-                       min="0.0" max="2000.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="153" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency of the low pass filter control LFO"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-153" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-154" style="width: 200px; font-weight: bold;">LFO amplitude</label>
-                <input type="range" id="param-154" name="LFO amplitude"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="154" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the low pass filter control LFO"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-154" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-155" style="width: 200px; font-weight: bold;">filter sensitivity</label>
-                <input type="range" id="param-155" name="filter sensitivity"
-                       min="0.0" max="500.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="155" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="sensitivity of the low pass filter to control envelope and LFO"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-155" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Oscillator</h3>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-121" style="width: 200px; font-weight: bold;">amplitude 1</label>
-                <input type="range" id="param-121" name="amplitude 1"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="121" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the first oscillator"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-121" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-122" style="width: 200px; font-weight: bold;">waveform 1</label>
-                <select id="param-122" name="waveform 1" data-sysex-address="122" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the first oscillator. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
-                        style="flex: 1; padding: 5px; margin: 0 10px;">
-                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
-                </select>
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-124" style="width: 200px; font-weight: bold;">amplitude 2</label>
-                <input type="range" id="param-124" name="amplitude 2"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="124" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the second oscillator"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-124" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-125" style="width: 200px; font-weight: bold;">waveform 2</label>
-                <select id="param-125" name="waveform 2" data-sysex-address="125" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the second oscillator. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
-                        style="flex: 1; padding: 5px; margin: 0 10px;">
-                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
-                </select>
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-127" style="width: 200px; font-weight: bold;">amplitude 3</label>
-                <input type="range" id="param-127" name="amplitude 3"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="127" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the third oscillator"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-127" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-128" style="width: 200px; font-weight: bold;">waveform 3</label>
-                <select id="param-128" name="waveform 3" data-sysex-address="128" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the third oscillator. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
-                        style="flex: 1; padding: 5px; margin: 0 10px;">
-                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
-                </select>
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-130" style="width: 200px; font-weight: bold;">noise</label>
-                <input type="range" id="param-130" name="noise"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="130" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the noise oscillator"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-130" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-131" style="width: 200px; font-weight: bold;">first note</label>
-                <input type="range" id="param-131" name="first note"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="131" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the first chord note"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-131" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-132" style="width: 200px; font-weight: bold;">second note</label>
-                <input type="range" id="param-132" name="second note"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="132" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the second chord note"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-132" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-133" style="width: 200px; font-weight: bold;">third note</label>
-                <input type="range" id="param-133" name="third note"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="133" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the third chord note"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-133" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-134" style="width: 200px; font-weight: bold;">fourth note</label>
-                <input type="range" id="param-134" name="fourth note"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="134" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the fourht chord note"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-134" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-123" style="width: 200px; font-weight: bold;">frequency multiplier 1</label>
-                <input type="range" id="param-123" name="frequency multiplier 1"
-                       min="50.0" max="200.0" 
-                       step="1.0" 
-                       value="0.0"
-                       
-                       data-sysex-address="123" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency multiplier for the first oscillator. 1 is normal, 0.5 an octave below and 1 an octave above"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-123" 
-                       value="0.00"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-126" style="width: 200px; font-weight: bold;">frequency multiplier 2</label>
-                <input type="range" id="param-126" name="frequency multiplier 2"
-                       min="50.0" max="200.0" 
-                       step="1.0" 
-                       value="0.0"
-                       
-                       data-sysex-address="126" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency multiplier for the second oscillator. 1 is normal, 0.5 an octave below and 1 an octave above"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-126" 
-                       value="0.00"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-129" style="width: 200px; font-weight: bold;">frequency multiplier 3</label>
-                <input type="range" id="param-129" name="frequency multiplier 3"
-                       min="50.0" max="200.0" 
-                       step="1.0" 
-                       value="0.0"
-                       
-                       data-sysex-address="129" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency multiplier for the third oscillator. 1 is normal, 0.5 an octave below and 1 an octave above"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-129" 
-                       value="0.00"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Output filter</h3>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-192" style="width: 200px; font-weight: bold;">frequency</label>
-                <input type="range" id="param-192" name="frequency"
-                       min="0" max="5000" 
-                       step="1" 
-                       value="0.5"
-                       
-                       data-sysex-address="192" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="corner frequency of the output filter"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-192" 
-                       value="0.5"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-193" style="width: 200px; font-weight: bold;">resonance</label>
-                <input type="range" id="param-193" name="resonance"
-                       min="70.0" max="500.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="193" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="resonance of the output filter"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-193" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-194" style="width: 200px; font-weight: bold;">lowpass</label>
-                <input type="range" id="param-194" name="lowpass"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="194" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="output lowpass component"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-194" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-195" style="width: 200px; font-weight: bold;">bandpass</label>
-                <input type="range" id="param-195" name="bandpass"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="195" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="output bandpass component"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-195" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-196" style="width: 200px; font-weight: bold;">highpass</label>
-                <input type="range" id="param-196" name="highpass"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="196" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="output highpass component"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-196" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-197" style="width: 200px; font-weight: bold;">output amplifier</label>
-                <input type="range" id="param-197" name="output amplifier"
-                       min="0.0" max="200.0" 
-                       step="1.0" 
-                       value="100.0"
-                       
-                       data-sysex-address="197" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplifies the volume of the chords"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-197" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Reverb</h3>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-184" style="width: 200px; font-weight: bold;">reverb level</label>
-                <input type="range" id="param-184" name="reverb level"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="184" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="level of the reverb applied to the chord signal"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-184" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Tremolo</h3>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Tremolo</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-156" style="width: 200px; font-weight: bold;">waveform</label>
                 <select id="param-156" name="waveform" data-sysex-address="156" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the tremolo (amplitude variation). In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.. Discontinuous signal will cause clicks"
@@ -1077,27 +845,13 @@
                        value="0.01"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Vibrato</h3>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Vibrato</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-160" style="width: 200px; font-weight: bold;">waveform</label>
                 <select id="param-160" name="waveform" data-sysex-address="160" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the vibrato (pitch variation). In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.."
                         style="flex: 1; padding: 5px; margin: 0 10px;">
                     <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
                 </select>
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-161" style="width: 200px; font-weight: bold;">frequency</label>
-                <input type="range" id="param-161" name="frequency"
-                       min="0.0" max="2000.0" 
-                       step="1.0" 
-                       value="0.0"
-                       
-                       data-sysex-address="161" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency of the vibrato oscillation"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-161" 
-                       value="0.00"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 10px 0;">
@@ -1125,6 +879,20 @@
                        style="flex: 1; margin: 0 10px;">
                 <input type="text" readonly id="value-163" 
                        value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-161" style="width: 200px; font-weight: bold;">frequency</label>
+                <input type="range" id="param-161" name="frequency"
+                       min="0.0" max="2000.0" 
+                       step="1.0" 
+                       value="0.0"
+                       
+                       data-sysex-address="161" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency of the vibrato oscillation"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-161" 
+                       value="0.00"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
         
@@ -1295,17 +1063,235 @@
                        value="0.00"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">hidden</h3>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Delay</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-3" style="width: 200px; font-weight: bold;">global gain</label>
-                <input type="range" id="param-3" name="global gain"
+                <label for="param-176" style="width: 200px; font-weight: bold;">delay length</label>
+                <input type="range" id="param-176" name="delay length"
+                       min="0" max="600" 
+                       step="1" 
+                       value="1"
+                       
+                       data-sysex-address="176" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="length in ms of the delay"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-176" 
+                       value="1"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-177" style="width: 200px; font-weight: bold;">delay filter frequency</label>
+                <input type="range" id="param-177" name="delay filter frequency"
+                       min="0" max="5000" 
+                       step="1" 
+                       value="0.5"
+                       
+                       data-sysex-address="177" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="corner frequency of the filter in the delay loop"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-177" 
+                       value="0.5"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-178" style="width: 200px; font-weight: bold;">delay filter resonance</label>
+                <input type="range" id="param-178" name="delay filter resonance"
+                       min="70.0" max="500.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="178" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="resonance of the filter in the delay loop"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-178" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-179" style="width: 200px; font-weight: bold;">delay lowpass</label>
+                <input type="range" id="param-179" name="delay lowpass"
                        min="0.0" max="100.0" 
                        step="1.0" 
                        value="50.0"
                        
-                       data-sysex-address="3" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="global gain of the chord section"
+                       data-sysex-address="179" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="lowpass component feedback into the delay"
                        style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-3" 
+                <input type="text" readonly id="value-179" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-180" style="width: 200px; font-weight: bold;">delay bandpass</label>
+                <input type="range" id="param-180" name="delay bandpass"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="180" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="bandpass component feedback into the delay"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-180" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-181" style="width: 200px; font-weight: bold;">delay highpass</label>
+                <input type="range" id="param-181" name="delay highpass"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="181" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="highpass component feedback into the delay"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-181" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-182" style="width: 200px; font-weight: bold;">dry mix</label>
+                <input type="range" id="param-182" name="dry mix"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="182" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="intensity of the dry signal in the output"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-182" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-183" style="width: 200px; font-weight: bold;">delay mix</label>
+                <input type="range" id="param-183" name="delay mix"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="183" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="intensity of the delayed signal in the output"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-183" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Reverb</h3>
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-184" style="width: 200px; font-weight: bold;">reverb level</label>
+                <input type="range" id="param-184" name="reverb level"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="184" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="level of the reverb applied to the chord signal"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-184" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Crunch</h3>
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-185" style="width: 200px; font-weight: bold;">crunch level</label>
+                <input type="range" id="param-185" name="crunch level"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="185" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="level of crunch applied to the chord signal"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-185" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-186" style="width: 200px; font-weight: bold;">crunch type</label>
+                <select id="param-186" name="crunch type" data-sysex-address="186" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="selects the waveshaper transfert function, with more and more distorted shape"
+                        style="flex: 1; padding: 5px; margin: 0 10px;">
+                    <option value="0">1</option><option value="1">2</option><option value="2">3</option>
+                </select>
+            </div>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Output filter</h3>
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-192" style="width: 200px; font-weight: bold;">frequency</label>
+                <input type="range" id="param-192" name="frequency"
+                       min="0" max="5000" 
+                       step="1" 
+                       value="0.5"
+                       
+                       data-sysex-address="192" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="corner frequency of the output filter"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-192" 
+                       value="0.5"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-193" style="width: 200px; font-weight: bold;">resonance</label>
+                <input type="range" id="param-193" name="resonance"
+                       min="70.0" max="500.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="193" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="resonance of the output filter"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-193" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-194" style="width: 200px; font-weight: bold;">lowpass</label>
+                <input type="range" id="param-194" name="lowpass"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="194" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="output lowpass component"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-194" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-195" style="width: 200px; font-weight: bold;">bandpass</label>
+                <input type="range" id="param-195" name="bandpass"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="195" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="output bandpass component"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-195" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-196" style="width: 200px; font-weight: bold;">highpass</label>
+                <input type="range" id="param-196" name="highpass"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="196" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="output highpass component"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-196" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-197" style="width: 200px; font-weight: bold;">output amplifier</label>
+                <input type="range" id="param-197" name="output amplifier"
+                       min="0.0" max="200.0" 
+                       step="1.0" 
+                       value="100.0"
+                       
+                       data-sysex-address="197" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplifies the volume of the chords"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-197" 
                        value="0.01"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
@@ -1316,141 +1302,135 @@
         <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
             <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">Harp Parameters</summary>
             <div style="padding: 10px;">
-                <h3 style="margin: 10px 0; font-size: 1.5em;">Crunch</h3>
+                <h3 style="margin: 10px 0; font-size: 1.1em;">General</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-86" style="width: 200px; font-weight: bold;">crunch level</label>
-                <input type="range" id="param-86" name="crunch level"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="86" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="level of crunch applied to the harp signal"
+                <label for="param-99" style="width: 200px; font-weight: bold;">octave change</label>
+                <input type="range" id="param-99" name="octave change"
+                       min="0" max="4" 
+                       step="1" 
+                       value="0"
+                       data-discrete='true'
+                       data-sysex-address="99" data-ui-type="discrete_slider" data-data-type="int" data-float-multiplier="1" title="changes the octave of the harp section up or down"
                        style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-86" 
-                       value="0.01"
+                <input type="text" readonly id="value-99" 
+                       value="0"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-87" style="width: 200px; font-weight: bold;">crunch type</label>
-                <select id="param-87" name="crunch type" data-sysex-address="87" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="selects the waveshaper transfert function, with more and more distorted shape"
+                <label for="param-40" style="width: 200px; font-weight: bold;">harp shuffling</label>
+                <input type="range" id="param-40" name="harp shuffling"
+                       min="0" max="6" 
+                       step="1" 
+                       value="0"
+                       data-discrete='true'
+                       data-sysex-address="40" data-ui-type="discrete_slider" data-data-type="int" data-float-multiplier="1" title="defines different harp patterns. 0 is normal, 1 i with second, 2 is with fourth, 3 with sixth, 4 octaves and 5 chromatics"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-40" 
+                       value="0"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-22" style="width: 200px; font-weight: bold;">change held strings</label>
+                <input type="checkbox" id="param-22" name="change held strings"
+                        data-sysex-address="22" data-ui-type="switch" data-data-type="int" data-float-multiplier="1" title="defines whether a held harp note will change when changing chord"
+                       style="margin: 0 10px;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-36" style="width: 200px; font-weight: bold;">scalar harp mode</label>
+                <select id="param-36" name="scalar harp mode" data-sysex-address="36" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="Sets harp to ascending scales: 0=Chord Tones (default), 1=Major, 2=Major Pentatonic, 3=Minor Pentatonic, 4=Diminished 6th, 5=Relative Natural Minor, 6=Relative Harmonic Minor, 7=Relative Minor Pentatonic, 8=Scale Per Chord Mode"
                         style="flex: 1; padding: 5px; margin: 0 10px;">
-                    <option value="0">1</option><option value="1">2</option><option value="2">3</option>
+                    <option value="0">Chord Tones</option><option value="1">Major Scale</option><option value="2">Major Pentatonic</option><option value="3">Minor Pentatonic</option><option value="4">Diminished 6th</option><option value="5">Relative Natural Minor</option><option value="6">Relative Harmonic Minor</option><option value="7">Relative Minor Pentatonic</option><option value="8">Scale Per Chord Mode</option>
                 </select>
             </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Delay</h3>
+        
             <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-77" style="width: 200px; font-weight: bold;">delay length</label>
-                <input type="range" id="param-77" name="delay length"
-                       min="0" max="600" 
+                <label for="param-98" style="width: 200px; font-weight: bold;">chromatic mode</label>
+                <input type="checkbox" id="param-98" name="chromatic mode"
+                        data-sysex-address="98" data-ui-type="switch" data-data-type="int" data-float-multiplier="1" title="puts the harp in chromatic mode, with static notes not dependant on chord selection"
+                       style="margin: 0 10px;">
+            </div>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Transient</h3>
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-105" style="width: 200px; font-weight: bold;">note level</label>
+                <input type="range" id="param-105" name="note level"
+                       min="0" max="24" 
                        step="1" 
-                       value="1"
-                       
-                       data-sysex-address="77" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="length in ms of the delay"
+                       value="0"
+                       data-discrete='true'
+                       data-sysex-address="105" data-ui-type="discrete_slider" data-data-type="int" data-float-multiplier="1" title="level in the scale of the transient"
                        style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-77" 
-                       value="1"
+                <input type="text" readonly id="value-105" 
+                       value="0"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-78" style="width: 200px; font-weight: bold;">delay filter frequency</label>
-                <input type="range" id="param-78" name="delay filter frequency"
+                <label for="param-100" style="width: 200px; font-weight: bold;">waveform</label>
+                <select id="param-100" name="waveform" data-sysex-address="100" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform of the transient. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
+                        style="flex: 1; padding: 5px; margin: 0 10px;">
+                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
+                </select>
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-101" style="width: 200px; font-weight: bold;">amplitude</label>
+                <input type="range" id="param-101" name="amplitude"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="101" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the transient"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-101" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-102" style="width: 200px; font-weight: bold;">attack</label>
+                <input type="range" id="param-102" name="attack"
                        min="0" max="5000" 
                        step="1" 
-                       value="0.5"
+                       value="15"
                        
-                       data-sysex-address="78" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="corner frequency of the filter in the delay loop"
+                       data-sysex-address="102" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="attack time of the transient"
                        style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-78" 
-                       value="0.5"
+                <input type="text" readonly id="value-102" 
+                       value="15"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-79" style="width: 200px; font-weight: bold;">delay filter resonance</label>
-                <input type="range" id="param-79" name="delay filter resonance"
-                       min="70.0" max="500.0" 
-                       step="1.0" 
-                       value="50.0"
+                <label for="param-103" style="width: 200px; font-weight: bold;">hold</label>
+                <input type="range" id="param-103" name="hold"
+                       min="0" max="5000" 
+                       step="1" 
+                       value="2"
                        
-                       data-sysex-address="79" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="resonance of the filter in the delay loop"
+                       data-sysex-address="103" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="hold time of the transient"
                        style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-79" 
-                       value="0.01"
+                <input type="text" readonly id="value-103" 
+                       value="2"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-80" style="width: 200px; font-weight: bold;">delay lowpass</label>
-                <input type="range" id="param-80" name="delay lowpass"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
+                <label for="param-104" style="width: 200px; font-weight: bold;">decay</label>
+                <input type="range" id="param-104" name="decay"
+                       min="0" max="5000" 
+                       step="1" 
+                       value="1000"
                        
-                       data-sysex-address="80" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="lowpass component feedback into the delay"
+                       data-sysex-address="104" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="decay time of the transient"
                        style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-80" 
-                       value="0.01"
+                <input type="text" readonly id="value-104" 
+                       value="1000"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-81" style="width: 200px; font-weight: bold;">delay bandpass</label>
-                <input type="range" id="param-81" name="delay bandpass"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="81" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="bandpass component feedback into the delay"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-81" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-82" style="width: 200px; font-weight: bold;">delay highpass</label>
-                <input type="range" id="param-82" name="delay highpass"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="82" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="highpass component feedback into the delay"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-82" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-83" style="width: 200px; font-weight: bold;">dry mix</label>
-                <input type="range" id="param-83" name="dry mix"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="83" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="intensity of the dry signal in the output"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-83" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-84" style="width: 200px; font-weight: bold;">delay mix</label>
-                <input type="range" id="param-84" name="delay mix"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="84" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="intensity of the delayed signal in the output"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-84" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Envelope</h3>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Envelope</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-43" style="width: 200px; font-weight: bold;">attack</label>
                 <input type="range" id="param-43" name="attack"
@@ -1534,57 +1514,7 @@
                        value="5"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">General</h3>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-99" style="width: 200px; font-weight: bold;">octave change</label>
-                <input type="range" id="param-99" name="octave change"
-                       min="0" max="4" 
-                       step="1" 
-                       value="0"
-                       data-discrete='true'
-                       data-sysex-address="99" data-ui-type="discrete_slider" data-data-type="int" data-float-multiplier="1" title="changes the octave of the harp section up or down"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-99" 
-                       value="0"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-40" style="width: 200px; font-weight: bold;">harp shuffling</label>
-                <input type="range" id="param-40" name="harp shuffling"
-                       min="0" max="6" 
-                       step="1" 
-                       value="0"
-                       data-discrete='true'
-                       data-sysex-address="40" data-ui-type="discrete_slider" data-data-type="int" data-float-multiplier="1" title="defines different harp patterns. 0 is normal, 1 i with second, 2 is with fourth, 3 with sixth, 4 octaves and 5 chromatics"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-40" 
-                       value="0"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-98" style="width: 200px; font-weight: bold;">chromatic mode</label>
-                <input type="checkbox" id="param-98" name="chromatic mode"
-                        data-sysex-address="98" data-ui-type="switch" data-data-type="int" data-float-multiplier="1" title="puts the harp in chromatic mode, with static notes not dependant on chord selection"
-                       style="margin: 0 10px;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-36" style="width: 200px; font-weight: bold;">scalar harp mode</label>
-                <select id="param-36" name="scalar harp mode" data-sysex-address="36" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="Sets harp to ascending scales: 0=Chord Tones (default), 1=Major, 2=Major Pentatonic, 3=Minor Pentatonic, 4=Diminished 6th, 5=Relative Natural Minor, 6=Relative Harmonic Minor, 7=Relative Minor Pentatonic, 8=Scale Per Chord Mode"
-                        style="flex: 1; padding: 5px; margin: 0 10px;">
-                    <option value="0">Chord Tones</option><option value="1">Major Scale</option><option value="2">Major Pentatonic</option><option value="3">Minor Pentatonic</option><option value="4">Diminished 6th</option><option value="5">Relative Natural Minor</option><option value="6">Relative Harmonic Minor</option><option value="7">Relative Minor Pentatonic</option><option value="8">Scale Per Chord Mode</option>
-                </select>
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-22" style="width: 200px; font-weight: bold;">change held strings</label>
-                <input type="checkbox" id="param-22" name="change held strings"
-                        data-sysex-address="22" data-ui-type="switch" data-data-type="int" data-float-multiplier="1" title="defines whether a held harp note will change when changing chord"
-                       style="margin: 0 10px;">
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Low pass filter</h3>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Low pass filter</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-49" style="width: 200px; font-weight: bold;">base frequency</label>
                 <input type="range" id="param-49" name="base frequency"
@@ -1609,6 +1539,20 @@
                        data-sysex-address="50" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="value that is multiplied by the note frequency and added to the base corner frequency to allow for keytracking"
                        style="flex: 1; margin: 0 10px;">
                 <input type="text" readonly id="value-50" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-58" style="width: 200px; font-weight: bold;">filter sensitivity</label>
+                <input type="range" id="param-58" name="filter sensitivity"
+                       min="0.0" max="500.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="58" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="sensitivity of the filter to the control envelope"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-58" 
                        value="0.01"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
@@ -1710,269 +1654,7 @@
                        value="5"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-58" style="width: 200px; font-weight: bold;">filter sensitivity</label>
-                <input type="range" id="param-58" name="filter sensitivity"
-                       min="0.0" max="500.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="58" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="sensitivity of the filter to the control envelope"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-58" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Oscillator</h3>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-41" style="width: 200px; font-weight: bold;">amplitude</label>
-                <input type="range" id="param-41" name="amplitude"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="41" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the 12 initial oscillators"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-41" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-42" style="width: 200px; font-weight: bold;">waveform</label>
-                <select id="param-42" name="waveform" data-sysex-address="42" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
-                        style="flex: 1; padding: 5px; margin: 0 10px;">
-                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
-                </select>
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Output filter</h3>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-88" style="width: 200px; font-weight: bold;">frequency</label>
-                <input type="range" id="param-88" name="frequency"
-                       min="0" max="5000" 
-                       step="1" 
-                       value="0.5"
-                       
-                       data-sysex-address="88" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="corner frequency of the output filter"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-88" 
-                       value="0.5"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-89" style="width: 200px; font-weight: bold;">resonance</label>
-                <input type="range" id="param-89" name="resonance"
-                       min="70.0" max="500.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="89" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="resonance of the output filter"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-89" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-90" style="width: 200px; font-weight: bold;">lowpass</label>
-                <input type="range" id="param-90" name="lowpass"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="90" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="output lowpass component"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-90" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-91" style="width: 200px; font-weight: bold;">bandpass</label>
-                <input type="range" id="param-91" name="bandpass"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="91" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="output bandpass component"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-91" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-92" style="width: 200px; font-weight: bold;">highpass</label>
-                <input type="range" id="param-92" name="highpass"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="92" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="output highpass component"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-92" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-93" style="width: 200px; font-weight: bold;">LFO waveform</label>
-                <select id="param-93" name="LFO waveform" data-sysex-address="93" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the output filter control LFO. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
-                        style="flex: 1; padding: 5px; margin: 0 10px;">
-                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
-                </select>
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-94" style="width: 200px; font-weight: bold;">LFO frequency</label>
-                <input type="range" id="param-94" name="LFO frequency"
-                       min="0.0" max="2000.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="94" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency of the output filter control LFO"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-94" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-95" style="width: 200px; font-weight: bold;">LFO amplitude</label>
-                <input type="range" id="param-95" name="LFO amplitude"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="95" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the output filter control LFO"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-95" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-96" style="width: 200px; font-weight: bold;">filter LFO sensitivity</label>
-                <input type="range" id="param-96" name="filter LFO sensitivity"
-                       min="0.0" max="500.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="96" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="sensitivity of the output filter to the control LFO"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-96" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-97" style="width: 200px; font-weight: bold;">output amplifier</label>
-                <input type="range" id="param-97" name="output amplifier"
-                       min="0.0" max="200.0" 
-                       step="1.0" 
-                       value="100.0"
-                       
-                       data-sysex-address="97" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplifies the volume of the harp"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-97" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Reverb</h3>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-85" style="width: 200px; font-weight: bold;">reverb level</label>
-                <input type="range" id="param-85" name="reverb level"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="85" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="level of the reverb applied to the harp signal"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-85" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Transient</h3>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-100" style="width: 200px; font-weight: bold;">waveform</label>
-                <select id="param-100" name="waveform" data-sysex-address="100" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform of the transient. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
-                        style="flex: 1; padding: 5px; margin: 0 10px;">
-                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
-                </select>
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-101" style="width: 200px; font-weight: bold;">amplitude</label>
-                <input type="range" id="param-101" name="amplitude"
-                       min="0.0" max="100.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="101" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the transient"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-101" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-105" style="width: 200px; font-weight: bold;">note level</label>
-                <input type="range" id="param-105" name="note level"
-                       min="0" max="24" 
-                       step="1" 
-                       value="0"
-                       data-discrete='true'
-                       data-sysex-address="105" data-ui-type="discrete_slider" data-data-type="int" data-float-multiplier="1" title="level in the scale of the transient"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-105" 
-                       value="0"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-102" style="width: 200px; font-weight: bold;">attack</label>
-                <input type="range" id="param-102" name="attack"
-                       min="0" max="5000" 
-                       step="1" 
-                       value="15"
-                       
-                       data-sysex-address="102" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="attack time of the transient"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-102" 
-                       value="15"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-103" style="width: 200px; font-weight: bold;">hold</label>
-                <input type="range" id="param-103" name="hold"
-                       min="0" max="5000" 
-                       step="1" 
-                       value="2"
-                       
-                       data-sysex-address="103" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="hold time of the transient"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-103" 
-                       value="2"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-104" style="width: 200px; font-weight: bold;">decay</label>
-                <input type="range" id="param-104" name="decay"
-                       min="0" max="5000" 
-                       step="1" 
-                       value="1000"
-                       
-                       data-sysex-address="104" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="decay time of the transient"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-104" 
-                       value="1000"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
-            </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Tremolo</h3>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Tremolo</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-59" style="width: 200px; font-weight: bold;">waveform</label>
                 <select id="param-59" name="waveform" data-sysex-address="59" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the tremolo (amplitude variation). In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.. Discontinuous signal will cause clicks"
@@ -2008,27 +1690,13 @@
                        value="0.01"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Vibrato</h3>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Vibrato</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-62" style="width: 200px; font-weight: bold;">waveform</label>
                 <select id="param-62" name="waveform" data-sysex-address="62" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the vibrato (pitch variation). In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.."
                         style="flex: 1; padding: 5px; margin: 0 10px;">
                     <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
                 </select>
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-63" style="width: 200px; font-weight: bold;">frequency</label>
-                <input type="range" id="param-63" name="frequency"
-                       min="0.0" max="2000.0" 
-                       step="1.0" 
-                       value="50.0"
-                       
-                       data-sysex-address="63" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency of the vibrato oscillation"
-                       style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-63" 
-                       value="0.01"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 10px 0;">
@@ -2212,17 +1880,299 @@
                        value="0.05"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">hidden</h3>
+        
             <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-2" style="width: 200px; font-weight: bold;">global gain</label>
-                <input type="range" id="param-2" name="global gain"
+                <label for="param-63" style="width: 200px; font-weight: bold;">frequency</label>
+                <input type="range" id="param-63" name="frequency"
+                       min="0.0" max="2000.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="63" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency of the vibrato oscillation"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-63" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Delay</h3>
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-77" style="width: 200px; font-weight: bold;">delay length</label>
+                <input type="range" id="param-77" name="delay length"
+                       min="0" max="600" 
+                       step="1" 
+                       value="1"
+                       
+                       data-sysex-address="77" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="length in ms of the delay"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-77" 
+                       value="1"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-78" style="width: 200px; font-weight: bold;">delay filter frequency</label>
+                <input type="range" id="param-78" name="delay filter frequency"
+                       min="0" max="5000" 
+                       step="1" 
+                       value="0.5"
+                       
+                       data-sysex-address="78" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="corner frequency of the filter in the delay loop"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-78" 
+                       value="0.5"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-79" style="width: 200px; font-weight: bold;">delay filter resonance</label>
+                <input type="range" id="param-79" name="delay filter resonance"
+                       min="70.0" max="500.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="79" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="resonance of the filter in the delay loop"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-79" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-80" style="width: 200px; font-weight: bold;">delay lowpass</label>
+                <input type="range" id="param-80" name="delay lowpass"
                        min="0.0" max="100.0" 
                        step="1.0" 
                        value="50.0"
                        
-                       data-sysex-address="2" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="global gain of the harp section"
+                       data-sysex-address="80" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="lowpass component feedback into the delay"
                        style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-2" 
+                <input type="text" readonly id="value-80" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-81" style="width: 200px; font-weight: bold;">delay bandpass</label>
+                <input type="range" id="param-81" name="delay bandpass"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="81" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="bandpass component feedback into the delay"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-81" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-82" style="width: 200px; font-weight: bold;">delay highpass</label>
+                <input type="range" id="param-82" name="delay highpass"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="82" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="highpass component feedback into the delay"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-82" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-83" style="width: 200px; font-weight: bold;">dry mix</label>
+                <input type="range" id="param-83" name="dry mix"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="83" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="intensity of the dry signal in the output"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-83" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-84" style="width: 200px; font-weight: bold;">delay mix</label>
+                <input type="range" id="param-84" name="delay mix"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="84" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="intensity of the delayed signal in the output"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-84" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Reverb</h3>
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-85" style="width: 200px; font-weight: bold;">reverb level</label>
+                <input type="range" id="param-85" name="reverb level"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="85" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="level of the reverb applied to the harp signal"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-85" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Crunch</h3>
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-86" style="width: 200px; font-weight: bold;">crunch level</label>
+                <input type="range" id="param-86" name="crunch level"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="86" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="level of crunch applied to the harp signal"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-86" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-87" style="width: 200px; font-weight: bold;">crunch type</label>
+                <select id="param-87" name="crunch type" data-sysex-address="87" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="selects the waveshaper transfert function, with more and more distorted shape"
+                        style="flex: 1; padding: 5px; margin: 0 10px;">
+                    <option value="0">1</option><option value="1">2</option><option value="2">3</option>
+                </select>
+            </div>
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Output filter</h3>
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-88" style="width: 200px; font-weight: bold;">frequency</label>
+                <input type="range" id="param-88" name="frequency"
+                       min="0" max="5000" 
+                       step="1" 
+                       value="0.5"
+                       
+                       data-sysex-address="88" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="corner frequency of the output filter"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-88" 
+                       value="0.5"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-89" style="width: 200px; font-weight: bold;">resonance</label>
+                <input type="range" id="param-89" name="resonance"
+                       min="70.0" max="500.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="89" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="resonance of the output filter"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-89" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-90" style="width: 200px; font-weight: bold;">lowpass</label>
+                <input type="range" id="param-90" name="lowpass"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="90" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="output lowpass component"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-90" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-91" style="width: 200px; font-weight: bold;">bandpass</label>
+                <input type="range" id="param-91" name="bandpass"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="91" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="output bandpass component"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-91" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-92" style="width: 200px; font-weight: bold;">highpass</label>
+                <input type="range" id="param-92" name="highpass"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="92" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="output highpass component"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-92" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-93" style="width: 200px; font-weight: bold;">LFO waveform</label>
+                <select id="param-93" name="LFO waveform" data-sysex-address="93" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators for the output filter control LFO. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
+                        style="flex: 1; padding: 5px; margin: 0 10px;">
+                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
+                </select>
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-94" style="width: 200px; font-weight: bold;">LFO frequency</label>
+                <input type="range" id="param-94" name="LFO frequency"
+                       min="0.0" max="2000.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="94" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="frequency of the output filter control LFO"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-94" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-95" style="width: 200px; font-weight: bold;">LFO amplitude</label>
+                <input type="range" id="param-95" name="LFO amplitude"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="95" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the output filter control LFO"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-95" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-96" style="width: 200px; font-weight: bold;">filter LFO sensitivity</label>
+                <input type="range" id="param-96" name="filter LFO sensitivity"
+                       min="0.0" max="500.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="96" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="sensitivity of the output filter to the control LFO"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-96" 
+                       value="0.01"
+                       style="width: 60px; text-align: right; border: none; background: transparent;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <label for="param-97" style="width: 200px; font-weight: bold;">output amplifier</label>
+                <input type="range" id="param-97" name="output amplifier"
+                       min="0.0" max="200.0" 
+                       step="1.0" 
+                       value="100.0"
+                       
+                       data-sysex-address="97" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplifies the volume of the harp"
+                       style="flex: 1; margin: 0 10px;">
+                <input type="text" readonly id="value-97" 
                        value="0.01"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
@@ -2233,7 +2183,7 @@
         <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
             <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">Chord Potentiometer Parameters</summary>
             <div style="padding: 10px;">
-                <h3 style="margin: 10px 0; font-size: 1.5em;">Potentiometer</h3>
+                <h3 style="margin: 10px 0; font-size: 1.1em;">Potentiometer</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-10" style="width: 200px; font-weight: bold;">chord alternate control</label>
                 <select id="param-10" name="chord alternate control" data-sysex-address="10" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the adress targeted by the chord potentiometer alternate function"
@@ -2262,7 +2212,7 @@
         <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
             <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">Harp Potentiometer Parameters</summary>
             <div style="padding: 10px;">
-                <h3 style="margin: 10px 0; font-size: 1.5em;">Potentiometer</h3>
+                <h3 style="margin: 10px 0; font-size: 1.1em;">Potentiometer</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-12" style="width: 200px; font-weight: bold;">harp alternate control</label>
                 <select id="param-12" name="harp alternate control" data-sysex-address="12" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the adress targeted by the harp potentiometer alternate function"
@@ -2291,7 +2241,7 @@
         <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
             <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">Modulation Potentiometer Parameters</summary>
             <div style="padding: 10px;">
-                <h3 style="margin: 10px 0; font-size: 1.5em;">Potentiometer</h3>
+                <h3 style="margin: 10px 0; font-size: 1.1em;">Potentiometer</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-14" style="width: 200px; font-weight: bold;">mod main control</label>
                 <select id="param-14" name="mod main control" data-sysex-address="14" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the adress targeted by the modulation potentiometer main function"
@@ -2342,7 +2292,7 @@
         <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
             <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">Sharp Button Parameters</summary>
             <div style="padding: 10px;">
-                <h3 style="margin: 10px 0; font-size: 1.5em;">General</h3>
+                <h3 style="margin: 10px 0; font-size: 1.1em;">General</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-31" style="width: 200px; font-weight: bold;">sharp function</label>
                 <input type="checkbox" id="param-31" name="sharp function"
@@ -2356,7 +2306,7 @@
                 <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
                     <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">Rhythm Parameters</summary>
                     <div style="padding: 10px;">
-                        <h3 style="margin: 10px 0; font-size: 1.5em;">Rhythm Settings</h3>
+                        <h3 style="margin: 10px 0; font-size: 1.1em;">Rhythm</h3>
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-187" style="width: 200px; font-weight: bold;">default_bpm</label>
                 <input type="range" id="param-187" name="default_bpm"
@@ -2426,7 +2376,7 @@
                        value="30"
                        style="width: 60px; text-align: right; border: none; background: transparent;">
             </div>
-        <h3 style="margin: 10px 0; font-size: 1.5em;">Rhythm Pattern</h3><div style="display: grid; grid-template-columns: repeat(16, 40px); gap: 5px; margin: 10px 0;">
+        <h3 style="margin: 10px 0; font-size: 1.1em;">Rhythm Pattern</h3><div style="display: grid; grid-template-columns: repeat(16, 40px); gap: 5px; margin: 10px 0;">
 <div style="display: flex; flex-direction: column; align-items: center;">
 
                 <input type="checkbox" id="rhythm-checkbox-0-0"

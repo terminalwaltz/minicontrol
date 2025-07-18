@@ -395,6 +395,58 @@ document.getElementById("reset-all-banks-btn")?.addEventListener("click", () => 
   showNotification("Reset all banks", "success");
 });
 
+document.getElementById("export-settings-btn")?.addEventListener("click", () => {
+  if (!controller.isConnected()) {
+    console.warn("[export-settings-btn] No device connected");
+    document.getElementById("information_zone")?.focus();
+    return;
+  }
+  const sysexArray = Array(256).fill(0); // Assuming max SysEx 255
+  Object.entries(currentValues).forEach(([sysex, value]) => {
+    sysexArray[parseInt(sysex)] = value;
+  });
+  for (let i = 0; i < 16; i++) {
+    sysexArray[BASE_ADDRESS_RHYTHM + i] = rhythmPattern[i] || 0;
+  }
+  const outputBase64 = sysexArray.join(";");
+  const encoded = btoa(outputBase64);
+  navigator.clipboard.writeText(encoded);
+  console.log(`[export-settings-btn] Exported settings: ${encoded}`);
+  showNotification("Preset code copied to clipboard", "success");
+});
+
+document.getElementById("load-settings-btn")?.addEventListener("click", () => {
+  if (!controller.isConnected()) {
+    console.warn("[load-settings-btn] No device connected");
+    document.getElementById("information_zone")?.focus();
+    return;
+  }
+  const presetCode = prompt("Paste preset code");
+  if (!presetCode) return;
+  try {
+    const parameters = atob(presetCode).split(";").map(v => parseFloat(v));
+    if (parameters.length !== 256) { // Assuming max SysEx 255
+      console.warn("[load-settings-btn] Malformed preset code");
+      showNotification("Malformed preset code", "error");
+      return;
+    }
+    for (let i = 2; i < parameters.length; i++) {
+      const param = findParameterBySysex(i);
+      if (param) {
+        const value = param.data_type === "float" ? Math.round(parameters[i]) : Math.round(parameters[i]);
+        controller.sendParameter(i, value);
+        currentValues[i] = value;
+      }
+    }
+    controller.sendParameter(0, 0); // Update interface
+    console.log("[load-settings-btn] Loaded settings");
+    showNotification("Preset loaded", "success");
+  } catch (error) {
+    console.warn("[load-settings-btn] Invalid preset code:", error);
+    showNotification("Invalid preset code", "error");
+  }
+});
+
 document.getElementById("randomise_btn")?.addEventListener("click", generateRandomPreset);
 
 initialize();

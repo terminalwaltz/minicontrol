@@ -11,6 +11,200 @@ if os.path.exists('sysex_name_map.json'):
     with open('sysex_name_map.json', 'r') as f:
         sysex_name_map = json.load(f)
 
+# Create a mapping of parameter names to sysex_adress for each group
+name_to_sysex = {}
+for group_name, params in parameters.items():
+    if group_name == 'sysex_name_map':
+        continue
+    name_to_sysex[group_name] = {param['name']: param['sysex_adress'] for param in params}
+
+# Define desired order of parameter groups
+group_order = [
+    'global_parameter',
+    'chord_parameter',
+    'harp_parameter',
+    'chord_potentiometer',
+    'harp_potentiometer',
+    'modulation_potentiometer',
+    'sharp_button_parameter',
+    'rhythm_parameter'
+]
+
+# Define subgroup order for each group
+subgroup_order = {
+    'global_parameter': ['General', 'Effects'],
+    'chord_parameter': ['General', 'Oscillator', 'Envelope', 'Low pass filter', 'Tremolo', 'Vibrato', 'Delay', 'Reverb', 'Crunch', 'Output filter'],
+    'harp_parameter': ['General', 'Waveform', 'Transient', 'Envelope', 'Low pass filter', 'Tremolo', 'Vibrato', 'Delay', 'Reverb', 'Crunch', 'Output filter'],
+    'chord_potentiometer': ['Potentiometer'],
+    'harp_potentiometer': ['Potentiometer'],
+    'modulation_potentiometer': ['Potentiometer'],
+    'sharp_button_parameter': ['General'],
+    'rhythm_parameter': ['Rhythm']
+}
+
+# Define parameter order by name within each subgroup
+parameter_name_order = {
+    'rhythm_parameter': {
+        'Rhythm': [
+            'default_bpm',
+            'cycle length',
+            'measure update',
+            'shuffle value',
+            'note pushed duration',
+            'rythm pattern'  # Covers SysEx 220–235 (grid)
+        ]
+    },
+    'global_parameter': {
+        'General': ['bank color', 'led attenuation', 'transpose'],
+        'Effects': ['pan', 'reverb size', 'reverb high damping', 'reverb low damping', 'reverb low pass', 'reverb diffusion']
+    },
+    'chord_parameter': {
+        'General': [
+            'octave change',
+            'chord frame shift',
+            'key selection',
+            'barry harris mode',
+            'retrigger chords',
+            'chord shuffling',
+            'slash level',
+            'inter-note delay',
+            'random note delay'
+        ],
+        'Delay': [
+            'delay length',
+            'delay filter frequency',
+            'delay filter resonance',
+            'delay lowpass',
+            'delay bandpass',
+            'delay highpass',
+            'dry mix',
+            'delay mix'
+        ],
+        'Reverb': ['reverb level'],
+        'Crunch': ['crunch level', 'crunch type'],
+        'Oscillator': [
+            'waveform 1',
+            'amplitude 1',
+            'frequency multiplier 1',
+            'waveform 2',
+            'amplitude 2',
+            'frequency multiplier 2',
+            'waveform 3',
+            'amplitude 3',
+            'frequency multiplier 3',
+            'noise',
+            'first note',
+            'second note',
+            'third note',
+            'fourth note'
+        ],
+        'Envelope': ['attack', 'hold', 'decay', 'sustain', 'release', 'retrigger release'],
+        'Low pass filter': [
+            'base frequency',
+            'keytrack value',
+            'resonance',
+            'attack',
+            'hold',
+            'decay',
+            'sustain',
+            'release',
+            'retrigger release',
+            'LFO waveform',
+            'LFO frequency',
+            'LFO amplitude',
+            'filter sensitivity'
+        ],
+        'Tremolo': ['waveform', 'frequency', 'keytrack value', 'amplitude'],
+        'Vibrato': ['waveform', 'frequency', 'keytrack value', 'amplitude']
+    },
+    'harp_parameter': {
+        'General': [
+            'string mode',
+            'string tuning',
+            'octave change',
+            'harp frame shift',
+            'key selection',
+            'barry harris mode',
+            'retrigger harp',
+            'harp shuffling'
+        ],
+        'Delay': [
+            'delay length',
+            'delay filter frequency',
+            'delay filter resonance',
+            'delay lowpass',
+            'delay bandpass',
+            'delay highpass',
+            'dry mix',
+            'delay mix'
+        ],
+        'Reverb': ['reverb level'],
+        'Crunch': ['crunch level', 'crunch type'],
+        'Waveform': ['waveform', 'frequency multiplier', 'amplitude', 'noise'],
+        'Envelope': ['attack', 'decay', 'sustain', 'release', 'retrigger release'],
+        'Low pass filter': [
+            'base frequency',
+            'keytrack value',
+            'resonance',
+            'attack',
+            'hold',
+            'decay',
+            'sustain',
+            'release',
+            'retrigger release',
+            'filter sensitivity'
+        ],
+        'Transient': ['waveform', 'amplitude', 'note level', 'attack', 'hold', 'decay'],
+        'Tremolo': ['waveform', 'frequency', 'amplitude'],
+        'Vibrato': [
+            'waveform',
+            'frequency',
+            'amplitude',
+            'attack',
+            'hold',
+            'decay',
+            'sustain',
+            'release',
+            'retrigger release',
+            'pitch bend',
+            'attack bend',
+            'hold bend',
+            'decay bend',
+            'retrigger release bend',
+            'intensity'
+        ],
+        'Output filter': [
+            'frequency',
+            'resonance',
+            'lowpass',
+            'bandpass',
+            'highpass',
+            'LFO waveform',
+            'LFO frequency',
+            'LFO amplitude',
+            'filter LFO sensitivity',
+            'output amplifier'
+        ]
+    },
+    'chord_potentiometer': {
+        'Potentiometer': ['chord alternate control', 'chord alternate range']
+    },
+    'harp_potentiometer': {
+        'Potentiometer': ['harp alternate control', 'harp alternate percent range']
+    },
+    'modulation_potentiometer': {
+        'Potentiometer': [
+            'mod main control',
+            'mod main percent range',
+            'mod alternate control',
+            'mod alternate percent range'
+        ]
+    },
+    'sharp_button_parameter': {
+        'General': ['sharp function']
+    }
+}
+
 # Generate HTML for parameter controls
 def generate_param_html(param):
     html = []
@@ -60,7 +254,7 @@ def generate_param_html(param):
             </div>
         ''')
     elif ui_type == 'select':
-                # Use options from parameters.json if available, otherwise use sysex_name_map
+        # Use options from parameters.json if available, otherwise use sysex_name_map
         if 'options' in param:
             options_html = ''.join([
                 f'<option value="{opt["value"]}">{opt["label"]}</option>'
@@ -117,14 +311,36 @@ def generate_details_html(group_name, params):
     grouped_params = {}
     for param in params:
         param_group = param['group']
+        if param_group == 'hidden':
+            continue
         if param_group not in grouped_params:
             grouped_params[param_group] = []
         grouped_params[param_group].append(param)
     
     param_html = []
-    for param_group, group_params in sorted(grouped_params.items()):
-        param_html.append(f'<h3 style="margin: 10px 0; font-size: 1.5em;">{param_group}</h3>')
-        param_html.extend([generate_param_html(param) for param in group_params])
+    # Use defined subgroup order or fallback to sorted
+    ordered_subgroups = subgroup_order.get(group_name, sorted(grouped_params.keys()))
+    for param_group in ordered_subgroups:
+        if param_group not in grouped_params:
+            continue
+        # Convert name-based order to sysex_adress order
+        name_order = parameter_name_order.get(group_name, {}).get(param_group, [])
+        param_order = [
+            name_to_sysex[group_name][name]
+            for name in name_order
+            if name in name_to_sysex[group_name]
+        ]
+        # Special handling for rhythm pattern (SysEx 220–235)
+        if group_name == 'rhythm_parameter' and param_group == 'Rhythm':
+            rhythm_pattern_sysex = [p['sysex_adress'] for p in params if p['name'] == 'rythm pattern']
+            param_order.extend(rhythm_pattern_sysex)
+        # Sort parameters by defined order or fallback to sysex_adress
+        sorted_params = sorted(
+            grouped_params[param_group],
+            key=lambda p: param_order.index(p['sysex_adress']) if p['sysex_adress'] in param_order else len(param_order) + p['sysex_adress']
+        )
+        param_html.append(f'<h3 style="margin: 10px 0; font-size: 1.1em;">{param_group}</h3>')
+        param_html.extend([generate_param_html(param) for param in sorted_params])
     
     if not param_html:
         return ''
@@ -139,7 +355,7 @@ def generate_details_html(group_name, params):
         </details>
     '''
 
-# Generate HTML
+# Define HTML template
 html_template = '''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -264,11 +480,12 @@ html_template = '''<!DOCTYPE html>
 </html>
 '''
 
-# Generate parameter sections based on JSON dictionary keys, excluding "hidden"
+# Generate parameter sections in specified order
 parameter_sections = []
-for group_name, params in parameters.items():
-    if group_name == 'sysex_name_map' or group_name == 'hidden':
+for group_name in group_order:
+    if group_name not in parameters or group_name == 'sysex_name_map' or group_name == 'hidden':
         continue
+    params = parameters[group_name]
     if group_name == 'rhythm_parameter':
         rhythm_params = [p for p in params if 220 <= p['sysex_adress'] <= 235]
         other_rhythm_params = [p for p in params if p['sysex_adress'] < 220 or p['sysex_adress'] > 235]
@@ -281,11 +498,26 @@ for group_name, params in parameters.items():
                     if param_group not in grouped_rhythm_params:
                         grouped_rhythm_params[param_group] = []
                     grouped_rhythm_params[param_group].append(param)
-                param_html.append('<h3 style="margin: 10px 0; font-size: 1.5em;">Rhythm Settings</h3>')
-                for param_group, group_params in sorted(grouped_rhythm_params.items()):
-                    param_html.extend([generate_param_html(param) for param in group_params])
+                # Use defined subgroup order for rhythm_parameter
+                ordered_subgroups = subgroup_order.get(group_name, sorted(grouped_rhythm_params.keys()))
+                for param_group in ordered_subgroups:
+                    if param_group not in grouped_rhythm_params:
+                        continue
+                    # Convert name-based order to sysex_adress order
+                    name_order = parameter_name_order.get(group_name, {}).get(param_group, [])
+                    param_order = [
+                        name_to_sysex[group_name][name]
+                        for name in name_order
+                        if name in name_to_sysex[group_name]
+                    ]
+                    sorted_params = sorted(
+                        grouped_rhythm_params[param_group],
+                        key=lambda p: param_order.index(p['sysex_adress']) if p['sysex_adress'] in param_order else len(param_order) + p['sysex_adress']
+                    )
+                    param_html.append(f'<h3 style="margin: 10px 0; font-size: 1.1em;">{param_group}</h3>')
+                    param_html.extend([generate_param_html(param) for param in sorted_params])
             if rhythm_params:
-                param_html.append('<h3 style="margin: 10px 0; font-size: 1.5em;">Rhythm Pattern</h3>')
+                param_html.append('<h3 style="margin: 10px 0; font-size: 1.1em;">Rhythm Pattern</h3>')
                 param_html.append(generate_rhythm_grid_html())
             parameter_sections.append(f'''
                 <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
@@ -307,8 +539,7 @@ html_content = html_template.format(
 with open('index.html', 'w') as f:
     f.write(html_content)
 
-print("Generated index.html")
-""" # Define sysex_handler_template with escaped braces
+# Define sysex_handler_template with escaped braces
 sysex_handler_template = '''#ifndef SYSEX_HANDLER_H
 #define SYSEX_HANDLER_H
 
@@ -361,4 +592,4 @@ switch_cases.sort(key=lambda x: int(x.split('case ')[1].split(':')[0]))
 with open('sysex_handler.h', 'w') as f:
     f.write(sysex_handler_template.format(switch_cases=''.join(switch_cases)))
 
-print("Generated index.html and sysex_handler.h") """
+print("Generated index.html and sysex_handler.h")
