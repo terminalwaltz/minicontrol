@@ -123,7 +123,7 @@ def generate_details_html(group_name, params):
     
     param_html = []
     for param_group, group_params in sorted(grouped_params.items()):
-        param_html.append(f'<h3 style="margin: 10px 0; font-size: 1.1em;">{param_group}</h3>')
+        param_html.append(f'<h3 style="margin: 10px 0; font-size: 1.5em;">{param_group}</h3>')
         param_html.extend([generate_param_html(param) for param in group_params])
     
     if not param_html:
@@ -273,11 +273,11 @@ for group_name, params in parameters.items():
                     if param_group not in grouped_rhythm_params:
                         grouped_rhythm_params[param_group] = []
                     grouped_rhythm_params[param_group].append(param)
-                param_html.append('<h3 style="margin: 10px 0; font-size: 1.1em;">Rhythm Settings</h3>')
+                param_html.append('<h3 style="margin: 10px 0; font-size: 1.5em;">Rhythm Settings</h3>')
                 for param_group, group_params in sorted(grouped_rhythm_params.items()):
                     param_html.extend([generate_param_html(param) for param in group_params])
             if rhythm_params:
-                param_html.append('<h3 style="margin: 10px 0; font-size: 1.1em;">Rhythm Pattern</h3>')
+                param_html.append('<h3 style="margin: 10px 0; font-size: 1.5em;">Rhythm Pattern</h3>')
                 param_html.append(generate_rhythm_grid_html())
             parameter_sections.append(f'''
                 <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
