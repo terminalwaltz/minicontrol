@@ -34,7 +34,7 @@ group_order = [
 subgroup_order = {
     'global_parameter': ['General', 'Effects'],
     'chord_parameter': ['General', 'Oscillator', 'Envelope', 'Low pass filter', 'Tremolo', 'Vibrato', 'Delay', 'Reverb', 'Crunch', 'Output filter'],
-    'harp_parameter': ['General', 'Waveform', 'Transient', 'Envelope', 'Low pass filter', 'Tremolo', 'Vibrato', 'Delay', 'Reverb', 'Crunch', 'Output filter'],
+    'harp_parameter': ['General', 'Oscillator', 'Transient', 'Envelope', 'Low pass filter', 'Tremolo', 'Vibrato', 'Delay', 'Reverb', 'Crunch', 'Output filter'],
     'chord_potentiometer': ['Potentiometer'],
     'harp_potentiometer': ['Potentiometer'],
     'modulation_potentiometer': ['Potentiometer'],
@@ -140,7 +140,7 @@ parameter_name_order = {
         ],
         'Reverb': ['reverb level'],
         'Crunch': ['crunch level', 'crunch type'],
-        'Waveform': ['waveform', 'frequency multiplier', 'amplitude', 'noise'],
+        'Oscillator': ['waveform', 'frequency multiplier', 'amplitude', 'noise'],
         'Envelope': ['attack', 'decay', 'sustain', 'release', 'retrigger release'],
         'Low pass filter': [
             'base frequency',

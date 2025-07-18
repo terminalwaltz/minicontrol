@@ -1589,6 +1589,29 @@
                         data-sysex-address="98" data-ui-type="switch" data-data-type="int" data-float-multiplier="1" title="puts the harp in chromatic mode, with static notes not dependant on chord selection"
                        style="margin: 0 8px;">
             </div>
+        <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Oscillator</h3>
+            <div style="display: flex; align-items: center; margin: 8px 0;">
+                <label for="param-41" style="width: 150px; font-weight: bold;">amplitude</label>
+                <input type="range" id="param-41" name="amplitude"
+                       min="0.0" max="100.0" 
+                       step="1.0" 
+                       value="50.0"
+                       
+                       data-sysex-address="41" data-ui-type="slider" data-data-type="float" data-float-multiplier="100.0" title="amplitude of the 12 initial oscillators"
+                       style="width: 150px; margin: 0 8px;">
+                <input type="number" id="value-41" 
+                       value="0.01"
+                       min="0" max="1" step="0.01"
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 8px 0;">
+                <label for="param-42" style="width: 150px; font-weight: bold;">waveform</label>
+                <select id="param-42" name="waveform" data-sysex-address="42" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="defines the waveform amongst 12 oscillators. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square."
+                        style="width: 150px; padding: 5px; margin: 0 8px;">
+                    <option value="0">Sine</option><option value="1">Sawtooth</option><option value="2">Square</option><option value="3">Triangle</option><option value="4">Bandlimited Pulse</option><option value="5">Pulse</option><option value="6">Reverse Sawtooth</option><option value="7">Noise</option><option value="8">Variable Triangle</option><option value="9">Bandlimited Sawtooth</option><option value="10">Reverse Bandlimited Sawtooth</option><option value="11">Bandlimited Square</option>
+                </select>
+            </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Transient</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
                 <label for="param-105" style="width: 150px; font-weight: bold;">note level</label>
