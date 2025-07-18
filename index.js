@@ -15,7 +15,20 @@ const updateInterval = 50;
 let minichord_device = false;
 const BASE_ADDRESS_RHYTHM = 220;
 
-// Loads parameter definitions from parameters.json
+function getFloatMultiplier(param) {
+  return parseFloat(param.float_multiplier) || (param.data_type === 'float' ? (controller.float_multiplier || 100.0) : 1);
+}
+
+function applyOverrideDefaults(target = defaultValues) {
+  [2, 3, 4, 5, 6].forEach(sysex => {
+    const param = findParameterBySysex(sysex);
+    if (param) {
+      const floatMultiplier = getFloatMultiplier(param);
+      target[sysex] = (sysex === 2 || sysex === 3) ? 0.5 * floatMultiplier : 512;
+    }
+  });
+}
+
 async function loadParameters() {
   if (parameters) return parameters;
   try {
@@ -31,7 +44,6 @@ async function loadParameters() {
   }
 }
 
-// Initializes default values from parameters.json
 async function initializeDefaultValues() {
   const params = await loadParameters();
   defaultValues = {};
@@ -39,29 +51,14 @@ async function initializeDefaultValues() {
     if (group === 'sysex_name_map') return;
     params[group].forEach(param => {
       const sysex = param.sysex_adress;
-      const floatMultiplier = parseFloat(param.float_multiplier) || (param.data_type === 'float' ? 
-                             (controller.float_multiplier || 100.0) : 1);
-      defaultValues[sysex] = param.data_type === 'float' ? 
-                            param.default_value * floatMultiplier : param.default_value;
+      const floatMultiplier = getFloatMultiplier(param);
+      defaultValues[sysex] = param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value;
     });
   });
-  const overrideAddresses = [2, 3, 4, 5, 6];
-  overrideAddresses.forEach(sysex => {
-    const param = findParameterBySysex(sysex);
-    if (param) {
-      const floatMultiplier = parseFloat(param.float_multiplier) || (param.data_type === 'float' ? 
-                             (controller.float_multiplier || 100.0) : 1);
-      if (sysex === 2 || sysex === 3) {
-        defaultValues[sysex] = 0.5 * floatMultiplier;
-      } else if (sysex === 4 || sysex === 5 || sysex === 6) {
-        defaultValues[sysex] = 512;
-      }
-    }
-  });
+  applyOverrideDefaults(defaultValues);
   console.log('[DEBUG] Default values:', defaultValues);
 }
 
-// Finds parameter by SysEx address
 function findParameterBySysex(sysex) {
   const params = parameters;
   for (const group of Object.keys(params)) {
@@ -72,7 +69,6 @@ function findParameterBySysex(sysex) {
   return null;
 }
 
-// Updates connection status display
 function updateConnectionStatus(connected, message) {
   const statusElement = document.getElementById("connection-status");
   if (!statusElement) return;
@@ -83,7 +79,6 @@ function updateConnectionStatus(connected, message) {
   if (message) showNotification(message, connected ? "success" : "error");
 }
 
-// Displays a temporary notification
 function showNotification(message, type = 'info') {
   const statusElement = document.getElementById("connection-status");
   if (!statusElement) return;
@@ -95,34 +90,25 @@ function showNotification(message, type = 'info') {
   }, 3000);
 }
 
-// Updates page color scheme and text color based on SysEx 20
 function updateUIColor() {
   const param = findParameterBySysex(20);
-  if (!param) {
-    console.warn('[updateUIColor] SysEx 20 not found in parameters.json');
-    return;
-  }
-  const bankColor = currentValues[20] || defaultValues[20] || param.default_value;
+  if (!param) return console.warn('[updateUIColor] SysEx 20 not found');
+  const bankColor = currentValues[20] ?? defaultValues[20] ?? param.default_value;
   const hue = bankColor % 360;
-  let textColor = '#ffffff'; // Default: white
-  if ((hue >= 45 && hue <= 75) || (hue >= 90 && hue <= 150)) {
-    textColor = '#000000'; // Black for yellow (45–75) and light green (90–150)
-  }
+  let textColor = '#ffffff';
+  if ((hue >= 45 && hue <= 75) || (hue >= 90 && hue <= 150)) textColor = '#000000';
   document.documentElement.style.setProperty('--primary-color', `hsl(${hue}, 70%, 50%)`);
   document.documentElement.style.setProperty('--text-color', textColor);
-  console.log(`[DEBUG] UI color updated: hue=${hue}, value=${bankColor}, textColor=${textColor}, currentValues[20]=${currentValues[20]}`);
-  const sliders = document.querySelectorAll('input[type="range"]');
-  sliders.forEach(slider => {
+  document.querySelectorAll('input[type="range"]').forEach(slider => {
     const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
     slider.style.background = `linear-gradient(to right, hsl(${hue}, 70%, 50%) 0%, hsl(${hue}, 70%, 50%) ${value}%, #ccc ${value}%, #ccc 100%)`;
   });
 }
 
-// Updates rhythm grid checkboxes (SysEx 220–235)
 function refreshRhythmGrid() {
   for (let step = 0; step < 16; step++) {
     const sysexAddress = BASE_ADDRESS_RHYTHM + step;
-    const patternValue = currentValues[sysexAddress] || 0;
+    const patternValue = currentValues[sysexAddress] ?? 0;
     rhythmPattern[step] = patternValue;
     for (let voice = 0; voice < 7; voice++) {
       const checkbox = document.getElementById(`rhythm-checkbox-${step}-${voice}`);
@@ -131,58 +117,52 @@ function refreshRhythmGrid() {
   }
 }
 
-// Sets up parameter controls (sliders, selects, and value displays)
+function applyUIValue(param, value) {
+  const sysex = param.sysex_adress;
+  const floatMultiplier = getFloatMultiplier(param);
+  const displayValue = param.data_type === 'float' ? (value / floatMultiplier).toFixed(2) : value;
+  const element = document.getElementById(`param-${sysex}`);
+  const valueDisplay = document.getElementById(`value-${sysex}`);
+  if (!element) return;
+
+  if (param.ui_type.includes('slider')) {
+    element.value = value;
+    if (valueDisplay) valueDisplay.value = displayValue;
+  } else if (param.ui_type === 'select') {
+    element.value = value;
+  }
+}
+
 async function setupParameterControls() {
   const params = await loadParameters();
   Object.keys(params).forEach(group => {
     if (group === 'sysex_name_map') return;
     params[group].forEach(param => {
       const sysex = param.sysex_adress;
-      const uiType = param.ui_type;
-      const floatMultiplier = parseFloat(param.float_multiplier) || (param.data_type === 'float' ? 
-                             (controller.float_multiplier || 100.0) : 1);
-      const defaultValue = defaultValues[sysex] !== undefined ? defaultValues[sysex] : 
-                          (param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value);
-      currentValues[sysex] = currentValues[sysex] || defaultValue;
+      const floatMultiplier = getFloatMultiplier(param);
+      const defaultValue = defaultValues[sysex] ?? (param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value);
+      currentValues[sysex] = currentValues[sysex] ?? defaultValue;
+      applyUIValue(param, currentValues[sysex]);
 
-      if (uiType === 'slider' || uiType === 'discrete_slider') {
-        const element = document.getElementById(`param-${sysex}`);
+      const element = document.getElementById(`param-${sysex}`);
+      if (!element) return;
+
+      if (param.ui_type.includes('slider')) {
         const valueDisplay = document.getElementById(`value-${sysex}`);
-        if (!element) {
-          console.warn(`[setupParameterControls] Slider param-${sysex} not found`);
-          return;
-        }
-        if (!valueDisplay) {
-          console.error(`[setupParameterControls] Value display value-${sysex} not found`);
-          return;
-        }
         element.min = param.min_value * floatMultiplier;
         element.max = param.max_value * floatMultiplier;
         element.step = param.data_type === 'float' ? 0.01 * floatMultiplier : 1;
-        element.value = currentValues[sysex];
-        valueDisplay.value = param.data_type === 'float' ? 
-                            (currentValues[sysex] / floatMultiplier).toFixed(2) : currentValues[sysex];
-        console.log(`[setupParameterControls] Sysex=${sysex}, initial value=${element.value}, display=${valueDisplay.value}`);
         element.addEventListener('input', () => {
           const uiValue = parseFloat(element.value) / floatMultiplier;
           const deviceValue = Math.round(parseFloat(element.value));
-          console.log(`[Slider Input] Sysex=${sysex}, uiValue=${uiValue.toFixed(2)}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}`);
           tempValues[sysex] = deviceValue;
           currentValues[sysex] = deviceValue;
-          valueDisplay.value = param.data_type === 'float' ? uiValue.toFixed(2) : deviceValue;
+          if (valueDisplay) valueDisplay.value = param.data_type === 'float' ? uiValue.toFixed(2) : deviceValue;
           controller.sendParameter(sysex, deviceValue);
         });
-      } else if (uiType === 'select') {
-        const element = document.getElementById(`param-${sysex}`);
-        if (!element) {
-          console.warn(`[setupParameterControls] Select param-${sysex} not found`);
-          return;
-        }
-        element.value = currentValues[sysex];
-        console.log(`[setupParameterControls] Select Sysex=${sysex}, initial value=${element.value}`);
+      } else if (param.ui_type === 'select') {
         element.addEventListener('change', () => {
           const value = parseInt(element.value);
-          console.log(`[Select Change] Sysex=${sysex}, value=${value}`);
           tempValues[sysex] = value;
           currentValues[sysex] = value;
           controller.sendParameter(sysex, value);
@@ -192,84 +172,34 @@ async function setupParameterControls() {
   });
 }
 
-// Handles incoming MIDI data
 function handleDataReceived(data) {
   console.log(`[handleDataReceived] Bank=${data.bankNumber}, parameters.length=${data.parameters.length}`);
   currentValues = {};
   data.parameters.forEach((value, sysex) => {
     if (value !== undefined) {
       const param = findParameterBySysex(sysex);
-      if (param) {
-        currentValues[sysex] = value;
-        console.log(`[handleDataReceived] Sysex=${sysex}, value=${value}`);
-      }
+      if (param) currentValues[sysex] = value;
     }
   });
-  const overrideAddresses = [2, 3, 4, 5, 6];
-  overrideAddresses.forEach(sysex => {
-    const param = findParameterBySysex(sysex);
-    if (param) {
-      const floatMultiplier = parseFloat(param.float_multiplier) || (param.data_type === 'float' ? 
-                             (controller.float_multiplier || 100.0) : 1);
-      if (sysex === 2 || sysex === 3) {
-        currentValues[sysex] = 0.5 * floatMultiplier;
-      } else if (sysex === 4 || sysex === 5 || sysex === 6) {
-        currentValues[sysex] = 512;
-      }
-      controller.sendParameter(sysex, currentValues[sysex]);
-    }
-  });
-  rhythmPattern = data.rhythmData.map(bits => {
-    let value = 0;
-    bits.forEach((bit, i) => { if (bit) value |= (1 << i); });
-    return value;
-  });
+  applyOverrideDefaults(currentValues);
+  rhythmPattern = data.rhythmData.map(bits => bits.reduce((acc, bit, i) => acc | (bit ? (1 << i) : 0), 0));
   targetBank = data.bankNumber;
   updateUI(data.bankNumber);
 }
 
-// Updates all UI controls based on currentValues
 async function updateUI(bankNumber) {
   console.log(`[updateUI] Bank ${bankNumber + 1}, targetBank=${targetBank + 1}`);
   currentBankNumber = bankNumber;
   const bankSelect = document.getElementById("bank_number_selection");
-  if (bankSelect && parseInt(bankSelect.value) !== targetBank) {
-    bankSelect.value = targetBank;
-  }
+  if (bankSelect && parseInt(bankSelect.value) !== targetBank) bankSelect.value = targetBank;
   const params = await loadParameters();
   Object.keys(params).forEach(group => {
     if (group === 'sysex_name_map') return;
     params[group].forEach(param => {
       const sysex = param.sysex_adress;
-      const uiType = param.ui_type;
-      const floatMultiplier = parseFloat(param.float_multiplier) || (param.data_type === 'float' ? 
-                             (controller.float_multiplier || 100.0) : 1);
-      const value = currentValues[sysex] !== undefined ? currentValues[sysex] : 
-                    (param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value);
-
-      if (uiType === 'slider' || uiType === 'discrete_slider') {
-        const element = document.getElementById(`param-${sysex}`);
-        const valueDisplay = document.getElementById(`value-${sysex}`);
-        if (!element) {
-          console.warn(`[updateUI] Slider param-${sysex} not found`);
-          return;
-        }
-        if (!valueDisplay) {
-          console.error(`[updateUI] Value display value-${sysex} not found`);
-          return;
-        }
-        element.value = value;
-        valueDisplay.value = param.data_type === 'float' ? (value / floatMultiplier).toFixed(2) : value;
-        console.log(`[updateUI] Sysex=${sysex}, value=${value}, display=${valueDisplay.value}, element exists=${!!element}, valueDisplay exists=${!!valueDisplay}`);
-      } else if (uiType === 'select') {
-        const element = document.getElementById(`param-${sysex}`);
-        if (!element) {
-          console.warn(`[updateUI] Select param-${sysex} not found`);
-          return;
-        }
-        element.value = value;
-        console.log(`[updateUI] Select Sysex=${sysex}, value=${value}, element exists=${!!element}`);
-      }
+      const floatMultiplier = getFloatMultiplier(param);
+      const value = currentValues[sysex] ?? (param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value);
+      applyUIValue(param, value);
     });
   });
   updateUIColor();
@@ -277,34 +207,169 @@ async function updateUI(bankNumber) {
   updateConnectionStatus(controller.isConnected(), null);
 }
 
-// Loads settings for a specific bank
 function loadBankSettings(bankNumber) {
-  if (!controller.isConnected()) {
-    console.warn(`[loadBankSettings] No device connected for bank ${bankNumber}`);
-    return;
-  }
+  if (!controller.isConnected()) return console.warn(`[loadBankSettings] No device connected for bank ${bankNumber}`);
   tempValues = {};
   controller.sendSysEx([0, 0, 0, bankNumber]);
   console.log(`[loadBankSettings] Requesting settings for bank ${bankNumber}`);
 }
 
-// Initializes the app
+// New: Random preset generation functions
+async function loadParameterRanges() {
+  try {
+    const [parametersResponse, presetsResponse] = await Promise.all([
+      fetch('parameters.json'),
+      fetch('shared_presets.json').catch(() => null) // Optional, fallback if not found
+    ]);
+    
+    const parametersData = await parametersResponse.json();
+    const presetsData = presetsResponse ? await presetsResponse.json() : null;
+    
+    const parameterRanges = {};
+    
+    // Use random preset as base if available
+    let randomPreset = null;
+    if (presetsData?.shared_presets?.length) {
+      randomPreset = presetsData.shared_presets[Math.floor(Math.random() * presetsData.shared_presets.length)];
+      console.log(`[loadParameterRanges] Using random preset: "${randomPreset.name}" by ${randomPreset.author}`);
+    }
+    
+    // Decode preset values if available
+    const decodedPreset = randomPreset ? atob(randomPreset.value).split(';').map(v => parseFloat(v)) : null;
+    
+    // Process parameters
+    ['global_parameter', 'harp_parameter', 'chord_parameter', 'rhythm_parameter'].forEach(category => {
+      if (!parametersData[category]) return;
+      parametersData[category].forEach(param => {
+        const sysex = param.sysex_adress;
+        const presetValue = decodedPreset ? decodedPreset[sysex] : null;
+        let defaultValue = param.default_value;
+        
+        if (presetValue !== undefined && presetValue !== null && !isNaN(presetValue)) {
+          defaultValue = param.data_type === 'float' ? presetValue / 100 : presetValue;
+        }
+        
+        parameterRanges[sysex] = {
+          min: param.min_value,
+          max: param.max_value,
+          type: param.data_type,
+          default: defaultValue,
+          original_default: param.default_value
+        };
+      });
+    });
+    
+    return parameterRanges;
+  } catch (error) {
+    console.error('[loadParameterRanges] Error:', error);
+    // Fallback to parameters.json only
+    try {
+      const response = await fetch('parameters.json');
+      const parametersData = await response.json();
+      
+      const parameterRanges = {};
+      
+      ['global_parameter', 'harp_parameter', 'chord_parameter', 'rhythm_parameter'].forEach(category => {
+        if (!parametersData[category]) return;
+        parametersData[category].forEach(param => {
+          parameterRanges[param.sysex_adress] = {
+            min: param.min_value,
+            max: param.max_value,
+            type: param.data_type,
+            default: param.default_value,
+            original_default: param.default_value
+          };
+        });
+      });
+      
+      return parameterRanges;
+    } catch (fallbackError) {
+      console.error('[loadParameterRanges] Fallback error:', fallbackError);
+      return {};
+    }
+  }
+}
+
+function normalRandom(mean, sigma) {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  return z * sigma + mean;
+}
+
+async function generateRandomPreset() {
+  if (!controller.isConnected()) {
+    document.getElementById("information_zone")?.focus();
+    showNotification("No device connected", "error");
+    return;
+  }
+  
+  const parameterRanges = await loadParameterRanges();
+  const weirdness_factor = 0.10;
+  const preset = Array(256).fill(0); // Assuming max SysEx 255
+  const fixedValues = [32, 33, 34, 41, 97, 197];
+  
+  Object.entries(parameterRanges).forEach(([sysex, params]) => {
+    const idx = parseInt(sysex);
+    
+    if (idx < 19 || fixedValues.includes(idx)) {
+      preset[idx] = params.original_default;
+    } else {
+      const minVal = params.min;
+      const maxVal = params.max;
+      const center = params.default;
+      const range = maxVal - minVal;
+      const sigma = range * weirdness_factor;
+      
+      let value = normalRandom(center, sigma);
+      value = Math.max(minVal, Math.min(maxVal, value));
+      
+      preset[idx] = params.type === 'float' ? Math.round(value * 100) / 100 : Math.round(value);
+    }
+  });
+  
+  for (let i = 2; i < 256; i++) {
+    if (preset[i] !== undefined && parameterRanges[i]) {
+      const param = findParameterBySysex(i);
+      if (!param) continue;
+      const floatMultiplier = getFloatMultiplier(param);
+      const valueToSend = param.data_type === 'float' ? Math.round(preset[i] * floatMultiplier) : preset[i];
+      controller.sendParameter(i, valueToSend);
+      currentValues[i] = valueToSend;
+    }
+  }
+  
+  controller.sendParameter(0, 0); // Update interface
+  console.log("[generateRandomPreset] Random preset applied");
+  showNotification("Random preset applied", "success");
+}
+
 async function initialize() {
   await initializeDefaultValues();
   await setupParameterControls();
   controller.onConnectionChange = updateConnectionStatus;
   controller.onDataReceived = handleDataReceived;
   const connected = await controller.initialize();
-  if (connected) {
-    loadBankSettings(0);
-  }
+  if (connected) loadBankSettings(0);
 }
 
-// Event listener for bank selection
 document.getElementById("bank_number_selection")?.addEventListener("change", (e) => {
   targetBank = parseInt(e.target.value);
   loadBankSettings(targetBank);
 });
 
-// Start the app
+document.getElementById("save-to-bank-btn")?.addEventListener("click", () => {
+  if (!controller.isConnected()) {
+    console.warn("[save-to-bank-btn] No device connected");
+    document.getElementById("information_zone")?.focus();
+    return;
+  }
+  console.log(`[save-to-bank-btn] Saving to bank ${targetBank}`);
+  controller.saveCurrentSettings(targetBank);
+  showNotification(`Saved to bank ${targetBank + 1}`, "success");
+});
+
+document.getElementById("randomise_btn")?.addEventListener("click", generateRandomPreset);
+
 initialize();

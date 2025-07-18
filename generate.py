@@ -229,6 +229,14 @@ html_template = '''<!DOCTYPE html>
         <button id="reset-all-banks-btn">reset all banks</button>
       </div>
     </div>
+    <div class="section">
+      <h5 style="margin: 0; font-size: 1.1em;">randomising:</h5>
+    </div>
+    <div class="controls">
+      <div class="button_div">
+        <button id="randomise_btn">randomise</button>
+      </div>
+    </div>
   </div>
   <details>
     <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">Connection instruction</summary>
