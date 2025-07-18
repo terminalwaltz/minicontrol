@@ -219,7 +219,6 @@ def generate_param_html(param):
     default_value = param.get('default_value', 0)
     float_multiplier = param.get('float_multiplier', 100.0 if data_type == 'float' else 1)
 
-    # Add metadata for special cases
     attrs = [
         f'data-sysex-address="{sysex_address}"',
         f'data-ui-type="{ui_type}"',
@@ -248,9 +247,9 @@ def generate_param_html(param):
                        {"data-discrete='true'" if ui_type == 'discrete_slider' else ''}
                        {' '.join(attrs)}
                        style="flex: 1; margin: 0 10px;">
-                <input type="text" readonly id="value-{sysex_address}" 
+                <input type="text" id="value-{sysex_address}" 
                        value="{display_value_str}"
-                       style="width: 60px; text-align: right; border: none; background: transparent;">
+                       style="width: 60px; text-align: right; border: 1px solid #ccc; padding: 2px;">
             </div>
         ''')
     elif ui_type == 'select':
@@ -285,7 +284,7 @@ def generate_param_html(param):
             </div>
         ''')
     return '\n'.join(html)
-
+    
 # Generate rhythm grid HTML
 def generate_rhythm_grid_html():
     rhythm_params = [p for p in parameters.get('rhythm_parameter', []) if 220 <= p['sysex_adress'] <= 235]

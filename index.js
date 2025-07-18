@@ -148,10 +148,10 @@ async function setupParameterControls() {
       applyUIValue(param, currentValues[sysex]);
 
       const element = document.getElementById(`param-${sysex}`);
+      const valueDisplay = document.getElementById(`value-${sysex}`);
       if (!element) return;
 
       if (param.ui_type.includes('slider')) {
-        const valueDisplay = document.getElementById(`value-${sysex}`);
         element.min = param.min_value * floatMultiplier;
         element.max = param.max_value * floatMultiplier;
         element.step = param.data_type === 'float' ? 0.01 * floatMultiplier : 1;
@@ -163,17 +163,36 @@ async function setupParameterControls() {
           if (valueDisplay) valueDisplay.value = param.data_type === 'float' ? uiValue.toFixed(2) : deviceValue;
           controller.sendParameter(sysex, deviceValue);
           const valuePercent = ((element.value - element.min) / (element.max - element.min)) * 100;
-          const hue = (currentValues[20] ?? defaultValues[20] ?? 0) % 360;
           element.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${valuePercent}%, #ccc ${valuePercent}%, #ccc 100%)`;
-          if (sysex === 20) updateUIColor(); // Update all sliders' colors when bank color changes
+          if (sysex === 20) updateUIColor();
         });
+        if (valueDisplay) {
+          valueDisplay.addEventListener('input', () => {
+            let inputValue = param.data_type === 'float' ? parseFloat(valueDisplay.value) : parseInt(valueDisplay.value);
+            if (isNaN(inputValue)) {
+              console.warn(`[text-input] Invalid value for ${sysex}: ${valueDisplay.value}`);
+              return;
+            }
+            inputValue = Math.max(param.min_value, Math.min(param.max_value, inputValue));
+            const deviceValue = param.data_type === 'float' ? Math.round(inputValue * floatMultiplier) : inputValue;
+            element.value = deviceValue;
+            tempValues[sysex] = deviceValue;
+            currentValues[sysex] = deviceValue;
+            valueDisplay.value = param.data_type === 'float' ? inputValue.toFixed(2) : inputValue;
+            controller.sendParameter(sysex, deviceValue);
+            const valuePercent = ((element.value - element.min) / (element.max - element.min)) * 100;
+            element.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${valuePercent}%, #ccc ${valuePercent}%, #ccc 100%)`;
+            if (sysex === 20) updateUIColor();
+            console.log(`[text-input] Param ${sysex}, Value=${inputValue}`);
+          });
+        }
       } else if (param.ui_type === 'select') {
         element.addEventListener('change', () => {
           const value = parseInt(element.value);
           tempValues[sysex] = value;
           currentValues[sysex] = value;
           controller.sendParameter(sysex, value);
-          if (sysex === 20) updateUIColor(); // Update colors for select-based bank color
+          if (sysex === 20) updateUIColor();
         });
       } else if (param.ui_type === 'switch') {
         element.addEventListener('input', () => {
@@ -185,6 +204,7 @@ async function setupParameterControls() {
       }
     });
   });
+  updateUIColor();
 }
 
 function handleDataReceived(data) {
@@ -370,13 +390,14 @@ function setupRhythmGridControls() {
           const sysexAddress = BASE_ADDRESS_RHYTHM + step;
           let patternValue = currentValues[sysexAddress] ?? 0;
           if (checkbox.checked) {
-            patternValue |= (1 << voice); // Set bit
+            patternValue |= (1 << voice);
           } else {
-            patternValue &= ~(1 << voice); // Clear bit
+            patternValue &= ~(1 << voice);
           }
           rhythmPattern[step] = patternValue;
           currentValues[sysexAddress] = patternValue;
           controller.sendParameter(sysexAddress, patternValue);
+          console.log(`[rhythm-checkbox] Step ${step}, Voice ${voice}, Pattern ${patternValue}`);
         });
       }
     }
