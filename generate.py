@@ -238,19 +238,19 @@ def generate_param_html(param):
         display_value_str = f"{display_value:.2f}" if data_type == 'float' else str(display_value)
         slider_value = default_value * float_multiplier if data_type == 'float' else default_value
         html.append(f'''
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-{sysex_address}" style="width: 200px; font-weight: bold;">{name}</label>
+            <div style="display: flex; align-items: center; margin: 8px 0;">
+                <label for="param-{sysex_address}" style="width: 150px; font-weight: bold;">{name}</label>
                 <input type="range" id="param-{sysex_address}" name="{name}"
                        min="{min_value * float_multiplier}" max="{max_value * float_multiplier}" 
                        step="{0.01 * float_multiplier if data_type == 'float' else 1}" 
                        value="{slider_value}"
                        {"data-discrete='true'" if ui_type == 'discrete_slider' else ''}
                        {' '.join(attrs)}
-                       style="flex: 1; margin: 0 10px;">
+                       style="width: 150px; margin: 0 8px;">
                 <input type="number" id="value-{sysex_address}" 
-                    value="{display_value_str}"
-                    min="{min_value}" max="{max_value}" step="{0.01 if data_type == 'float' else 1}"
-                    style="width: 60px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       value="{display_value_str}"
+                       min="{min_value}" max="{max_value}" step="{0.01 if data_type == 'float' else 1}"
+                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
             </div>
         ''')
     elif ui_type == 'select':
@@ -267,21 +267,21 @@ def generate_param_html(param):
                 if key in option_addresses
             ])
         html.append(f'''
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-{sysex_address}" style="width: 200px; font-weight: bold;">{name}</label>
+            <div style="display: flex; align-items: center; margin: 8px 0;">
+                <label for="param-{sysex_address}" style="width: 150px; font-weight: bold;">{name}</label>
                 <select id="param-{sysex_address}" name="{name}" {' '.join(attrs)}
-                        style="flex: 1; padding: 5px; margin: 0 10px;">
+                        style="width: 150px; padding: 5px; margin: 0 8px;">
                     {options_html}
                 </select>
             </div>
         ''')
     elif ui_type == 'switch':
         html.append(f'''
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <label for="param-{sysex_address}" style="width: 200px; font-weight: bold;">{name}</label>
+            <div style="display: flex; align-items: center; margin: 8px 0;">
+                <label for="param-{sysex_address}" style="width: 150px; font-weight: bold;">{name}</label>
                 <input type="checkbox" id="param-{sysex_address}" name="{name}"
                        {'checked' if default_value else ''} {' '.join(attrs)}
-                       style="margin: 0 10px;">
+                       style="margin: 0 8px;">
             </div>
         ''')
     return '\n'.join(html)
@@ -291,7 +291,7 @@ def generate_rhythm_grid_html():
     rhythm_params = [p for p in parameters.get('rhythm_parameter', []) if 220 <= p['sysex_adress'] <= 235]
     if not rhythm_params:
         return ''
-    html = ['<div style="display: grid; grid-template-columns: repeat(16, 40px); gap: 5px; margin: 10px 0;">']
+    html = ['<div style="display: grid; grid-template-columns: repeat(16, 15px); gap: 5px; margin: 10px 0;">']
     for step in range(16):
         html.append(f'<div style="display: flex; flex-direction: column; align-items: center;">')
         for voice in range(7):
@@ -346,7 +346,7 @@ def generate_details_html(group_name, params):
     
     display_name = group_name.replace('_parameter', '').replace('_', ' ').title() + ' Parameters'
     return f'''
-        <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+        <details style="margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
             <summary style="font-size: 1.6em; font-weight: bold; cursor: pointer;">{display_name}</summary>
             <div style="padding: 10px;">
                 {''.join(param_html)}
@@ -360,143 +360,164 @@ html_template = '''<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Minichord UI</title>
-   <style>
- :root {{
- --primary-color: hsl(0, 70%, 50%);
- --text-color: #ffffff; 
- }}
- body {{ font-family: Arial, sans-serif; margin: 20px; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); }}
- .status-header {{ display: flex; justify-content: space-between; align-items: center; background-color: #333; color: #ffffff; padding: 10px; border-radius: 5px; }}
- .connection-status {{ display: flex; align-items: center; }}
- #dot {{ margin-left: 5px; font-size: 1.2em; color: var(--primary-color); }}
- .disconnected #dot {{ color: red; }}
- #header {{ margin: 20px 0; padding: 10px; background-color: #e0e0e0; border-radius: 5px; }}
- .section {{ margin-bottom: 10px; }}
- .controls {{ display: flex; flex-wrap: wrap; gap: 10px; }}
- .button_div {{ margin-right: 10px; }}
- button {{ padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }}
- button:hover {{ background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }}
- #bank_number_selection {{ padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }}
- #bank_number_selection:hover {{ background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }}
- input[type="range"] {{
- -webkit-appearance: none;
- width: 100%;
- height: 8px;
- border-radius: 5px;
- background: linear-gradient(to right, var(--primary-color, hsl(0, 70%, 50%)) 0%, var(--primary-color, hsl(0, 70%, 50%)) 0%, #ccc 0%, #ccc 100%);
- outline: none;
- }}
- input[type="range"]::-webkit-slider-thumb {{
- -webkit-appearance: none;
- width: 16px;
- height: 16px;
- border-radius: 50%;
- background: var(--primary-color);
- cursor: pointer;
- }}
- input[type="range"]::-moz-range-track {{
- height: 8px;
- border-radius: 5px;
- background: linear-gradient(to right, var(--primary-color, hsl(0, 70%, 50%)) 0%, var(--primary-color, hsl(0, 70%, 50%)) 0%, #ccc 0%, #ccc 100%);
- }}
- input[type="range"]::-moz-range-thumb {{
- width: 16px;
- height: 16px;
- border-radius: 50%;
- background: var(--primary-color);
- cursor: pointer;
- }}
- a {{ color: var(--primary-color); text-decoration: none; }}
- a:hover {{ text-decoration: underline; }}
- details summary:hover {{ color: var(--primary-color); }}
- input[type="text"][readonly ] {{ border: none; background: transparent; }}
- </style>
+  <style>
+    :root {{
+      --primary-color: hsl(0, 70%, 50%);
+      --text-color: #ffffff; 
+    }}
+    body {{ font-family: Arial, sans-serif; margin: 20px; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); }}
+    .status-header {{ display: flex; justify-content: space-between; align-items: center; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); color: #333; padding: 10px; border-radius: 5px; }}
+    .connection-status {{ display: flex; align-items: center; }}
+    #dot {{ margin-left: 2px; margin-right: 4px; font-size: 1.2em; color: green; }}
+    .disconnected #dot {{ color: red; }}
+    #notification-bubble {{
+      padding: 4px 10px;
+      background: green;
+      color: #fff;
+      border: 1px solid #fff;
+      border-radius: 12px;
+      font-size: 0.9em;
+      font-weight: 500;
+      display: none;
+    }}
+    .connected #notification-bubble {{
+      background: green;
+      border: 1px solid #fff;
+    }}
+    .disconnected #notification-bubble {{
+      background: red;
+      border: 1px solid #fff;
+    }}
+    #header {{ margin: 20px 0; padding: 10px; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); border-radius: 5px; }}
+    .section {{ margin-bottom: 10px; }}
+    .controls {{ display: flex; flex-wrap: wrap; gap: 10px; }}
+    .button_div {{ margin-right: 10px; }}
+    button {{ padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }}
+    button:hover {{ background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }}
+    #bank_number_selection {{ padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }}
+    #bank_number_selection:hover {{ background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }}
+    input[type="range"] {{
+      -webkit-appearance: none;
+      width: 150px;
+      height: 6px;
+      border-radius: 5px;
+      background: linear-gradient(to right, var(--primary-color, hsl(0, 70%, 50%)) 0%, var(--primary-color, hsl(0, 70%, 50%)) 0%, #ccc 0%, #ccc 100%);
+      outline: none;
+    }}
+    input[type="range"]::-webkit-slider-thumb {{
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+    }}
+    input[type="range"]::-moz-range-track {{
+      height: 6px;
+      border-radius: 5px;
+      background: linear-gradient(to right, var(--primary-color, hsl(0, 70%, 50%)) 0%, var(--primary-color, hsl(0, 70%, 50%)) 0%, #ccc 0%, #ccc 100%);
+    }}
+    input[type="range"]::-moz-range-thumb {{
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+    }}
+    a {{ color: var(--primary-color); text-decoration: none; }}
+    a:hover {{ text-decoration: underline; }}
+    details summary:hover {{ color: var(--primary-color); }}
+    input[type="text"][readonly] {{ border: none; background: transparent; }}
+  </style>
 </head>
 <body>
-  <div class="status-header">
-    <h1>minicontrol</h1>
-    <div id="connection-status" class="connection-status disconnected">
-      <span id="dot">●</span>
+  <div id="container" style="max-width: 100vw; margin: 0 auto;">
+    <div class="status-header">
+      <h1>minicontrol</h1>
+      <div id="connection-status" class="connection-status disconnected">
+        <span id="dot">●</span>
+        <span id="notification-bubble"></span>
+      </div>
     </div>
-  </div>
-  <div id="header">
-    <div class="section">
-      <h5 style="margin: 0; font-size: 1.5em;">saving:</h5>
-    </div>
-    <div class="controls">
-      <div class="button_div">
-        <div class="select_container">
-          <span style="margin-right: 5px;">target bank:</span>
-          <select id="bank_number_selection">
-            <option value="0">1</option>
-            <option value="1">2</option>
-            <option value="2">3</option>
-            <option value="3">4</option>
-            <option value="4">5</option>
-            <option value="5">6</option>
-            <option value="6">7</option>
-            <option value="7">8</option>
-            <option value="8">9</option>
-            <option value="9">10</option>
-            <option value="10">11</option>
-            <option value="11">12</option>
-          </select>
+    <div id="header">
+      <div class="section">
+        <h5 style="margin: 0; font-size: 1.5em;">saving:</h5>
+      </div>
+      <div class="controls">
+        <div class="button_div">
+          <div class="select_container">
+            <span style="margin-right: 5px;">target bank:</span>
+            <select id="bank_number_selection">
+              <option value="0">1</option>
+              <option value="1">2</option>
+              <option value="2">3</option>
+              <option value="3">4</option>
+              <option value="4">5</option>
+              <option value="5">6</option>
+              <option value="6">7</option>
+              <option value="7">8</option>
+              <option value="8">9</option>
+              <option value="9">10</option>
+              <option value="10">11</option>
+              <option value="11">12</option>
+            </select>
+          </div>
+        </div>
+        <div class="button_div">
+          <button id="save-to-bank-btn">save to bank</button>
         </div>
       </div>
-      <div class="button_div">
-        <button id="save-to-bank-btn">save to bank</button>
+      <div class="section">
+        <h5 style="margin: 0; font-size: 1.5em;">sharing:</h5>
+      </div>
+      <div class="controls">
+        <div class="button_div">
+          <button id="export-settings-btn">export settings</button>
+        </div>
+        <div class="button_div">
+          <button id="load-settings-btn">load settings</button>
+        </div>
+      </div>
+      <div class="section">
+        <h5 style="margin: 0; font-size: 1.5em;">resetting:</h5>
+      </div>
+      <div class="controls">
+        <div class="button_div">
+          <button id="reset-bank-btn">reset bank</button>
+        </div>
+        <div class="button_div">
+          <button id="reset-all-banks-btn">reset all banks</button>
+        </div>
+      </div>
+      <div class="section">
+        <h5 style="margin: 0; font-size: 1.5em;">randomising:</h5>
+      </div>
+      <div class="controls">
+        <div class="button_div">
+          <button id="randomise_btn">randomise</button>
+        </div>
       </div>
     </div>
-    <div class="section">
-      <h5 style="margin: 0; font-size: 1.5em;">sharing:</h5>
-    </div>
-    <div class="controls">
-      <div class="button_div">
-        <button id="export-settings-btn">export settings</button>
-      </div>
-      <div class="button_div">
-        <button id="load-settings-btn">load settings</button>
-      </div>
-    </div>
-    <div class="section">
-      <h5 style="margin: 0; font-size: 1.5em;">resetting:</h5>
-    </div>
-    <div class="controls">
-      <div class="button_div">
-        <button id="reset-bank-btn">reset bank</button>
-      </div>
-      <div class="button_div">
-        <button id="reset-all-banks-btn">reset all banks</button>
+    <details>
+      <summary style="font-size: 1.6em; font-weight: bold; cursor: pointer;">Connection instruction</summary>
+      <ul style="padding-left: 20px;">
+        <li>provide the system authorization for MIDI control</li>
+        <li>use a recent version of Chrome</li>
+        <li>connect the minichord with a USB cable and make sure it is on.</li>
+      </ul>
+      <div tabindex="1" id="information_zone">
+        <strong id="information_text"></strong>
       </div>
     </div>
-    <div class="section">
-      <h5 style="margin: 0; font-size: 1.5em;">randomising:</h5>
+    <div id="instruction_zone" style="margin: 20px 0;">
+      For instruction on how to use this tool, please refer to the 
+      <a href="../user_manual/#custom-presets">minichord documentation.</a><br><br>
+      To test and load user-submitted presets, visit the 
+      <a href="https://minichord.com/minicontrol/minishop.html">minishop.</a>
     </div>
-    <div class="controls">
-      <div class="button_div">
-        <button id="randomise_btn">randomise</button>
-      </div>
+    <div id="parameters">
+      {parameter_sections}
     </div>
-  </div>
-  <details>
-    <summary style="font-size: 1.6em; font-weight: bold; cursor: pointer;">Connection instruction</summary>
-    <ul style="padding-left: 20px;">
-      <li>provide the system authorization for MIDI control</li>
-      <li>use a recent version of Chrome</li>
-      <li>connect the minichord with a USB cable and make sure it is on.</li>
-    </ul>
-    <div tabindex="1" id="information_zone">
-      <strong id="information_text"></strong>
-    </div>
-  </details>
-  <div id="instruction_zone" style="margin: 20px 0;">
-    For instruction on how to use this tool, please refer to the 
-    <a href="../user_manual/#custom-presets">minichord documentation.</a><br><br>
-    To test and load user-submitted presets, visit the 
-    <a href="https://minichord.com/minicontrol/minishop.html">minishop.</a>
-  </div>
-  <div id="parameters">
-    {parameter_sections}
   </div>
   <script src="minichordcontroller.js"></script>
   <script src="index.js"></script>
@@ -544,7 +565,7 @@ for group_name in group_order:
                 param_html.append('<h3 style="margin: 30px 0 10px; font-size: 1.5em;">Rhythm Pattern</h3>')
                 param_html.append(generate_rhythm_grid_html())
             parameter_sections.append(f'''
-                <details style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                <details style="margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
                     <summary style="font-size: 1.6em; font-weight: bold; cursor: pointer;">Rhythm Parameters</summary>
                     <div style="padding: 10px;">
                         {''.join(param_html)}
