@@ -95,7 +95,7 @@ function showNotification(message, type = 'info') {
   }, 3000);
 }
 
-// Updates page color scheme based on SysEx 20
+// Updates page color scheme and text color based on SysEx 20
 function updateUIColor() {
   const param = findParameterBySysex(20);
   if (!param) {
@@ -104,8 +104,13 @@ function updateUIColor() {
   }
   const bankColor = currentValues[20] || defaultValues[20] || param.default_value;
   const hue = bankColor % 360;
+  let textColor = '#ffffff'; // Default: white
+  if ((hue >= 45 && hue <= 75) || (hue >= 90 && hue <= 150)) {
+    textColor = '#000000'; // Black for yellow (45–75) and light green (90–150)
+  }
   document.documentElement.style.setProperty('--primary-color', `hsl(${hue}, 70%, 50%)`);
-  console.log(`[DEBUG] UI color updated: hue=${hue}, value=${bankColor}, currentValues[20]=${currentValues[20]}`);
+  document.documentElement.style.setProperty('--text-color', textColor);
+  console.log(`[DEBUG] UI color updated: hue=${hue}, value=${bankColor}, textColor=${textColor}, currentValues[20]=${currentValues[20]}`);
   const sliders = document.querySelectorAll('input[type="range"]');
   sliders.forEach(slider => {
     const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
@@ -126,45 +131,63 @@ function refreshRhythmGrid() {
   }
 }
 
-// Sets up parameter controls (sliders and value displays)
+// Sets up parameter controls (sliders, selects, and value displays)
 async function setupParameterControls() {
   const params = await loadParameters();
   Object.keys(params).forEach(group => {
     if (group === 'sysex_name_map') return;
     params[group].forEach(param => {
-      if (param.ui_type !== 'slider' && param.ui_type !== 'discrete_slider') return;
       const sysex = param.sysex_adress;
-      const element = document.getElementById(`param-${sysex}`);
-      const valueDisplay = document.getElementById(`value-${sysex}`);
-      if (!element) {
-        console.warn(`[setupParameterControls] Slider param-${sysex} not found`);
-        return;
-      }
-      if (!valueDisplay) {
-        console.error(`[setupParameterControls] Value display value-${sysex} not found`);
-        return;
-      }
+      const uiType = param.ui_type;
       const floatMultiplier = parseFloat(param.float_multiplier) || (param.data_type === 'float' ? 
                              (controller.float_multiplier || 100.0) : 1);
-      element.min = param.min_value * floatMultiplier;
-      element.max = param.max_value * floatMultiplier;
-      element.step = param.data_type === 'float' ? 0.01 * floatMultiplier : 1;
       const defaultValue = defaultValues[sysex] !== undefined ? defaultValues[sysex] : 
                           (param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value);
       currentValues[sysex] = currentValues[sysex] || defaultValue;
-      element.value = currentValues[sysex];
-      valueDisplay.value = param.data_type === 'float' ? 
-                          (currentValues[sysex] / floatMultiplier).toFixed(2) : currentValues[sysex];
-      console.log(`[setupParameterControls] Sysex=${sysex}, initial value=${element.value}, display=${valueDisplay.value}`);
-      element.addEventListener('input', () => {
-        const uiValue = parseFloat(element.value) / floatMultiplier;
-        const deviceValue = Math.round(parseFloat(element.value));
-        console.log(`[Slider Input] Sysex=${sysex}, uiValue=${uiValue.toFixed(2)}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}`);
-        tempValues[sysex] = deviceValue;
-        currentValues[sysex] = deviceValue;
-        valueDisplay.value = param.data_type === 'float' ? uiValue.toFixed(2) : deviceValue;
-        controller.sendParameter(sysex, deviceValue);
-      });
+
+      if (uiType === 'slider' || uiType === 'discrete_slider') {
+        const element = document.getElementById(`param-${sysex}`);
+        const valueDisplay = document.getElementById(`value-${sysex}`);
+        if (!element) {
+          console.warn(`[setupParameterControls] Slider param-${sysex} not found`);
+          return;
+        }
+        if (!valueDisplay) {
+          console.error(`[setupParameterControls] Value display value-${sysex} not found`);
+          return;
+        }
+        element.min = param.min_value * floatMultiplier;
+        element.max = param.max_value * floatMultiplier;
+        element.step = param.data_type === 'float' ? 0.01 * floatMultiplier : 1;
+        element.value = currentValues[sysex];
+        valueDisplay.value = param.data_type === 'float' ? 
+                            (currentValues[sysex] / floatMultiplier).toFixed(2) : currentValues[sysex];
+        console.log(`[setupParameterControls] Sysex=${sysex}, initial value=${element.value}, display=${valueDisplay.value}`);
+        element.addEventListener('input', () => {
+          const uiValue = parseFloat(element.value) / floatMultiplier;
+          const deviceValue = Math.round(parseFloat(element.value));
+          console.log(`[Slider Input] Sysex=${sysex}, uiValue=${uiValue.toFixed(2)}, deviceValue=${deviceValue}, floatMultiplier=${floatMultiplier}`);
+          tempValues[sysex] = deviceValue;
+          currentValues[sysex] = deviceValue;
+          valueDisplay.value = param.data_type === 'float' ? uiValue.toFixed(2) : deviceValue;
+          controller.sendParameter(sysex, deviceValue);
+        });
+      } else if (uiType === 'select') {
+        const element = document.getElementById(`param-${sysex}`);
+        if (!element) {
+          console.warn(`[setupParameterControls] Select param-${sysex} not found`);
+          return;
+        }
+        element.value = currentValues[sysex];
+        console.log(`[setupParameterControls] Select Sysex=${sysex}, initial value=${element.value}`);
+        element.addEventListener('change', () => {
+          const value = parseInt(element.value);
+          console.log(`[Select Change] Sysex=${sysex}, value=${value}`);
+          tempValues[sysex] = value;
+          currentValues[sysex] = value;
+          controller.sendParameter(sysex, value);
+        });
+      }
     });
   });
 }
@@ -217,25 +240,36 @@ async function updateUI(bankNumber) {
   Object.keys(params).forEach(group => {
     if (group === 'sysex_name_map') return;
     params[group].forEach(param => {
-      if (param.ui_type !== 'slider' && param.ui_type !== 'discrete_slider') return;
       const sysex = param.sysex_adress;
-      const element = document.getElementById(`param-${sysex}`);
-      const valueDisplay = document.getElementById(`value-${sysex}`);
-      if (!element) {
-        console.warn(`[updateUI] Slider param-${sysex} not found`);
-        return;
-      }
-      if (!valueDisplay) {
-        console.error(`[updateUI] Value display value-${sysex} not found`);
-        return;
-      }
+      const uiType = param.ui_type;
       const floatMultiplier = parseFloat(param.float_multiplier) || (param.data_type === 'float' ? 
                              (controller.float_multiplier || 100.0) : 1);
       const value = currentValues[sysex] !== undefined ? currentValues[sysex] : 
                     (param.data_type === 'float' ? param.default_value * floatMultiplier : param.default_value);
-      element.value = value;
-      valueDisplay.value = param.data_type === 'float' ? (value / floatMultiplier).toFixed(2) : value;
-      console.log(`[updateUI] Sysex=${sysex}, value=${value}, display=${valueDisplay.value}, element exists=${!!element}, valueDisplay exists=${!!valueDisplay}`);
+
+      if (uiType === 'slider' || uiType === 'discrete_slider') {
+        const element = document.getElementById(`param-${sysex}`);
+        const valueDisplay = document.getElementById(`value-${sysex}`);
+        if (!element) {
+          console.warn(`[updateUI] Slider param-${sysex} not found`);
+          return;
+        }
+        if (!valueDisplay) {
+          console.error(`[updateUI] Value display value-${sysex} not found`);
+          return;
+        }
+        element.value = value;
+        valueDisplay.value = param.data_type === 'float' ? (value / floatMultiplier).toFixed(2) : value;
+        console.log(`[updateUI] Sysex=${sysex}, value=${value}, display=${valueDisplay.value}, element exists=${!!element}, valueDisplay exists=${!!valueDisplay}`);
+      } else if (uiType === 'select') {
+        const element = document.getElementById(`param-${sysex}`);
+        if (!element) {
+          console.warn(`[updateUI] Select param-${sysex} not found`);
+          return;
+        }
+        element.value = value;
+        console.log(`[updateUI] Select Sysex=${sysex}, value=${value}, element exists=${!!element}`);
+      }
     });
   });
   updateUIColor();

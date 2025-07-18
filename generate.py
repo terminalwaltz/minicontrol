@@ -1,8 +1,15 @@
 import json
+import os
 
 # Load source JSON
 with open('parameters.json', 'r') as f:
     parameters = json.load(f)
+
+# Load sysex name map, fallback to empty dict if file not found
+sysex_name_map = {}
+if os.path.exists('sysex_name_map.json'):
+    with open('sysex_name_map.json', 'r') as f:
+        sysex_name_map = json.load(f)
 
 # Generate HTML for parameter controls
 def generate_param_html(param):
@@ -34,7 +41,6 @@ def generate_param_html(param):
         attrs.append(f'data-rhythm-step="{param["rhythm_step"]}"')
 
     if ui_type == 'slider' or ui_type == 'discrete_slider':
-        # Compute display value based on data type
         display_value = (default_value / float_multiplier) if data_type == 'float' else default_value
         display_value_str = f"{display_value:.2f}" if data_type == 'float' else str(display_value)
         slider_value = default_value * float_multiplier if data_type == 'float' else default_value
@@ -54,10 +60,19 @@ def generate_param_html(param):
             </div>
         ''')
     elif ui_type == 'select':
-        options_html = ''.join([
-            f'<option value="{opt["value"]}">{opt["label"]}</option>'
-            for opt in param.get('options', [])
-        ])
+                # Use options from parameters.json if available, otherwise use sysex_name_map
+        if 'options' in param:
+            options_html = ''.join([
+                f'<option value="{opt["value"]}">{opt["label"]}</option>'
+                for opt in param.get('options', [])
+            ])
+        else:
+            # Generate options from sysex_name_map for SysEx 10, limited to addresses 40–219
+            options_html = ''.join([
+                f'<option value="{key}">{value}</option>'
+                for key, value in sorted(sysex_name_map.items(), key=lambda x: int(x[0]))
+                if 40 <= int(key) <= 219
+            ])
         html.append(f'''
             <div style="display: flex; align-items: center; margin: 10px 0;">
                 <label for="param-{sysex_address}" style="width: 200px; font-weight: bold;">{name}</label>
@@ -97,7 +112,7 @@ def generate_rhythm_grid_html():
     html.append('</div>')
     return '\n'.join(html)
 
-# Generate HTML for parameter drop-downs with group headers
+# Generate HTML for parameter controls with group headers
 def generate_details_html(group_name, params):
     grouped_params = {}
     for param in params:
@@ -133,9 +148,10 @@ html_template = '''<!DOCTYPE html>
   <style>
     :root {{
       --primary-color: hsl(0, 70%, 50%);
+      --text-color: #ffffff;
     }}
     body {{ font-family: Arial, sans-serif; margin: 20px; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); }}
-    .status-header {{ display: flex; justify-content: space-between; align-items: center; background-color: #333; color: white; padding: 10px; border-radius: 5px; }}
+    .status-header {{ display: flex; justify-content: space-between; align-items: center; background-color: #333; color: #ffffff; padding: 10px; border-radius: 5px; }}
     .connection-status {{ display: flex; align-items: center; }}
     #dot {{ margin-left: 5px; font-size: 1.2em; color: var(--primary-color); }}
     .disconnected #dot {{ color: red; }}
@@ -143,8 +159,10 @@ html_template = '''<!DOCTYPE html>
     .section {{ margin-bottom: 10px; }}
     .controls {{ display: flex; flex-wrap: wrap; gap: 10px; }}
     .button_div {{ margin-right: 10px; }}
-    button, select {{ padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: white; cursor: pointer; }}
-    button:hover, select:hover {{ background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }}
+    button {{ padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }}
+    button:hover {{ background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }}
+    #bank_number_selection {{ padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }}
+    #bank_number_selection:hover {{ background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }}
     input[type="range"] {{
       background: linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) 50%, #ccc 50%, #ccc 100%);
     }}
