@@ -15,7 +15,7 @@
     }
     .status-header {
       display: flex;
-      justify-content: space-between;
+      justify-content: space-around;
       align-items: center;
       background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
       color: #333;
@@ -36,22 +36,22 @@
       color: red;
     }
     #notification-bubble {
-      padding: 4px 10px;
-      background: green;
-      color: #fff;
-      border: 1px solid #fff;
-      border-radius: 12px;
-      font-size: 0.9em;
+      padding: 10px 10px;
+      background: lightgreen;
+      color: black;
+      border: 2px solid green;
+      border-radius: 25px;
+      font-size: 1.1em;
       font-weight: 500;
       display: none;
     }
     .connected #notification-bubble {
-      background: green;
-      border: 1px solid #fff;
+      background: lightgreen;
+      border: 2px solid green;
     }
     .disconnected #notification-bubble {
-      background: red;
-      border: 1px solid #fff;
+      background: lightcoral;
+      border: 2px solid red;
     }
     #header {
       margin: 20px 0;
@@ -60,7 +60,7 @@
       border-radius: 5px;
     }
     .section {
-      margin-bottom: 10px;
+      margin-bottom: 2px;
     }
     .controls {
       display: flex;
@@ -196,7 +196,7 @@
     </div>
     <div id="header">
       <div class="section">
-        <h5 style="margin: 0; font-size: 1.5em;">saving:</h5>
+        <h5 style="margin: 0; font-size: 1.1em;">saving:</h5>
       </div>
       <div class="controls">
         <div class="button_div">
@@ -223,7 +223,7 @@
         </div>
       </div>
       <div class="section">
-        <h5 style="margin: 0; font-size: 1.5em;">sharing:</h5>
+        <h5 style="margin: 0; font-size: 1.1em;">sharing:</h5>
       </div>
       <div class="controls">
         <div class="button_div">
@@ -234,7 +234,7 @@
         </div>
       </div>
       <div class="section">
-        <h5 style="margin: 0; font-size: 1.5em;">resetting:</h5>
+        <h5 style="margin: 0; font-size: 1.1em;">resetting:</h5>
       </div>
       <div class="controls">
         <div class="button_div">
@@ -245,7 +245,7 @@
         </div>
       </div>
       <div class="section">
-        <h5 style="margin: 0; font-size: 1.5em;">randomising:</h5>
+        <h5 style="margin: 0; font-size: 1.1em;">randomising:</h5>
       </div>
       <div class="controls">
         <div class="button_div">
@@ -254,7 +254,7 @@
       </div>
     </div>
     <details>
-      <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">Connection instruction</summary>
+      <summary style="width: fit-content; font-size: 1.1em; font-weight: bold; cursor: pointer;">Connection instruction</summary>
       <ul style="padding-left: 20px;">
         <li>provide the system authorization for MIDI control</li>
         <li>use a recent version of Chrome</li>
@@ -264,9 +264,9 @@
         <strong id="information_text"></strong>
       </div>
     </div>
-    <div id="instruction_zone" style="margin: 20px 0;">
+    <div id="instruction_zone" style="margin: 2px 0;">
       For instruction on how to use this tool, please refer to the 
-      <a href="../user_manual/#custom-presets">minichord documentation.</a><br><br>
+      <a href="../user_manual/#custom-presets">minichord documentation.</a><br>
       To test and load user-submitted presets, visit the 
       <a href="https://minichord.com/minicontrol/minishop.html">minishop.</a>
     </div>

@@ -35,7 +35,7 @@ async function loadParameters() {
     const response = await fetch('parameters.json');
     if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
     parameters = await response.json();
-    console.log('[DEBUG] Loaded parameters:', Object.keys(parameters));
+   // console.log('[DEBUG] Loaded parameters:', Object.keys(parameters));
     return parameters;
   } catch (error) {
     console.error('[loadParameters] Failed:', error);
@@ -56,7 +56,7 @@ async function initializeDefaultValues() {
     });
   });
   applyOverrideDefaults(defaultValues);
-  console.log('[DEBUG] Default values:', defaultValues);
+ // console.log('[DEBUG] Default values:', defaultValues);
 }
 
 function findParameterBySysex(sysex) {
@@ -104,7 +104,7 @@ function updateUIColor() {
   document.querySelectorAll('input[type="range"]').forEach(slider => {
     const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
     slider.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${value}%, #ccc ${value}%, #ccc 100%)`;
-    console.log(`[updateUIColor] Slider ${slider.id}, Hue=${hue}, Value=${value}%`);
+    //console.log(`[updateUIColor] Slider ${slider.id}, Hue=${hue}, Value=${value}%`);
   });
 }
 
@@ -185,7 +185,7 @@ async function setupParameterControls() {
             const valuePercent = ((element.value - element.min) / (element.max - element.min)) * 100;
             element.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${valuePercent}%, #ccc ${valuePercent}%, #ccc 100%)`;
             if (sysex === 20) updateUIColor();
-            console.log(`[text-input] Param ${sysex}, Value=${inputValue}`);
+            //console.log(`[text-input] Param ${sysex}, Value=${inputValue}`);
           });
         }
       } else if (param.ui_type === 'select') {
@@ -210,7 +210,7 @@ async function setupParameterControls() {
 }
 
 function handleDataReceived(data) {
-  console.log(`[handleDataReceived] Bank=${data.bankNumber}, parameters.length=${data.parameters.length}`);
+ // console.log(`[handleDataReceived] Bank=${data.bankNumber}, parameters.length=${data.parameters.length}`);
   currentValues = {};
   data.parameters.forEach((value, sysex) => {
     if (value !== undefined) {
@@ -225,7 +225,7 @@ function handleDataReceived(data) {
 }
 
 async function updateUI(bankNumber) {
-  console.log(`[updateUI] Bank ${bankNumber + 1}, targetBank=${targetBank + 1}`);
+ // console.log(`[updateUI] Bank ${bankNumber + 1}, targetBank=${targetBank + 1}`);
   currentBankNumber = bankNumber;
   const bankSelect = document.getElementById("bank_number_selection");
   // Only update dropdown if it doesn't match the current bank
@@ -249,7 +249,7 @@ function loadBankSettings(bankNumber) {
   if (!controller.isConnected()) return console.warn(`[loadBankSettings] No device connected for bank ${bankNumber}`);
   tempValues = {};
   controller.sendSysEx([0, 0, 0, bankNumber]);
-  console.log(`[loadBankSettings] Requesting settings for bank ${bankNumber}`);
+ // console.log(`[loadBankSettings] Requesting settings for bank ${bankNumber}`);
 }
 
 // New: Random preset generation functions
@@ -399,7 +399,7 @@ function setupRhythmGridControls() {
           rhythmPattern[step] = patternValue;
           currentValues[sysexAddress] = patternValue;
           controller.sendParameter(sysexAddress, patternValue);
-          console.log(`[rhythm-checkbox] Step ${step}, Voice ${voice}, Pattern ${patternValue}`);
+         // console.log(`[rhythm-checkbox] Step ${step}, Voice ${voice}, Pattern ${patternValue}`);
         });
       }
     }

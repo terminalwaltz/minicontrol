@@ -120,12 +120,12 @@ processCurrentData(midiMessage) {
       processedData.parameters[i] = sysex_value;
     }
     if (i === 32 || i === 20 || (i >= 187 && i <= 191) || i === 99 || i === 30) {
-      console.log(`[PROCESS DATA] Sysex=${i}, value=${sysex_value}, bank=${processedData.bankNumber}`);
+     //console.log(`[PROCESS DATA] Sysex=${i}, value=${sysex_value}, bank=${processedData.bankNumber}`);
     }
   }
   this.active_bank_number = processedData.bankNumber;
   if (this.pendingSave) {
-    console.log(`[processCurrentData] Received settings for bank ${processedData.bankNumber} after save, verifying...`);
+   //console.log(`[processCurrentData] Received settings for bank ${processedData.bankNumber} after save, verifying...`);
     // Assuming index.js has a global currentValues
     if (typeof currentValues !== 'undefined') {
       for (let i = 2; i < this.parameter_size; i++) {
@@ -165,7 +165,7 @@ processCurrentData(midiMessage) {
   const hiAddr = Math.floor(address / 128);
   try {
     this.sendSysEx([loAddr, hiAddr, loVal, hiVal]);
-    console.log(`[SEND PARAMETER] Sysex=${address}, value=${finalValue}`);
+   //console.log(`[SEND PARAMETER] Sysex=${address}, value=${finalValue}`);
     return true;
   } catch (error) {
     console.error(`sendParameter: failed, address=${address}, value=${finalValue}, error=`, error);
@@ -181,11 +181,11 @@ saveCurrentSettings(bankNumber) {
   try {
     this.pendingSave = true;
     this.sendSysEx([0, 0, 2, bankNumber]);
-    console.log(`[SAVE] Sent sysex=[0, 0, 2, ${bankNumber}] for bank ${bankNumber}`);
+   //console.log(`[SAVE] Sent sysex=[0, 0, 2, ${bankNumber}] for bank ${bankNumber}`);
     // Simulate device acknowledgment (adjust timeout based on MIDI spec)
     setTimeout(() => {
       this.pendingSave = false;
-      console.log(`[SAVE] Cleared pendingSave for bank ${bankNumber}`);
+     //console.log(`[SAVE] Cleared pendingSave for bank ${bankNumber}`);
     }, 500); // Adjust based on Minichord save latency
     return true;
   } catch (error) {
@@ -225,7 +225,7 @@ saveCurrentSettings(bankNumber) {
     }
     const sysex_message = [0xF0, 0, 0, 0, 0, 0x01, 0xF7]; // Command 0x01 for rhythm data
     this.device.send(sysex_message);
-    console.log('requestRhythmData: Sent SysEx rhythm data request [F0, 0,0,0,0, 01, F7]');
+   //console.log('requestRhythmData: Sent SysEx rhythm data request [F0, 0,0,0,0, 01, F7]');
   }
 
   getButtonState(name) {
