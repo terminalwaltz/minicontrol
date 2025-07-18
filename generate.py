@@ -254,18 +254,17 @@ def generate_param_html(param):
             </div>
         ''')
     elif ui_type == 'select':
-        # Use options from parameters.json if available, otherwise use sysex_name_map
         if 'options' in param:
             options_html = ''.join([
                 f'<option value="{opt["value"]}">{opt["label"]}</option>'
                 for opt in param.get('options', [])
             ])
         else:
-            # Generate options from sysex_name_map for SysEx 10, limited to addresses 40–219
+            option_addresses = param.get('option_addresses', list(sysex_name_map.keys()))
             options_html = ''.join([
                 f'<option value="{key}">{value}</option>'
-                for key, value in sorted(sysex_name_map.items(), key=lambda x: int(x[0]))
-                if 40 <= int(key) <= 219
+                for key, value in sorted(sysex_name_map.items(), key=lambda x: x[1].lower())
+                if key in option_addresses
             ])
         html.append(f'''
             <div style="display: flex; align-items: center; margin: 10px 0;">

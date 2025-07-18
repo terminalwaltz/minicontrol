@@ -21,8 +21,11 @@ for group_name, params in parameters.items():
             readable_group = group_name.replace('_parameter', '')
             sysex_name_map[str(sysex)] = f"{readable_group}: {name}"
 
+# Sort sysex_name_map by value (label) alphabetically
+sorted_sysex_name_map = dict(sorted(sysex_name_map.items(), key=lambda x: x[1].lower()))
+
 # Save to sysex_name_map.json
 with open('sysex_name_map.json', 'w') as f:
-    json.dump(sysex_name_map, f, indent=2)
+    json.dump(sorted_sysex_name_map, f, indent=2)
 
 print("Generated sysex_name_map.json")
