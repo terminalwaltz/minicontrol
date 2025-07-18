@@ -247,9 +247,10 @@ def generate_param_html(param):
                        {"data-discrete='true'" if ui_type == 'discrete_slider' else ''}
                        {' '.join(attrs)}
                        style="flex: 1; margin: 0 10px;">
-                <input type="text" id="value-{sysex_address}" 
-                       value="{display_value_str}"
-                       style="width: 60px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                <input type="number" id="value-{sysex_address}" 
+                    value="{display_value_str}"
+                    min="{min_value}" max="{max_value}" step="{0.01 if data_type == 'float' else 1}"
+                    style="width: 60px; text-align: right; border: 1px solid #ccc; padding: 2px;">
             </div>
         ''')
     elif ui_type == 'select':
@@ -284,7 +285,7 @@ def generate_param_html(param):
             </div>
         ''')
     return '\n'.join(html)
-    
+
 # Generate rhythm grid HTML
 def generate_rhythm_grid_html():
     rhythm_params = [p for p in parameters.get('rhythm_parameter', []) if 220 <= p['sysex_adress'] <= 235]
