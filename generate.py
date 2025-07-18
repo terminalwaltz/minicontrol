@@ -250,7 +250,7 @@ def generate_param_html(param):
                 <input type="number" id="value-{sysex_address}" 
                        value="{display_value_str}"
                        min="{min_value}" max="{max_value}" step="{0.01 if data_type == 'float' else 1}"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         ''')
     elif ui_type == 'select':
@@ -346,7 +346,7 @@ def generate_details_html(group_name, params):
     
     display_name = group_name.replace('_parameter', '').replace('_', ' ').title() + ' Parameters'
     return f'''
-        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: none; border-radius: 5px;">
             <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">{display_name}</summary>
             <div style="padding: 10px;">
                 {''.join(param_html)}
@@ -363,13 +363,35 @@ html_template = '''<!DOCTYPE html>
   <style>
     :root {{
       --primary-color: hsl(0, 70%, 50%);
-      --text-color: #ffffff; 
+      --text-color: #ffffff;
     }}
-    body {{ font-family: Arial, sans-serif; margin: 20px; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); }}
-    .status-header {{ display: flex; justify-content: none; align-items: center; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); color: #333; padding: 10px; border-radius: 5px; }}
-    .connection-status {{ display: flex; align-items: center; }}
-    #dot {{ margin-left: 2px; margin-right: 4px; font-size: 1.2em; color: green; }}
-    .disconnected #dot {{ color: red; }}
+    body {{
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
+    }}
+    .status-header {{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
+      color: #333;
+      padding: 10px;
+      border-radius: 5px;
+    }}
+    .connection-status {{
+      display: flex;
+      align-items: center;
+    }}
+    #dot {{
+      margin-left: 2px;
+      margin-right: 4px;
+      font-size: 1.2em;
+      color: green;
+    }}
+    .disconnected #dot {{
+      color: red;
+    }}
     #notification-bubble {{
       padding: 4px 10px;
       background: green;
@@ -388,14 +410,45 @@ html_template = '''<!DOCTYPE html>
       background: red;
       border: 1px solid #fff;
     }}
-    #header {{ margin: 20px 0; padding: 10px; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); border-radius: 5px; }}
-    .section {{ margin-bottom: 10px; }}
-    .controls {{ display: flex; flex-wrap: wrap; gap: 10px; }}
-    .button_div {{ margin-right: 10px; }}
-    button {{ padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }}
-    button:hover {{ background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }}
-    #bank_number_selection {{ padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }}
-    #bank_number_selection:hover {{ background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }}
+    #header {{
+      margin: 20px 0;
+      padding: 10px;
+      background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
+      border-radius: 5px;
+    }}
+    .section {{
+      margin-bottom: 10px;
+    }}
+    .controls {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }}
+    .button_div {{
+      margin-right: 10px;
+    }}
+    button {{
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      cursor: pointer;
+    }}
+    button:hover {{
+      background-color: hsl(var(--primary-color-hue, 0), 70%, 45%);
+    }}
+    #bank_number_selection {{
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      cursor: pointer;
+    }}
+    #bank_number_selection:hover {{
+      background-color: hsl(var(--primary-color-hue, 0), 70%, 40%);
+    }}
     input[type="range"] {{
       -webkit-appearance: none;
       width: 150px;
@@ -424,10 +477,69 @@ html_template = '''<!DOCTYPE html>
       background: var(--primary-color);
       cursor: pointer;
     }}
-    a {{ color: var(--primary-color); text-decoration: none; }}
-    a:hover {{ text-decoration: underline; }}
-    details summary:hover {{ color: var(--primary-color); }}
-    input[type="text"][readonly] {{ border: none; background: transparent; }}
+    a {{
+      color: var(--primary-color);
+      text-decoration: none;
+    }}
+    a:hover {{
+      text-decoration: underline;
+    }}
+    details summary:hover {{
+      color: var(--primary-color);
+    }}
+    input[type="text"][readonly] {{
+      border: none;
+      background: transparent;
+    }}
+    /* Default single-column layout for smartphones */
+    #parameters {{
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }}
+    details {{
+      width: 100%;
+      margin: 0;
+      padding: 8px;
+      border: none;
+      border-radius: none;
+      box-sizing: border-box;
+    }}
+    /* Three-column grid layout for larger screens */
+    @media screen and (min-width: 768px) {{
+      #parameters {{
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 30px;
+        width: 100%;
+        max-width: 1600px; /* Increased for wider layout */
+        margin: 0 auto;
+      }}
+      details {{
+        width: 100%;
+        max-width: 450px; /* Increased to reduce squishing */
+        margin: 0;
+        padding: 8px;
+        box-sizing: border-box;
+        overflow-x: auto; /* Allow scrolling for wide content */
+      }}
+      /* Fallback for older browsers */
+      @supports not (display: grid) {{
+        #parameters {{
+          display: flex;
+          flex-wrap: wrap;
+          gap: 30px;
+        }}
+        details {{
+          flex: 1 1 calc(33.33% - 30px);
+          max-width: 400px; /* Match grid max-width */
+          box-sizing: border-box;
+        }}
+      }}
+    }}
   </style>
 </head>
 <body>
@@ -565,7 +677,7 @@ for group_name in group_order:
                 param_html.append('<h3 style="margin: 30px 0 10px; font-size: 1.5em;">Rhythm Pattern</h3>')
                 param_html.append(generate_rhythm_grid_html())
             parameter_sections.append(f'''
-                <details style="width: fit-content; margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                <details style="width: fit-content; margin: 20px 0; padding: 8px; border: none; border-radius: 5px;">
                     <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">Rhythm Parameters</summary>
                     <div style="padding: 10px;">
                         {''.join(param_html)}

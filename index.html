@@ -6,13 +6,35 @@
   <style>
     :root {
       --primary-color: hsl(0, 70%, 50%);
-      --text-color: #ffffff; 
+      --text-color: #ffffff;
     }
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); }
-    .status-header { display: flex; justify-content: none; align-items: center; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); color: #333; padding: 10px; border-radius: 5px; }
-    .connection-status { display: flex; align-items: center; }
-    #dot { margin-left: 2px; margin-right: 4px; font-size: 1.2em; color: green; }
-    .disconnected #dot { color: red; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
+    }
+    .status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
+      color: #333;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .connection-status {
+      display: flex;
+      align-items: center;
+    }
+    #dot {
+      margin-left: 2px;
+      margin-right: 4px;
+      font-size: 1.2em;
+      color: green;
+    }
+    .disconnected #dot {
+      color: red;
+    }
     #notification-bubble {
       padding: 4px 10px;
       background: green;
@@ -31,14 +53,45 @@
       background: red;
       border: 1px solid #fff;
     }
-    #header { margin: 20px 0; padding: 10px; background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); border-radius: 5px; }
-    .section { margin-bottom: 10px; }
-    .controls { display: flex; flex-wrap: wrap; gap: 10px; }
-    .button_div { margin-right: 10px; }
-    button { padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }
-    button:hover { background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }
-    #bank_number_selection { padding: 8px; border: none; border-radius: 5px; background-color: var(--primary-color); color: var(--text-color); cursor: pointer; }
-    #bank_number_selection:hover { background-color: hsl(var(--primary-color-hue, 0), 70%, 40%); }
+    #header {
+      margin: 20px 0;
+      padding: 10px;
+      background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
+      border-radius: 5px;
+    }
+    .section {
+      margin-bottom: 10px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .button_div {
+      margin-right: 10px;
+    }
+    button {
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: hsl(var(--primary-color-hue, 0), 70%, 45%);
+    }
+    #bank_number_selection {
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      cursor: pointer;
+    }
+    #bank_number_selection:hover {
+      background-color: hsl(var(--primary-color-hue, 0), 70%, 40%);
+    }
     input[type="range"] {
       -webkit-appearance: none;
       width: 150px;
@@ -67,10 +120,69 @@
       background: var(--primary-color);
       cursor: pointer;
     }
-    a { color: var(--primary-color); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    details summary:hover { color: var(--primary-color); }
-    input[type="text"][readonly] { border: none; background: transparent; }
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    details summary:hover {
+      color: var(--primary-color);
+    }
+    input[type="text"][readonly] {
+      border: none;
+      background: transparent;
+    }
+    /* Default single-column layout for smartphones */
+    #parameters {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    details {
+      width: 100%;
+      margin: 0;
+      padding: 8px;
+      border: none;
+      border-radius: none;
+      box-sizing: border-box;
+    }
+    /* Three-column grid layout for larger screens */
+    @media screen and (min-width: 768px) {
+      #parameters {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 30px;
+        width: 100%;
+        max-width: 1600px; /* Increased for wider layout */
+        margin: 0 auto;
+      }
+      details {
+        width: 100%;
+        max-width: 450px; /* Increased to reduce squishing */
+        margin: 0;
+        padding: 8px;
+        box-sizing: border-box;
+        overflow-x: auto; /* Allow scrolling for wide content */
+      }
+      /* Fallback for older browsers */
+      @supports not (display: grid) {
+        #parameters {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 30px;
+        }
+        details {
+          flex: 1 1 calc(33.33% - 30px);
+          max-width: 400px; /* Match grid max-width */
+          box-sizing: border-box;
+        }
+      }
+    }
   </style>
 </head>
 <body>
@@ -160,7 +272,7 @@
     </div>
     <div id="parameters">
       
-        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: none; border-radius: 5px;">
             <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">Global Parameters</summary>
             <div style="padding: 10px;">
                 <h3 style="margin: 30px 0 10px; font-size: 1.5em;">General</h3>
@@ -176,7 +288,7 @@
                 <input type="number" id="value-20" 
                        value="0"
                        min="0" max="360" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -191,7 +303,7 @@
                 <input type="number" id="value-32" 
                        value="0.00"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -206,7 +318,7 @@
                 <input type="number" id="value-30" 
                        value="0"
                        min="0" max="11" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Effects</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -221,7 +333,7 @@
                 <input type="number" id="value-29" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -236,7 +348,7 @@
                 <input type="number" id="value-24" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -251,7 +363,7 @@
                 <input type="number" id="value-25" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -266,7 +378,7 @@
                 <input type="number" id="value-26" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -281,7 +393,7 @@
                 <input type="number" id="value-27" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -296,13 +408,13 @@
                 <input type="number" id="value-28" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             </div>
         </details>
     
-        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: none; border-radius: 5px;">
             <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">Chord Parameters</summary>
             <div style="padding: 10px;">
                 <h3 style="margin: 30px 0 10px; font-size: 1.5em;">General</h3>
@@ -318,7 +430,7 @@
                 <input type="number" id="value-198" 
                        value="0"
                        min="0" max="4" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -333,7 +445,7 @@
                 <input type="number" id="value-34" 
                        value="0"
                        min="0" max="6" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -370,7 +482,7 @@
                 <input type="number" id="value-120" 
                        value="0"
                        min="0" max="5" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -385,7 +497,7 @@
                 <input type="number" id="value-23" 
                        value="0"
                        min="0" max="2" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -400,7 +512,7 @@
                 <input type="number" id="value-135" 
                        value="10"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -415,7 +527,7 @@
                 <input type="number" id="value-136" 
                        value="10"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Oscillator</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -438,7 +550,7 @@
                 <input type="number" id="value-121" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -453,7 +565,7 @@
                 <input type="number" id="value-123" 
                        value="0.00"
                        min="0.5" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -476,7 +588,7 @@
                 <input type="number" id="value-124" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -491,7 +603,7 @@
                 <input type="number" id="value-126" 
                        value="0.00"
                        min="0.5" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -514,7 +626,7 @@
                 <input type="number" id="value-127" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -529,7 +641,7 @@
                 <input type="number" id="value-129" 
                        value="0.00"
                        min="0.5" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -544,7 +656,7 @@
                 <input type="number" id="value-130" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -559,7 +671,7 @@
                 <input type="number" id="value-131" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -574,7 +686,7 @@
                 <input type="number" id="value-132" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -589,7 +701,7 @@
                 <input type="number" id="value-133" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -604,7 +716,7 @@
                 <input type="number" id="value-134" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Envelope</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -619,7 +731,7 @@
                 <input type="number" id="value-137" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -634,7 +746,7 @@
                 <input type="number" id="value-138" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -649,7 +761,7 @@
                 <input type="number" id="value-139" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -664,7 +776,7 @@
                 <input type="number" id="value-140" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -679,7 +791,7 @@
                 <input type="number" id="value-141" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -694,7 +806,7 @@
                 <input type="number" id="value-142" 
                        value="5"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Low pass filter</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -709,7 +821,7 @@
                 <input type="number" id="value-143" 
                        value="0.5"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -732,7 +844,7 @@
                 <input type="number" id="value-153" 
                        value="0.01"
                        min="0" max="20" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -747,7 +859,7 @@
                 <input type="number" id="value-154" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -762,7 +874,7 @@
                 <input type="number" id="value-155" 
                        value="0.01"
                        min="0" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -777,7 +889,7 @@
                 <input type="number" id="value-144" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -792,7 +904,7 @@
                 <input type="number" id="value-145" 
                        value="0.01"
                        min="0.7" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -807,7 +919,7 @@
                 <input type="number" id="value-146" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -822,7 +934,7 @@
                 <input type="number" id="value-147" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -837,7 +949,7 @@
                 <input type="number" id="value-148" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -852,7 +964,7 @@
                 <input type="number" id="value-149" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -867,7 +979,7 @@
                 <input type="number" id="value-150" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -882,7 +994,7 @@
                 <input type="number" id="value-151" 
                        value="5"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Tremolo</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -905,7 +1017,7 @@
                 <input type="number" id="value-157" 
                        value="0.00"
                        min="0" max="20" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -920,7 +1032,7 @@
                 <input type="number" id="value-158" 
                        value="0.00"
                        min="0" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -935,7 +1047,7 @@
                 <input type="number" id="value-159" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Vibrato</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -958,7 +1070,7 @@
                 <input type="number" id="value-162" 
                        value="0.00"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -973,7 +1085,7 @@
                 <input type="number" id="value-163" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -988,7 +1100,7 @@
                 <input type="number" id="value-161" 
                        value="0.00"
                        min="0" max="20" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1003,7 +1115,7 @@
                 <input type="number" id="value-164" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1018,7 +1130,7 @@
                 <input type="number" id="value-165" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1033,7 +1145,7 @@
                 <input type="number" id="value-166" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1048,7 +1160,7 @@
                 <input type="number" id="value-167" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1063,7 +1175,7 @@
                 <input type="number" id="value-168" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1078,7 +1190,7 @@
                 <input type="number" id="value-169" 
                        value="5"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1093,7 +1205,7 @@
                 <input type="number" id="value-170" 
                        value="0.01"
                        min="0" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1108,7 +1220,7 @@
                 <input type="number" id="value-171" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1123,7 +1235,7 @@
                 <input type="number" id="value-172" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1138,7 +1250,7 @@
                 <input type="number" id="value-173" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1153,7 +1265,7 @@
                 <input type="number" id="value-174" 
                        value="5"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1168,7 +1280,7 @@
                 <input type="number" id="value-175" 
                        value="0.00"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Delay</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1183,7 +1295,7 @@
                 <input type="number" id="value-176" 
                        value="1"
                        min="0" max="600" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1198,7 +1310,7 @@
                 <input type="number" id="value-177" 
                        value="0.5"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1213,7 +1325,7 @@
                 <input type="number" id="value-178" 
                        value="0.01"
                        min="0.7" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1228,7 +1340,7 @@
                 <input type="number" id="value-179" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1243,7 +1355,7 @@
                 <input type="number" id="value-180" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1258,7 +1370,7 @@
                 <input type="number" id="value-181" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1273,7 +1385,7 @@
                 <input type="number" id="value-182" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1288,7 +1400,7 @@
                 <input type="number" id="value-183" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Reverb</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1303,7 +1415,7 @@
                 <input type="number" id="value-184" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Crunch</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1318,7 +1430,7 @@
                 <input type="number" id="value-185" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1341,7 +1453,7 @@
                 <input type="number" id="value-192" 
                        value="0.5"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1356,7 +1468,7 @@
                 <input type="number" id="value-193" 
                        value="0.01"
                        min="0.7" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1371,7 +1483,7 @@
                 <input type="number" id="value-194" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1386,7 +1498,7 @@
                 <input type="number" id="value-195" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1401,7 +1513,7 @@
                 <input type="number" id="value-196" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1416,13 +1528,13 @@
                 <input type="number" id="value-197" 
                        value="0.01"
                        min="0" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             </div>
         </details>
     
-        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: none; border-radius: 5px;">
             <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">Harp Parameters</summary>
             <div style="padding: 10px;">
                 <h3 style="margin: 30px 0 10px; font-size: 1.5em;">General</h3>
@@ -1438,7 +1550,7 @@
                 <input type="number" id="value-99" 
                        value="0"
                        min="0" max="4" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1453,7 +1565,7 @@
                 <input type="number" id="value-40" 
                        value="0"
                        min="0" max="6" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1490,7 +1602,7 @@
                 <input type="number" id="value-105" 
                        value="0"
                        min="0" max="24" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1513,7 +1625,7 @@
                 <input type="number" id="value-101" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1528,7 +1640,7 @@
                 <input type="number" id="value-102" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1543,7 +1655,7 @@
                 <input type="number" id="value-103" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1558,7 +1670,7 @@
                 <input type="number" id="value-104" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Envelope</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1573,7 +1685,7 @@
                 <input type="number" id="value-43" 
                        value="5"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1588,7 +1700,7 @@
                 <input type="number" id="value-44" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1603,7 +1715,7 @@
                 <input type="number" id="value-45" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1618,7 +1730,7 @@
                 <input type="number" id="value-46" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1633,7 +1745,7 @@
                 <input type="number" id="value-47" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1648,7 +1760,7 @@
                 <input type="number" id="value-48" 
                        value="5"
                        min="0" max="10" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Low pass filter</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1663,7 +1775,7 @@
                 <input type="number" id="value-49" 
                        value="0.5"
                        min="0" max="2000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1678,7 +1790,7 @@
                 <input type="number" id="value-50" 
                        value="0.01"
                        min="0" max="3" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1693,7 +1805,7 @@
                 <input type="number" id="value-58" 
                        value="0.01"
                        min="0" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1708,7 +1820,7 @@
                 <input type="number" id="value-51" 
                        value="0.01"
                        min="0.7" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1723,7 +1835,7 @@
                 <input type="number" id="value-52" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1738,7 +1850,7 @@
                 <input type="number" id="value-53" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1753,7 +1865,7 @@
                 <input type="number" id="value-54" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1768,7 +1880,7 @@
                 <input type="number" id="value-55" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1783,7 +1895,7 @@
                 <input type="number" id="value-56" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1798,7 +1910,7 @@
                 <input type="number" id="value-57" 
                        value="5"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Tremolo</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1821,7 +1933,7 @@
                 <input type="number" id="value-60" 
                        value="0.01"
                        min="0" max="20" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1836,7 +1948,7 @@
                 <input type="number" id="value-61" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Vibrato</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1859,7 +1971,7 @@
                 <input type="number" id="value-64" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1874,7 +1986,7 @@
                 <input type="number" id="value-65" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1889,7 +2001,7 @@
                 <input type="number" id="value-66" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1904,7 +2016,7 @@
                 <input type="number" id="value-67" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1919,7 +2031,7 @@
                 <input type="number" id="value-68" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1934,7 +2046,7 @@
                 <input type="number" id="value-69" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1949,7 +2061,7 @@
                 <input type="number" id="value-70" 
                        value="5"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1964,7 +2076,7 @@
                 <input type="number" id="value-71" 
                        value="0.01"
                        min="0" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1979,7 +2091,7 @@
                 <input type="number" id="value-72" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1994,7 +2106,7 @@
                 <input type="number" id="value-73" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2009,7 +2121,7 @@
                 <input type="number" id="value-74" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2024,7 +2136,7 @@
                 <input type="number" id="value-75" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2039,7 +2151,7 @@
                 <input type="number" id="value-76" 
                        value="0.05"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2054,7 +2166,7 @@
                 <input type="number" id="value-63" 
                        value="0.01"
                        min="0" max="20" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Delay</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2069,7 +2181,7 @@
                 <input type="number" id="value-77" 
                        value="1"
                        min="0" max="600" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2084,7 +2196,7 @@
                 <input type="number" id="value-78" 
                        value="0.5"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2099,7 +2211,7 @@
                 <input type="number" id="value-79" 
                        value="0.01"
                        min="0.7" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2114,7 +2226,7 @@
                 <input type="number" id="value-80" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2129,7 +2241,7 @@
                 <input type="number" id="value-81" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2144,7 +2256,7 @@
                 <input type="number" id="value-82" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2159,7 +2271,7 @@
                 <input type="number" id="value-83" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2174,7 +2286,7 @@
                 <input type="number" id="value-84" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Reverb</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2189,7 +2301,7 @@
                 <input type="number" id="value-85" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Crunch</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2204,7 +2316,7 @@
                 <input type="number" id="value-86" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2227,7 +2339,7 @@
                 <input type="number" id="value-88" 
                        value="0.5"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2242,7 +2354,7 @@
                 <input type="number" id="value-89" 
                        value="0.01"
                        min="0.7" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2257,7 +2369,7 @@
                 <input type="number" id="value-90" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2272,7 +2384,7 @@
                 <input type="number" id="value-91" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2287,7 +2399,7 @@
                 <input type="number" id="value-92" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2310,7 +2422,7 @@
                 <input type="number" id="value-94" 
                        value="0.01"
                        min="0" max="20" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2325,7 +2437,7 @@
                 <input type="number" id="value-95" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2340,7 +2452,7 @@
                 <input type="number" id="value-96" 
                        value="0.01"
                        min="0" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2355,13 +2467,13 @@
                 <input type="number" id="value-97" 
                        value="0.01"
                        min="0" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             </div>
         </details>
     
-        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: none; border-radius: 5px;">
             <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">Chord Potentiometer Parameters</summary>
             <div style="padding: 10px;">
                 <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Potentiometer</h3>
@@ -2385,13 +2497,13 @@
                 <input type="number" id="value-11" 
                        value="0"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             </div>
         </details>
     
-        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: none; border-radius: 5px;">
             <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">Harp Potentiometer Parameters</summary>
             <div style="padding: 10px;">
                 <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Potentiometer</h3>
@@ -2415,13 +2527,13 @@
                 <input type="number" id="value-13" 
                        value="0"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             </div>
         </details>
     
-        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: none; border-radius: 5px;">
             <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">Modulation Potentiometer Parameters</summary>
             <div style="padding: 10px;">
                 <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Potentiometer</h3>
@@ -2445,7 +2557,7 @@
                 <input type="number" id="value-15" 
                        value="0"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2468,13 +2580,13 @@
                 <input type="number" id="value-17" 
                        value="0"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             </div>
         </details>
     
-        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+        <details style="width: fit-content; margin: 20px 0; padding: 8px; border: none; border-radius: 5px;">
             <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">Sharp Button Parameters</summary>
             <div style="padding: 10px;">
                 <h3 style="margin: 30px 0 10px; font-size: 1.5em;">General</h3>
@@ -2488,7 +2600,7 @@
             </div>
         </details>
     
-                <details style="width: fit-content; margin: 20px 0; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                <details style="width: fit-content; margin: 20px 0; padding: 8px; border: none; border-radius: 5px;">
                     <summary style="width: fit-content; font-size: 1.6em; font-weight: bold; cursor: pointer;">Rhythm Parameters</summary>
                     <div style="padding: 10px;">
                         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Rhythm</h3>
@@ -2504,7 +2616,7 @@
                 <input type="number" id="value-187" 
                        value="90"
                        min="30" max="300" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2519,7 +2631,7 @@
                 <input type="number" id="value-188" 
                        value="16"
                        min="1" max="16" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2534,7 +2646,7 @@
                 <input type="number" id="value-189" 
                        value="2"
                        min="1" max="8" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2549,7 +2661,7 @@
                 <input type="number" id="value-190" 
                        value="0.00"
                        min="0.5" max="1.5" step="0.01"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2564,7 +2676,7 @@
                 <input type="number" id="value-191" 
                        value="30"
                        min="20" max="1000" step="1"
-                       style="width: 50px; text-align: right; border: 1px solid #ccc; padding: 2px;">
+                       style="width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Rhythm Pattern</h3><div style="display: grid; grid-template-columns: repeat(16, 15px); gap: 5px; margin: 10px 0;">
 <div style="display: flex; flex-direction: column; align-items: center;">
