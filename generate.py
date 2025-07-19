@@ -1,6 +1,10 @@
 import json
 import os
 
+
+# Define SVG file reference (replace with your actual SVG file path)
+svg_file = 'minichord_layout_web.svg' 
+
 # Load source JSON
 with open('parameters.json', 'r') as f:
     parameters = json.load(f)
@@ -367,6 +371,7 @@ html_template = '''<!DOCTYPE html>
       --background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
       --header-bg: hsl(var(--primary-color-hue, 0), 10%, 95%);
       --text-primary: #333;
+      --svg-filter: none;
     }}
     [data-theme="dark"] {{
       --background-color: #1a1a1a;
@@ -374,6 +379,7 @@ html_template = '''<!DOCTYPE html>
       --text-primary: #e0e0e0;
       --primary-color: hsl(var(--primary-color-hue, 0), 70%, 60%);
       --text-color: #000000;
+      --svg-filter: invert(100%) grayscale(100%);
     }}
     body {{
       font-family: Arial, sans-serif;
@@ -450,6 +456,32 @@ html_template = '''<!DOCTYPE html>
       background-color: var(--header-bg);
       border-radius: 5px;
       color: var(--text-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 20px;
+    }}
+    .controls-container {{
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      min-width: 200px;
+    }}
+    .svg-container {{
+      flex: 0 0 auto;
+      height: 20vw;
+      max-width: 80vw;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }}
+    .svg-container img {{
+      width: 150%;
+      height: 150%;
+      object-fit: contain;
+      filter: var(--svg-filter);
     }}
     .section {{
       margin-bottom: 2px;
@@ -473,9 +505,6 @@ html_template = '''<!DOCTYPE html>
     button:hover {{
       background-color: hsl(var(--primary-color-hue, 0), 70%, 45%);
     }}
-    [data-theme="dark"] button {{
-      background-color: hsl(var(--primary-color-hue, 0), 70%, 60%);
-    }}
     [data-theme="dark"] button:hover {{
       background-color: hsl(var(--primary-color-hue, 0), 70%, 55%);
     }}
@@ -486,9 +515,6 @@ html_template = '''<!DOCTYPE html>
       background-color: var(--primary-color);
       color: var(--text-color);
       cursor: pointer;
-    }}
-    [data-theme="dark"] #bank_number_selection {{
-      background-color: hsl(var(--primary-color-hue, 0), 70%, 60%);
     }}
     #bank_number_selection:hover {{
       background-color: hsl(var(--primary-color-hue, 0), 70%, 40%);
@@ -597,6 +623,12 @@ html_template = '''<!DOCTYPE html>
         }}
       }}
     }}
+    @media screen and (max-width: 767px) {{
+      .svg-container {{
+        max-width: 100%;
+        height: 100%;
+      }}
+    }}
   </style>
 </head>
 <body>
@@ -611,70 +643,75 @@ html_template = '''<!DOCTYPE html>
       </div>
     </div>
     <div id="header">
-      <div class="section">
-        <h5 style="margin: 0; font-size: 1.1em;">saving:</h5>
-      </div>
-      <div class="controls">
-        <div class="button_div">
-          <div class="select_container">
-            <span style="margin-right: 5px;">target bank:</span>
-            <select id="bank_number_selection">
-              <option value="0">1</option>
-              <option value="1">2</option>
-              <option value="2">3</option>
-              <option value="3">4</option>
-              <option value="4">5</option>
-              <option value="5">6</option>
-              <option value="6">7</option>
-              <option value="7">8</option>
-              <option value="8">9</option>
-              <option value="9">10</option>
-              <option value="10">11</option>
-              <option value="11">12</option>
-            </select>
+      <div class="controls-container">
+        <div class="section">
+          <h5 style="margin: 0; font-size: 1.1em;">saving:</h5>
+        </div>
+        <div class="controls">
+          <div class="button_div">
+            <div class="select_container">
+              <span style="margin-right: 5px;">target bank:</span>
+              <select id="bank_number_selection">
+                <option value="0">1</option>
+                <option value="1">2</option>
+                <option value="2">3</option>
+                <option value="3">4</option>
+                <option value="4">5</option>
+                <option value="5">6</option>
+                <option value="6">7</option>
+                <option value="7">8</option>
+                <option value="8">9</option>
+                <option value="9">10</option>
+                <option value="10">11</option>
+                <option value="11">12</option>
+              </select>
+            </div>
+          </div>
+          <div class="button_div">
+            <button id="save-to-bank-btn">save to bank</button>
           </div>
         </div>
-        <div class="button_div">
-          <button id="save-to-bank-btn">save to bank</button>
+        <div class="section">
+          <h5 style="margin: 0; font-size: 1.1em;">sharing:</h5>
+        </div>
+        <div class="controls">
+          <div class="button_div">
+            <button id="export-settings-btn">export settings</button>
+          </div>
+          <div class="button_div">
+            <button id="load-settings-btn">load settings</button>
+          </div>
+        </div>
+        <div class="section">
+          <h5 style="margin: 0; font-size: 1.1em;">resetting:</h5>
+        </div>
+        <div class="controls">
+          <div class="button_div">
+            <button id="reset-bank-btn">reset bank</button>
+          </div>
+          <div class="button_div">
+            <button id="reset-all-banks-btn">reset all banks</button>
+          </div>
+        </div>
+        <div class="section">
+          <h5 style="margin: 0; font-size: 1.1em;">randomising:</h5>
+        </div>
+        <div class="controls">
+          <div class="button_div">
+            <button id="randomise_btn">randomise</button>
+          </div>
+        </div>
+        <div class="section">
+          <h5 style="margin: 0; font-size: 1.1em;">theme:</h5>
+        </div>
+        <div class="controls">
+          <div class="button_div">
+            <button id="toggle-theme-btn">Toggle Dark Mode</button>
+          </div>
         </div>
       </div>
-      <div class="section">
-        <h5 style="margin: 0; font-size: 1.1em;">sharing:</h5>
-      </div>
-      <div class="controls">
-        <div class="button_div">
-          <button id="export-settings-btn">export settings</button>
-        </div>
-        <div class="button_div">
-          <button id="load-settings-btn">load settings</button>
-        </div>
-      </div>
-      <div class="section">
-        <h5 style="margin: 0; font-size: 1.1em;">resetting:</h5>
-      </div>
-      <div class="controls">
-        <div class="button_div">
-          <button id="reset-bank-btn">reset bank</button>
-        </div>
-        <div class="button_div">
-          <button id="reset-all-banks-btn">reset all banks</button>
-        </div>
-      </div>
-      <div class="section">
-        <h5 style="margin: 0; font-size: 1.1em;">randomising:</h5>
-      </div>
-      <div class="controls">
-        <div class="button_div">
-          <button id="randomise_btn">randomise</button>
-        </div>
-      </div>
-      <div class="section">
-        <h5 style="margin: 0; font-size: 1.1em;">theme:</h5>
-      </div>
-      <div class="controls">
-        <div class="button_div">
-          <button id="toggle-theme-btn">Toggle Dark Mode</button>
-        </div>
+      <div class="svg-container">
+        <img src="{svg_file}" alt="Minichord Logo">
       </div>
     </div>
     <details>
@@ -703,6 +740,7 @@ html_template = '''<!DOCTYPE html>
 </body>
 </html>
 '''
+
 
 # Generate parameter sections in specified order
 parameter_sections = []
@@ -756,7 +794,8 @@ for group_name in group_order:
 
 # Insert into HTML
 html_content = html_template.format(
-    parameter_sections=''.join(parameter_sections)
+    parameter_sections=''.join(parameter_sections),
+    svg_file=svg_file
 )
 
 # Write to index.html
