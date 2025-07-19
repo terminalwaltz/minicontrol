@@ -367,7 +367,7 @@ html_template = '''<!DOCTYPE html>
     }}
     body {{
       font-family: Arial, sans-serif;
-      margin: 20px;
+      margin: 0px;
       background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
     }}
     .status-header {{
