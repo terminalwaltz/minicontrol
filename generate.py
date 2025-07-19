@@ -250,7 +250,7 @@ def generate_param_html(param):
                 <input type="number" id="value-{sysex_address}" 
                        value="{display_value_str}"
                        min="{min_value}" max="{max_value}" step="{0.01 if data_type == 'float' else 1}"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         ''')
     elif ui_type == 'select':
@@ -372,43 +372,50 @@ html_template = '''<!DOCTYPE html>
     }}
     .status-header {{
       display: flex;
-      justify-content: space-around;
-      align-items: center;
+      justify-content: flex-start; /* Align to left */
+      align-items: flex-start;
       background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
       color: #333;
       padding: 10px;
       border-radius: 5px;
     }}
-    .connection-status {{
+    .title-container {{
       display: flex;
-      align-items: center;
-    }}
-    #dot {{
-      margin-left: 2px;
-      margin-right: 4px;
-      font-size: 1.2em;
-      color: green;
-    }}
-    .disconnected #dot {{
-      color: red;
+      flex-direction: column;
+      align-items: flex-start;
     }}
     #notification-bubble {{
       padding: 10px 10px;
       background: lightgreen;
-      color: black;
-      border: 2px solid green;
-      border-radius: 25px;
+      color: darkgreen;
+      border: 3px solid green;
+      border-radius: 20px;
       font-size: 1.1em;
-      font-weight: 500;
+      font-weight: bold;
       display: none;
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
     }}
-    .connected #notification-bubble {{
+    .connected#notification-bubble {{
       background: lightgreen;
-      border: 2px solid green;
+      border: 3px solid green;
     }}
-    .disconnected #notification-bubble {{
+    .disconnected#notification-bubble {{
       background: lightcoral;
-      border: 2px solid red;
+      border: 3px solid red;
+    }}
+    #dot {{
+      margin-right: 8px; /* Space between dot and text */
+      font-size: 1.2em;
+      color: green;
+    }}
+    .disconnected#notification-bubble #dot {{
+      color: red;
+    }}
+    #connection-text {{
+      font-size: 1.1em;
+      font-weight: bold;
     }}
     #header {{
       margin: 20px 0;
@@ -515,16 +522,16 @@ html_template = '''<!DOCTYPE html>
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 30px;
         width: 100%;
-        max-width: 1600px; /* Increased for wider layout */
+        max-width: 1600px;
         margin: 0 auto;
       }}
       details {{
         width: 100%;
-        max-width: 450px; /* Increased to reduce squishing */
+        max-width: 450px;
         margin: 0;
         padding: 8px;
         box-sizing: border-box;
-        overflow-x: auto; /* Allow scrolling for wide content */
+        overflow-x: auto;
       }}
       /* Fallback for older browsers */
       @supports not (display: grid) {{
@@ -535,7 +542,7 @@ html_template = '''<!DOCTYPE html>
         }}
         details {{
           flex: 1 1 calc(33.33% - 30px);
-          max-width: 400px; /* Match grid max-width */
+          max-width: 400px;
           box-sizing: border-box;
         }}
       }}
@@ -545,10 +552,12 @@ html_template = '''<!DOCTYPE html>
 <body>
   <div id="container" style="max-width: 100vw; margin: 0 auto;">
     <div class="status-header">
-      <h1>minicontrol</h1>
-      <div id="connection-status" class="connection-status disconnected">
-        <span id="dot">●</span>
-        <span id="notification-bubble"></span>
+      <div class="title-container">
+        <h1>minicontrol</h1>
+        <span id="notification-bubble">
+          <span id="dot">●</span>
+          <span id="connection-text"></span>
+        </span>
       </div>
     </div>
     <div id="header">

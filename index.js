@@ -70,28 +70,30 @@ function findParameterBySysex(sysex) {
 }
 
 function updateConnectionStatus(connected, message) {
-  const statusElement = document.getElementById("connection-status");
   const bubbleElement = document.getElementById("notification-bubble");
-  if (!statusElement || !bubbleElement) return;
+  const textElement = document.getElementById("connection-text");
+  if (!bubbleElement || !textElement) return;
   minichord_device = connected;
-  statusElement.className = `connection-status ${connected ? 'connected' : 'disconnected'}`;
+  bubbleElement.className = connected ? 'connected' : 'disconnected';
   const bankText = currentBankNumber >= 0 ? ` | Bank ${currentBankNumber + 1}` : '';
-  bubbleElement.textContent = connected ? `minichord connected${bankText}` : "minichord disconnected";
-  bubbleElement.style.display = 'inline-block';
+  textElement.textContent = connected ? `minichord connected${bankText}` : "minichord disconnected";
+  bubbleElement.style.display = 'flex';
   if (message) showNotification(message, connected ? "success" : "error");
 }
 
 function showNotification(message, type = 'info') {
   const bubbleElement = document.getElementById("notification-bubble");
-  if (!bubbleElement) return;
+  const textElement = document.getElementById("connection-text");
+  if (!bubbleElement || !textElement) return;
   if (notificationTimeout) clearTimeout(notificationTimeout);
-  bubbleElement.textContent = message;
-  bubbleElement.className = `notification-bubble ${type === 'success' ? 'connected' : 'disconnected'}`;
-  bubbleElement.style.display = 'inline-block';
+  textElement.textContent = message;
+  bubbleElement.className = type === 'success' ? 'connected' : 'disconnected';
+  bubbleElement.style.display = 'flex';
   notificationTimeout = setTimeout(() => {
     updateConnectionStatus(controller.isConnected(), null);
   }, 3000);
 }
+
 function updateUIColor() {
   const param = findParameterBySysex(20);
   if (!param) return console.warn('[updateUIColor] SysEx 20 not found');

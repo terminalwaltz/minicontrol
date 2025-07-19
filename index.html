@@ -15,43 +15,50 @@
     }
     .status-header {
       display: flex;
-      justify-content: space-around;
-      align-items: center;
+      justify-content: flex-start; /* Align to left */
+      align-items: flex-start;
       background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
       color: #333;
       padding: 10px;
       border-radius: 5px;
     }
-    .connection-status {
+    .title-container {
       display: flex;
-      align-items: center;
-    }
-    #dot {
-      margin-left: 2px;
-      margin-right: 4px;
-      font-size: 1.2em;
-      color: green;
-    }
-    .disconnected #dot {
-      color: red;
+      flex-direction: column;
+      align-items: flex-start;
     }
     #notification-bubble {
       padding: 10px 10px;
       background: lightgreen;
-      color: black;
-      border: 2px solid green;
-      border-radius: 25px;
+      color: darkgreen;
+      border: 3px solid green;
+      border-radius: 20px;
       font-size: 1.1em;
-      font-weight: 500;
+      font-weight: bold;
       display: none;
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
     }
-    .connected #notification-bubble {
+    .connected#notification-bubble {
       background: lightgreen;
-      border: 2px solid green;
+      border: 3px solid green;
     }
-    .disconnected #notification-bubble {
+    .disconnected#notification-bubble {
       background: lightcoral;
-      border: 2px solid red;
+      border: 3px solid red;
+    }
+    #dot {
+      margin-right: 8px; /* Space between dot and text */
+      font-size: 1.2em;
+      color: green;
+    }
+    .disconnected#notification-bubble #dot {
+      color: red;
+    }
+    #connection-text {
+      font-size: 1.1em;
+      font-weight: bold;
     }
     #header {
       margin: 20px 0;
@@ -158,16 +165,16 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 30px;
         width: 100%;
-        max-width: 1600px; /* Increased for wider layout */
+        max-width: 1600px;
         margin: 0 auto;
       }
       details {
         width: 100%;
-        max-width: 450px; /* Increased to reduce squishing */
+        max-width: 450px;
         margin: 0;
         padding: 8px;
         box-sizing: border-box;
-        overflow-x: auto; /* Allow scrolling for wide content */
+        overflow-x: auto;
       }
       /* Fallback for older browsers */
       @supports not (display: grid) {
@@ -178,7 +185,7 @@
         }
         details {
           flex: 1 1 calc(33.33% - 30px);
-          max-width: 400px; /* Match grid max-width */
+          max-width: 400px;
           box-sizing: border-box;
         }
       }
@@ -188,10 +195,12 @@
 <body>
   <div id="container" style="max-width: 100vw; margin: 0 auto;">
     <div class="status-header">
-      <h1>minicontrol</h1>
-      <div id="connection-status" class="connection-status disconnected">
-        <span id="dot">●</span>
-        <span id="notification-bubble"></span>
+      <div class="title-container">
+        <h1>minicontrol</h1>
+        <span id="notification-bubble">
+          <span id="dot">●</span>
+          <span id="connection-text"></span>
+        </span>
       </div>
     </div>
     <div id="header">
@@ -288,7 +297,7 @@
                 <input type="number" id="value-20" 
                        value="0"
                        min="0" max="360" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -303,7 +312,7 @@
                 <input type="number" id="value-32" 
                        value="0.00"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -318,7 +327,7 @@
                 <input type="number" id="value-30" 
                        value="0"
                        min="0" max="11" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Effects</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -333,7 +342,7 @@
                 <input type="number" id="value-29" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -348,7 +357,7 @@
                 <input type="number" id="value-24" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -363,7 +372,7 @@
                 <input type="number" id="value-25" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -378,7 +387,7 @@
                 <input type="number" id="value-26" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -393,7 +402,7 @@
                 <input type="number" id="value-27" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -408,7 +417,7 @@
                 <input type="number" id="value-28" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             </div>
@@ -430,7 +439,7 @@
                 <input type="number" id="value-198" 
                        value="0"
                        min="0" max="4" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -445,7 +454,7 @@
                 <input type="number" id="value-34" 
                        value="0"
                        min="0" max="6" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -482,7 +491,7 @@
                 <input type="number" id="value-120" 
                        value="0"
                        min="0" max="5" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -497,7 +506,7 @@
                 <input type="number" id="value-23" 
                        value="0"
                        min="0" max="2" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -512,7 +521,7 @@
                 <input type="number" id="value-135" 
                        value="10"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -527,7 +536,7 @@
                 <input type="number" id="value-136" 
                        value="10"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Oscillator</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -550,7 +559,7 @@
                 <input type="number" id="value-121" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -565,7 +574,7 @@
                 <input type="number" id="value-123" 
                        value="0.00"
                        min="0.5" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -588,7 +597,7 @@
                 <input type="number" id="value-124" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -603,7 +612,7 @@
                 <input type="number" id="value-126" 
                        value="0.00"
                        min="0.5" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -626,7 +635,7 @@
                 <input type="number" id="value-127" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -641,7 +650,7 @@
                 <input type="number" id="value-129" 
                        value="0.00"
                        min="0.5" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -656,7 +665,7 @@
                 <input type="number" id="value-130" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -671,7 +680,7 @@
                 <input type="number" id="value-131" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -686,7 +695,7 @@
                 <input type="number" id="value-132" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -701,7 +710,7 @@
                 <input type="number" id="value-133" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -716,7 +725,7 @@
                 <input type="number" id="value-134" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Envelope</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -731,7 +740,7 @@
                 <input type="number" id="value-137" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -746,7 +755,7 @@
                 <input type="number" id="value-138" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -761,7 +770,7 @@
                 <input type="number" id="value-139" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -776,7 +785,7 @@
                 <input type="number" id="value-140" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -791,7 +800,7 @@
                 <input type="number" id="value-141" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -806,7 +815,7 @@
                 <input type="number" id="value-142" 
                        value="5"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Low pass filter</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -821,7 +830,7 @@
                 <input type="number" id="value-143" 
                        value="0.5"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -844,7 +853,7 @@
                 <input type="number" id="value-153" 
                        value="0.01"
                        min="0" max="20" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -859,7 +868,7 @@
                 <input type="number" id="value-154" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -874,7 +883,7 @@
                 <input type="number" id="value-155" 
                        value="0.01"
                        min="0" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -889,7 +898,7 @@
                 <input type="number" id="value-144" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -904,7 +913,7 @@
                 <input type="number" id="value-145" 
                        value="0.01"
                        min="0.7" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -919,7 +928,7 @@
                 <input type="number" id="value-146" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -934,7 +943,7 @@
                 <input type="number" id="value-147" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -949,7 +958,7 @@
                 <input type="number" id="value-148" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -964,7 +973,7 @@
                 <input type="number" id="value-149" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -979,7 +988,7 @@
                 <input type="number" id="value-150" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -994,7 +1003,7 @@
                 <input type="number" id="value-151" 
                        value="5"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Tremolo</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1017,7 +1026,7 @@
                 <input type="number" id="value-157" 
                        value="0.00"
                        min="0" max="20" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1032,7 +1041,7 @@
                 <input type="number" id="value-158" 
                        value="0.00"
                        min="0" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1047,7 +1056,7 @@
                 <input type="number" id="value-159" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Vibrato</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1070,7 +1079,7 @@
                 <input type="number" id="value-162" 
                        value="0.00"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1085,7 +1094,7 @@
                 <input type="number" id="value-163" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1100,7 +1109,7 @@
                 <input type="number" id="value-161" 
                        value="0.00"
                        min="0" max="20" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1115,7 +1124,7 @@
                 <input type="number" id="value-164" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1130,7 +1139,7 @@
                 <input type="number" id="value-165" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1145,7 +1154,7 @@
                 <input type="number" id="value-166" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1160,7 +1169,7 @@
                 <input type="number" id="value-167" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1175,7 +1184,7 @@
                 <input type="number" id="value-168" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1190,7 +1199,7 @@
                 <input type="number" id="value-169" 
                        value="5"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1205,7 +1214,7 @@
                 <input type="number" id="value-170" 
                        value="0.01"
                        min="0" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1220,7 +1229,7 @@
                 <input type="number" id="value-171" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1235,7 +1244,7 @@
                 <input type="number" id="value-172" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1250,7 +1259,7 @@
                 <input type="number" id="value-173" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1265,7 +1274,7 @@
                 <input type="number" id="value-174" 
                        value="5"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1280,7 +1289,7 @@
                 <input type="number" id="value-175" 
                        value="0.00"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Delay</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1295,7 +1304,7 @@
                 <input type="number" id="value-176" 
                        value="1"
                        min="0" max="600" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1310,7 +1319,7 @@
                 <input type="number" id="value-177" 
                        value="0.5"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1325,7 +1334,7 @@
                 <input type="number" id="value-178" 
                        value="0.01"
                        min="0.7" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1340,7 +1349,7 @@
                 <input type="number" id="value-179" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1355,7 +1364,7 @@
                 <input type="number" id="value-180" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1370,7 +1379,7 @@
                 <input type="number" id="value-181" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1385,7 +1394,7 @@
                 <input type="number" id="value-182" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1400,7 +1409,7 @@
                 <input type="number" id="value-183" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Reverb</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1415,7 +1424,7 @@
                 <input type="number" id="value-184" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Crunch</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1430,7 +1439,7 @@
                 <input type="number" id="value-185" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1453,7 +1462,7 @@
                 <input type="number" id="value-192" 
                        value="0.5"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1468,7 +1477,7 @@
                 <input type="number" id="value-193" 
                        value="0.01"
                        min="0.7" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1483,7 +1492,7 @@
                 <input type="number" id="value-194" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1498,7 +1507,7 @@
                 <input type="number" id="value-195" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1513,7 +1522,7 @@
                 <input type="number" id="value-196" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1528,7 +1537,7 @@
                 <input type="number" id="value-197" 
                        value="0.01"
                        min="0" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             </div>
@@ -1550,7 +1559,7 @@
                 <input type="number" id="value-99" 
                        value="0"
                        min="0" max="4" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1565,7 +1574,7 @@
                 <input type="number" id="value-40" 
                        value="0"
                        min="0" max="6" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1602,7 +1611,7 @@
                 <input type="number" id="value-41" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1625,7 +1634,7 @@
                 <input type="number" id="value-105" 
                        value="0"
                        min="0" max="24" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1648,7 +1657,7 @@
                 <input type="number" id="value-101" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1663,7 +1672,7 @@
                 <input type="number" id="value-102" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1678,7 +1687,7 @@
                 <input type="number" id="value-103" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1693,7 +1702,7 @@
                 <input type="number" id="value-104" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Envelope</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1708,7 +1717,7 @@
                 <input type="number" id="value-43" 
                        value="5"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1723,7 +1732,7 @@
                 <input type="number" id="value-44" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1738,7 +1747,7 @@
                 <input type="number" id="value-45" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1753,7 +1762,7 @@
                 <input type="number" id="value-46" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1768,7 +1777,7 @@
                 <input type="number" id="value-47" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1783,7 +1792,7 @@
                 <input type="number" id="value-48" 
                        value="5"
                        min="0" max="10" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Low pass filter</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1798,7 +1807,7 @@
                 <input type="number" id="value-49" 
                        value="0.5"
                        min="0" max="2000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1813,7 +1822,7 @@
                 <input type="number" id="value-50" 
                        value="0.01"
                        min="0" max="3" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1828,7 +1837,7 @@
                 <input type="number" id="value-58" 
                        value="0.01"
                        min="0" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1843,7 +1852,7 @@
                 <input type="number" id="value-51" 
                        value="0.01"
                        min="0.7" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1858,7 +1867,7 @@
                 <input type="number" id="value-52" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1873,7 +1882,7 @@
                 <input type="number" id="value-53" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1888,7 +1897,7 @@
                 <input type="number" id="value-54" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1903,7 +1912,7 @@
                 <input type="number" id="value-55" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1918,7 +1927,7 @@
                 <input type="number" id="value-56" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1933,7 +1942,7 @@
                 <input type="number" id="value-57" 
                        value="5"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Tremolo</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1956,7 +1965,7 @@
                 <input type="number" id="value-60" 
                        value="0.01"
                        min="0" max="20" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1971,7 +1980,7 @@
                 <input type="number" id="value-61" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Vibrato</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -1994,7 +2003,7 @@
                 <input type="number" id="value-64" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2009,7 +2018,7 @@
                 <input type="number" id="value-65" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2024,7 +2033,7 @@
                 <input type="number" id="value-66" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2039,7 +2048,7 @@
                 <input type="number" id="value-67" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2054,7 +2063,7 @@
                 <input type="number" id="value-68" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2069,7 +2078,7 @@
                 <input type="number" id="value-69" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2084,7 +2093,7 @@
                 <input type="number" id="value-70" 
                        value="5"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2099,7 +2108,7 @@
                 <input type="number" id="value-71" 
                        value="0.01"
                        min="0" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2114,7 +2123,7 @@
                 <input type="number" id="value-72" 
                        value="15"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2129,7 +2138,7 @@
                 <input type="number" id="value-73" 
                        value="2"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2144,7 +2153,7 @@
                 <input type="number" id="value-74" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2159,7 +2168,7 @@
                 <input type="number" id="value-75" 
                        value="1000"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2174,7 +2183,7 @@
                 <input type="number" id="value-76" 
                        value="0.05"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2189,7 +2198,7 @@
                 <input type="number" id="value-63" 
                        value="0.01"
                        min="0" max="20" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Delay</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2204,7 +2213,7 @@
                 <input type="number" id="value-77" 
                        value="1"
                        min="0" max="600" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2219,7 +2228,7 @@
                 <input type="number" id="value-78" 
                        value="0.5"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2234,7 +2243,7 @@
                 <input type="number" id="value-79" 
                        value="0.01"
                        min="0.7" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2249,7 +2258,7 @@
                 <input type="number" id="value-80" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2264,7 +2273,7 @@
                 <input type="number" id="value-81" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2279,7 +2288,7 @@
                 <input type="number" id="value-82" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2294,7 +2303,7 @@
                 <input type="number" id="value-83" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2309,7 +2318,7 @@
                 <input type="number" id="value-84" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Reverb</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2324,7 +2333,7 @@
                 <input type="number" id="value-85" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Crunch</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2339,7 +2348,7 @@
                 <input type="number" id="value-86" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2362,7 +2371,7 @@
                 <input type="number" id="value-88" 
                        value="0.5"
                        min="0" max="5000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2377,7 +2386,7 @@
                 <input type="number" id="value-89" 
                        value="0.01"
                        min="0.7" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2392,7 +2401,7 @@
                 <input type="number" id="value-90" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2407,7 +2416,7 @@
                 <input type="number" id="value-91" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2422,7 +2431,7 @@
                 <input type="number" id="value-92" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2445,7 +2454,7 @@
                 <input type="number" id="value-94" 
                        value="0.01"
                        min="0" max="20" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2460,7 +2469,7 @@
                 <input type="number" id="value-95" 
                        value="0.01"
                        min="0" max="1" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2475,7 +2484,7 @@
                 <input type="number" id="value-96" 
                        value="0.01"
                        min="0" max="5" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2490,7 +2499,7 @@
                 <input type="number" id="value-97" 
                        value="0.01"
                        min="0" max="2" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             </div>
@@ -2520,7 +2529,7 @@
                 <input type="number" id="value-11" 
                        value="0"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             </div>
@@ -2550,7 +2559,7 @@
                 <input type="number" id="value-13" 
                        value="0"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             </div>
@@ -2580,7 +2589,7 @@
                 <input type="number" id="value-15" 
                        value="0"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2603,7 +2612,7 @@
                 <input type="number" id="value-17" 
                        value="0"
                        min="0" max="100" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             </div>
@@ -2639,7 +2648,7 @@
                 <input type="number" id="value-187" 
                        value="90"
                        min="30" max="300" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2654,7 +2663,7 @@
                 <input type="number" id="value-188" 
                        value="16"
                        min="1" max="16" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2669,7 +2678,7 @@
                 <input type="number" id="value-189" 
                        value="2"
                        min="1" max="8" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2684,7 +2693,7 @@
                 <input type="number" id="value-190" 
                        value="0.00"
                        min="0.5" max="1.5" step="0.01"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
@@ -2699,7 +2708,7 @@
                 <input type="number" id="value-191" 
                        value="30"
                        min="20" max="1000" step="1"
-                       style="width: 50px; text-align: right; border: none; padding: 2px;">
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Rhythm Pattern</h3><div style="display: grid; grid-template-columns: repeat(16, 15px); gap: 5px; margin: 10px 0;">
 <div style="display: flex; flex-direction: column; align-items: center;">
