@@ -356,7 +356,7 @@ def generate_details_html(group_name, params):
 
 # Define HTML template
 html_template = '''<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Minichord UI</title>
@@ -364,18 +364,29 @@ html_template = '''<!DOCTYPE html>
     :root {{
       --primary-color: hsl(0, 70%, 50%);
       --text-color: #ffffff;
+      --background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
+      --header-bg: hsl(var(--primary-color-hue, 0), 10%, 95%);
+      --text-primary: #333;
+    }}
+    [data-theme="dark"] {{
+      --background-color: #1a1a1a;
+      --header-bg: #1a1a1a;
+      --text-primary: #e0e0e0;
+      --primary-color: hsl(var(--primary-color-hue, 0), 70%, 60%);
+      --text-color: #000000;
     }}
     body {{
       font-family: Arial, sans-serif;
-      margin: 0px;
-      background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
+      margin: 20px;
+      background-color: var(--background-color);
+      color: var(--text-primary);
     }}
     .status-header {{
       display: flex;
-      justify-content: flex-start; /* Align to left */
+      justify-content: flex-start;
       align-items: flex-start;
-      background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
-      color: #333;
+      background-color: var(--header-bg);
+      color: var(--text-primary);
       padding: 10px;
       border-radius: 5px;
     }}
@@ -397,6 +408,16 @@ html_template = '''<!DOCTYPE html>
       display: flex;
       align-items: center;
     }}
+    [data-theme="dark"] #notification-bubble.connected {{
+      background: #228b22;
+      border-color: #006400;
+      color: #e0e0e0;
+    }}
+    [data-theme="dark"] #notification-bubble.disconnected {{
+      background: #8b0000;
+      border-color: #ff4040;
+      color: #e0e0e0;
+    }}
     .connected#notification-bubble {{
       background: lightgreen;
       border: 3px solid green;
@@ -406,9 +427,15 @@ html_template = '''<!DOCTYPE html>
       border: 3px solid red;
     }}
     #dot {{
-      margin-right: 8px; /* Space between dot and text */
+      margin-right: 8px;
       font-size: 1.2em;
       color: green;
+    }}
+    [data-theme="dark"] #dot.connected {{
+      color: #00ff00;
+    }}
+    [data-theme="dark"] #dot.disconnected {{
+      color: #ff4040;
     }}
     .disconnected#notification-bubble #dot {{
       color: red;
@@ -420,8 +447,9 @@ html_template = '''<!DOCTYPE html>
     #header {{
       margin: 20px 0;
       padding: 10px;
-      background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
+      background-color: var(--header-bg);
       border-radius: 5px;
+      color: var(--text-primary);
     }}
     .section {{
       margin-bottom: 2px;
@@ -445,6 +473,12 @@ html_template = '''<!DOCTYPE html>
     button:hover {{
       background-color: hsl(var(--primary-color-hue, 0), 70%, 45%);
     }}
+    [data-theme="dark"] button {{
+      background-color: hsl(var(--primary-color-hue, 0), 70%, 60%);
+    }}
+    [data-theme="dark"] button:hover {{
+      background-color: hsl(var(--primary-color-hue, 0), 70%, 55%);
+    }}
     #bank_number_selection {{
       padding: 8px;
       border: none;
@@ -453,8 +487,14 @@ html_template = '''<!DOCTYPE html>
       color: var(--text-color);
       cursor: pointer;
     }}
+    [data-theme="dark"] #bank_number_selection {{
+      background-color: hsl(var(--primary-color-hue, 0), 70%, 60%);
+    }}
     #bank_number_selection:hover {{
       background-color: hsl(var(--primary-color-hue, 0), 70%, 40%);
+    }}
+    [data-theme="dark"] #bank_number_selection:hover {{
+      background-color: hsl(var(--primary-color-hue, 0), 70%, 55%);
     }}
     input[type="range"] {{
       -webkit-appearance: none;
@@ -463,6 +503,9 @@ html_template = '''<!DOCTYPE html>
       border-radius: 5px;
       background: linear-gradient(to right, var(--primary-color, hsl(0, 70%, 50%)) 0%, var(--primary-color, hsl(0, 70%, 50%)) 0%, #ccc 0%, #ccc 100%);
       outline: none;
+    }}
+    [data-theme="dark"] input[type="range"] {{
+      background: linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) 0%, #555 0%, #555 100%);
     }}
     input[type="range"]::-webkit-slider-thumb {{
       -webkit-appearance: none;
@@ -477,6 +520,9 @@ html_template = '''<!DOCTYPE html>
       border-radius: 5px;
       background: linear-gradient(to right, var(--primary-color, hsl(0, 70%, 50%)) 0%, var(--primary-color, hsl(0, 70%, 50%)) 0%, #ccc 0%, #ccc 100%);
     }}
+    [data-theme="dark"] input[type="range"]::-moz-range-track {{
+      background: linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) 0%, #555 0%, #555 100%);
+    }}
     input[type="range"]::-moz-range-thumb {{
       width: 12px;
       height: 12px;
@@ -488,6 +534,9 @@ html_template = '''<!DOCTYPE html>
       color: var(--primary-color);
       text-decoration: none;
     }}
+    [data-theme="dark"] a {{
+      color: hsl(var(--primary-color-hue, 0), 70%, 60%);
+    }}
     a:hover {{
       text-decoration: underline;
     }}
@@ -497,6 +546,7 @@ html_template = '''<!DOCTYPE html>
     input[type="text"][readonly] {{
       border: none;
       background: transparent;
+      color: var(--text-primary);
     }}
     /* Default single-column layout for smartphones */
     #parameters {{
@@ -616,6 +666,14 @@ html_template = '''<!DOCTYPE html>
       <div class="controls">
         <div class="button_div">
           <button id="randomise_btn">randomise</button>
+        </div>
+      </div>
+      <div class="section">
+        <h5 style="margin: 0; font-size: 1.1em;">theme:</h5>
+      </div>
+      <div class="controls">
+        <div class="button_div">
+          <button id="toggle-theme-btn">Toggle Dark Mode</button>
         </div>
       </div>
     </div>

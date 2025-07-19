@@ -35,7 +35,7 @@ async function loadParameters() {
     const response = await fetch('parameters.json');
     if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
     parameters = await response.json();
-   // console.log('[DEBUG] Loaded parameters:', Object.keys(parameters));
+    // console.log('[DEBUG] Loaded parameters:', Object.keys(parameters));
     return parameters;
   } catch (error) {
     console.error('[loadParameters] Failed:', error);
@@ -56,7 +56,7 @@ async function initializeDefaultValues() {
     });
   });
   applyOverrideDefaults(defaultValues);
- // console.log('[DEBUG] Default values:', defaultValues);
+  // console.log('[DEBUG] Default values:', defaultValues);
 }
 
 function findParameterBySysex(sysex) {
@@ -99,15 +99,41 @@ function updateUIColor() {
   if (!param) return console.warn('[updateUIColor] SysEx 20 not found');
   const bankColor = currentValues[20] ?? defaultValues[20] ?? param.default_value;
   const hue = bankColor % 360;
-  let textColor = '#ffffff';
-  if ((hue >= 45 && hue <= 75) || (hue >= 90 && hue <= 150)) textColor = '#000000';
-  document.documentElement.style.setProperty('--primary-color', `hsl(${hue}, 70%, 50%)`);
+  const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+  // Set primary color based on theme
+  const primaryColor = isDarkMode ? `hsl(${hue}, 70%, 60%)` : `hsl(${hue}, 70%, 50%)`;
+  // Set text color based on hue for readability
+  const textColor = (hue >= 45 && hue <= 75) || (hue >= 90 && hue <= 150) ? '#000000' : '#ffffff';
+  document.documentElement.style.setProperty('--primary-color-hue', hue);
+  document.documentElement.style.setProperty('--primary-color', primaryColor);
   document.documentElement.style.setProperty('--text-color', textColor);
   document.querySelectorAll('input[type="range"]').forEach(slider => {
     const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
-    slider.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${value}%, #ccc ${value}%, #ccc 100%)`;
-    //console.log(`[updateUIColor] Slider ${slider.id}, Hue=${hue}, Value=${value}%`);
+    const trackColor = isDarkMode ? '#555' : '#ccc';
+    slider.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${value}%, ${trackColor} ${value}%, ${trackColor} 100%)`;
+    // console.log(`[updateUIColor] Slider ${slider.id}, Hue=${hue}, Value=${value}%, Theme=${isDarkMode ? 'dark' : 'light'}`);
   });
+  // Update button styles
+  document.querySelectorAll('button, #bank_number_selection').forEach(element => {
+    element.style.backgroundColor = primaryColor;
+    element.style.color = textColor;
+  });
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const currentTheme = html.getAttribute('data-theme') || 'light';
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  // console.log(`[toggleTheme] Switched to ${newTheme} mode`);
+  updateUIColor(); // Ensure sliders update with theme
+}
+
+function loadTheme() {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  // console.log(`[loadTheme] Loaded ${savedTheme} mode`);
 }
 
 function refreshRhythmGrid() {
@@ -167,7 +193,7 @@ async function setupParameterControls() {
           if (valueDisplay) valueDisplay.value = param.data_type === 'float' ? uiValue.toFixed(2) : deviceValue;
           controller.sendParameter(sysex, deviceValue);
           const valuePercent = ((element.value - element.min) / (element.max - element.min)) * 100;
-          element.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${valuePercent}%, #ccc ${valuePercent}%, #ccc 100%)`;
+          element.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${valuePercent}%, #ccc 0%, #ccc 100%)`;
           if (sysex === 20) updateUIColor();
         });
         if (valueDisplay) {
@@ -185,9 +211,9 @@ async function setupParameterControls() {
             valueDisplay.value = param.data_type === 'float' ? inputValue.toFixed(2) : inputValue;
             controller.sendParameter(sysex, deviceValue);
             const valuePercent = ((element.value - element.min) / (element.max - element.min)) * 100;
-            element.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${valuePercent}%, #ccc ${valuePercent}%, #ccc 100%)`;
+            element.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${valuePercent}%, #ccc 0%, #ccc 100%)`;
             if (sysex === 20) updateUIColor();
-            //console.log(`[text-input] Param ${sysex}, Value=${inputValue}`);
+            // console.log(`[text-input] Param ${sysex}, Value=${inputValue}`);
           });
         }
       } else if (param.ui_type === 'select') {
@@ -212,7 +238,7 @@ async function setupParameterControls() {
 }
 
 function handleDataReceived(data) {
- // console.log(`[handleDataReceived] Bank=${data.bankNumber}, parameters.length=${data.parameters.length}`);
+  // console.log(`[handleDataReceived] Bank=${data.bankNumber}, parameters.length=${data.parameters.length}`);
   currentValues = {};
   data.parameters.forEach((value, sysex) => {
     if (value !== undefined) {
@@ -227,10 +253,9 @@ function handleDataReceived(data) {
 }
 
 async function updateUI(bankNumber) {
- // console.log(`[updateUI] Bank ${bankNumber + 1}, targetBank=${targetBank + 1}`);
+  // console.log(`[updateUI] Bank ${bankNumber + 1}, targetBank=${targetBank + 1}`);
   currentBankNumber = bankNumber;
   const bankSelect = document.getElementById("bank_number_selection");
-  // Only update dropdown if it doesn't match the current bank
   if (bankSelect && parseInt(bankSelect.value) !== bankNumber) bankSelect.value = bankNumber;
   const params = await loadParameters();
   Object.keys(params).forEach(group => {
@@ -251,15 +276,14 @@ function loadBankSettings(bankNumber) {
   if (!controller.isConnected()) return console.warn(`[loadBankSettings] No device connected for bank ${bankNumber}`);
   tempValues = {};
   controller.sendSysEx([0, 0, 0, bankNumber]);
- // console.log(`[loadBankSettings] Requesting settings for bank ${bankNumber}`);
+  // console.log(`[loadBankSettings] Requesting settings for bank ${bankNumber}`);
 }
 
-// New: Random preset generation functions
 async function loadParameterRanges() {
   try {
     const [parametersResponse, presetsResponse] = await Promise.all([
       fetch('parameters.json'),
-      fetch('shared_presets.json').catch(() => null) // Optional, fallback if not found
+      fetch('shared_presets.json').catch(() => null)
     ]);
     
     const parametersData = await parametersResponse.json();
@@ -267,17 +291,14 @@ async function loadParameterRanges() {
     
     const parameterRanges = {};
     
-    // Use random preset as base if available
     let randomPreset = null;
     if (presetsData?.shared_presets?.length) {
       randomPreset = presetsData.shared_presets[Math.floor(Math.random() * presetsData.shared_presets.length)];
       console.log(`[loadParameterRanges] Using random preset: "${randomPreset.name}" by ${randomPreset.author}`);
     }
     
-    // Decode preset values if available
     const decodedPreset = randomPreset ? atob(randomPreset.value).split(';').map(v => parseFloat(v)) : null;
     
-    // Process parameters
     ['global_parameter', 'harp_parameter', 'chord_parameter', 'rhythm_parameter'].forEach(category => {
       if (!parametersData[category]) return;
       parametersData[category].forEach(param => {
@@ -302,7 +323,6 @@ async function loadParameterRanges() {
     return parameterRanges;
   } catch (error) {
     console.error('[loadParameterRanges] Error:', error);
-    // Fallback to parameters.json only
     try {
       const response = await fetch('parameters.json');
       const parametersData = await response.json();
@@ -347,7 +367,7 @@ async function generateRandomPreset() {
   
   const parameterRanges = await loadParameterRanges();
   const weirdness_factor = 0.10;
-  const preset = Array(256).fill(0); // Assuming max SysEx 255
+  const preset = Array(256).fill(0);
   const fixedValues = [32, 33, 34, 41, 97, 197];
   
   Object.entries(parameterRanges).forEach(([sysex, params]) => {
@@ -380,7 +400,7 @@ async function generateRandomPreset() {
     }
   }
   
-  controller.sendParameter(0, 0); // Update interface
+  controller.sendParameter(0, 0);
   console.log("[generateRandomPreset] Random preset applied");
   showNotification("Random preset applied", "success");
 }
@@ -401,7 +421,7 @@ function setupRhythmGridControls() {
           rhythmPattern[step] = patternValue;
           currentValues[sysexAddress] = patternValue;
           controller.sendParameter(sysexAddress, patternValue);
-         // console.log(`[rhythm-checkbox] Step ${step}, Voice ${voice}, Pattern ${patternValue}`);
+          // console.log(`[rhythm-checkbox] Step ${step}, Voice ${voice}, Pattern ${patternValue}`);
         });
       }
     }
@@ -411,11 +431,13 @@ function setupRhythmGridControls() {
 async function initialize() {
   await initializeDefaultValues();
   await setupParameterControls();
-  setupRhythmGridControls(); // Add this line
+  setupRhythmGridControls();
   controller.onConnectionChange = updateConnectionStatus;
   controller.onDataReceived = handleDataReceived;
   const connected = await controller.initialize();
   if (connected) loadBankSettings(0);
+  loadTheme(); // Load saved theme
+  document.getElementById("toggle-theme-btn")?.addEventListener("click", toggleTheme);
 }
 
 document.getElementById("bank_number_selection")?.addEventListener("change", (e) => {
@@ -464,7 +486,7 @@ document.getElementById("export-settings-btn")?.addEventListener("click", () => 
     document.getElementById("information_zone")?.focus();
     return;
   }
-  const sysexArray = Array(256).fill(0); // Assuming max SysEx 255
+  const sysexArray = Array(256).fill(0);
   Object.entries(currentValues).forEach(([sysex, value]) => {
     sysexArray[parseInt(sysex)] = value;
   });
@@ -488,7 +510,7 @@ document.getElementById("load-settings-btn")?.addEventListener("click", () => {
   if (!presetCode) return;
   try {
     const parameters = atob(presetCode).split(";").map(v => parseFloat(v));
-    if (parameters.length !== 256) { // Assuming max SysEx 255
+    if (parameters.length !== 256) {
       console.warn("[load-settings-btn] Malformed preset code");
       showNotification("Malformed preset code", "error");
       return;
@@ -501,7 +523,7 @@ document.getElementById("load-settings-btn")?.addEventListener("click", () => {
         currentValues[i] = value;
       }
     }
-    controller.sendParameter(0, 0); // Update interface
+    controller.sendParameter(0, 0);
     console.log("[load-settings-btn] Loaded settings");
     showNotification("Preset loaded", "success");
   } catch (error) {
