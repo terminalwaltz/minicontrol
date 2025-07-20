@@ -79,7 +79,7 @@ class MiniChordController {
     if (event.port.state === "disconnected" && name.includes("minichord")) {
       this.device = false;
       if (this.onConnectionChange) {
-        this.onConnectionChange(false, "Minichord disconnected");
+        this.onConnectionChange(false, "minichord disconnected");
       }
     }
 

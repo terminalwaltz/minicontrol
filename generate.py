@@ -435,7 +435,7 @@ html_template = '''<!DOCTYPE html>
     #dot {{
       margin-right: 8px;
       font-size: 1.2em;
-      color: green;
+      color: lightgreen;
     }}
     [data-theme="dark"] #dot.connected {{
       color: #00ff00;
