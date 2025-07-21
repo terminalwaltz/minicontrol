@@ -1906,7 +1906,7 @@
       "max_value": 8,
       "sysex_adress": 36,
       "curve": "linear",
-      "tooltip": "Sets harp to ascending scales: 0=Chord Tones (default), 1=Major, 2=Major Pentatonic, 3=Minor Pentatonic, 4=Diminished 6th, 5=Relative Natural Minor, 6=Relative Harmonic Minor, 7=Relative Minor Pentatonic, 8=Scale Per Chord Mode",
+      "tooltip": "Sets harp to ascending scales: 0=Chord Tones (default), 1=Major, 2=Major Pentatonic, 3=Minor Pentatonic, 4=Diminished 6th, 5=Relative Natural Minor, 6=Relative Harmonic Minor, 7=Relative Minor Pentatonic, 8=Scale Per Chord Mode, 9=Mode 8 but Pentatonic",
       "iterate": 1,
       "method": "scalar_harp_selection=value;",
       "introduction_version": 3,
@@ -1921,7 +1921,8 @@
         {"value": 5, "label": "Relative Natural Minor"},
         {"value": 6, "label": "Relative Harmonic Minor"},
         {"value": 7, "label": "Relative Minor Pentatonic"},
-        {"value": 8, "label": "Scale Per Chord Mode"}
+        {"value": 8, "label": "Scale Per Chord Mode"},
+        {"value": 9, "label": "SPC Mode Pentatonic"}
       ]
     },
     {
