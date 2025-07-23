@@ -3358,8 +3358,18 @@
       "iterate": 1,
       "method": "flat_button_modifier=value;",
       "introduction_version": 3,
-      "ui_type": "switch",
-      "step": 1
+      "ui_type": "select",
+      "step": 1,
+      "options":[
+        {
+          "value":0,
+          "label":"sharp"
+        },
+        {
+          "value":1,
+          "label":"flat"
+        }
+      ]
     }
   ],
   "rhythm_parameter": [

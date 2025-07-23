@@ -63,13 +63,13 @@ class MiniChordController {
   if (!foundOutput || !foundInput) {
     this.device = false;
     if (this.onConnectionChange) {
-      this.onConnectionChange(false, "Minichord not found.");
+      this.onConnectionChange(false, "minichord not found.");
     }
     return false;
   }
   midiAccess.onstatechange = (e) => this.handleStateChange(e);
   if (this.onConnectionChange) {
-    this.onConnectionChange(true, "Minichord connected");
+    this.onConnectionChange(true, "minichord connected");
   }
   return true;
 }
