@@ -59,7 +59,7 @@ parameter_name_order = {
         ]
     },
     'global_parameter': {
-        'General': ['bank color', 'led attenuation', 'transpose'],
+        'General': ['bank color', 'led attenuation', 'transpose','sharp function'],
         'Effects': ['pan', 'reverb size', 'reverb high damping', 'reverb low damping', 'reverb low pass', 'reverb diffusion']
     },
     'chord_parameter': {
@@ -203,9 +203,6 @@ parameter_name_order = {
             'mod alternate control',
             'mod alternate percent range'
         ]
-    },
-    'sharp_button_parameter': {
-        'General': ['sharp function']
     }
 }
 

@@ -49,6 +49,30 @@
       "step": 1
     },
     {
+      "name": "sharp function",
+      "group": "General",
+      "default_value": false,
+      "data_type": "int",
+      "sysex_adress": 31,
+      "curve": "linear",
+      "tooltip": "change the sharp button to a flat button",
+      "iterate": 1,
+      "method": "flat_button_modifier=value;",
+      "introduction_version": 3,
+      "ui_type": "select",
+      "step": 1,
+      "options":[
+        {
+          "value":0,
+          "label":"sharp"
+        },
+        {
+          "value":1,
+          "label":"flat"
+        }
+      ]
+    },
+    {
       "name": "pan",
       "group": "Effects",
       "default_value": 1,
@@ -3344,32 +3368,6 @@
       "introduction_version": 2,
       "ui_type": "slider",
       "step": 1
-    }
-  ],
-  "sharp_button_parameter": [
-    {
-      "name": "sharp function",
-      "group": "General",
-      "default_value": false,
-      "data_type": "int",
-      "sysex_adress": 31,
-      "curve": "linear",
-      "tooltip": "change the sharp button to a flat button",
-      "iterate": 1,
-      "method": "flat_button_modifier=value;",
-      "introduction_version": 3,
-      "ui_type": "select",
-      "step": 1,
-      "options":[
-        {
-          "value":0,
-          "label":"sharp"
-        },
-        {
-          "value":1,
-          "label":"flat"
-        }
-      ]
     }
   ],
   "rhythm_parameter": [
