@@ -705,6 +705,9 @@ void apply_audio_parameter(int adress, int value) {
         case 235:
             rythm_pattern[15]=value;
             break;
+        case 255:
+            a4_master_tuning = constrain(value, 432, 444); c_frequency = 130.81 * (a4_master_tuning / 440.0); save_master_tuning(); /* Note: current_sysex_parameters[255] is not updated to keep master tuning independent of presets */ if (current_line >= 0) { for (int i = 0; i < 4; i++) { if (chord_envelope_array[i]->isActive()) { set_chord_voice_frequency(i, current_chord_notes[i]); } } } for (int i = 0; i < 12; i++) { if (string_enveloppe_array[i]->isActive()) { set_harp_voice_frequency(i, current_harp_notes[i]); } };
+            break;
         default:
             break;
     }

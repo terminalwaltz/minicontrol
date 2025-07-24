@@ -86,6 +86,7 @@
   "24": "global: effects: reverb size",
   "20": "global: general: bank color",
   "32": "global: general: led attenuation",
+  "31": "global: general: sharp function",
   "30": "global: general: transpose",
   "86": "harp: crunch: crunch level",
   "87": "harp: crunch: crunch type",
@@ -159,6 +160,5 @@
   "187": "rhythm: rhythm: default_bpm",
   "189": "rhythm: rhythm: measure update",
   "191": "rhythm: rhythm: note pushed duration",
-  "190": "rhythm: rhythm: shuffle value",
-  "31": "sharp_button: general: sharp function"
+  "190": "rhythm: rhythm: shuffle value"
 }
