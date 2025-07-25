@@ -432,7 +432,12 @@ html_template = '''<!DOCTYPE html>
       background: lightcoral;
       border: 3px solid red;
     }}
-    #dot {{
+    .connected#notification-bubble #dot {{
+      margin-right: 8px;
+      font-size: 1.2em;
+      color: green;
+    }}
+    [data-theme="dark"] .connected#notification-bubble #dot {{
       margin-right: 8px;
       font-size: 1.2em;
       color: lightgreen;
