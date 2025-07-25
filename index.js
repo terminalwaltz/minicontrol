@@ -3,15 +3,12 @@ let parameters = null;
 let currentValues = {};
 let controller = new MiniChordController();
 let tempValues = {};
-let bankSettings = {};
 let currentBankNumber = -1;
 let targetBank = -1;
 const bankNames = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"];
 let defaultValues = {};
 let notificationTimeout = null;
 let rhythmPattern = new Array(16).fill(0);
-let lastUpdate = 0;
-const updateInterval = 50;
 let minichord_device = false;
 const BASE_ADDRESS_RHYTHM = 220;
 
