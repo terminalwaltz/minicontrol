@@ -12,7 +12,7 @@
       "tooltip": "color of the preset",
       "iterate": 1,
       "method": "bank_led_hue=value; set_led_color(bank_led_hue, 1.0, 1-led_attenuation);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -28,7 +28,7 @@
       "tooltip": "attenuation of the brightness of the led",
       "iterate": 1,
       "method": "led_attenuation=value; set_led_color(bank_led_hue, 1.0, 1-led_attenuation);",
-      "introduction_version": 3,
+      "introduction_version": 0.03,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -44,7 +44,7 @@
       "tooltip": "transpose all sounds by a number of semitones",
       "iterate": 1,
       "method": "transpose_semitones=value;midi_base_note_transposed=midi_base_note+transpose_semitones;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "discrete_slider",
       "step": 1
     },
@@ -76,7 +76,7 @@
       ],
       "method": "a4_master_tuning = constrain(value, 432, 444); c_frequency = 130.81 * (a4_master_tuning / 440.0); save_master_tuning(); /* Note: current_sysex_parameters[255] is not updated to keep master tuning independent of presets */ if (current_line >= 0) { for (int i = 0; i < 4; i++) { if (chord_envelope_array[i]->isActive()) { set_chord_voice_frequency(i, current_chord_notes[i]); } } } for (int i = 0; i < 12; i++) { if (string_enveloppe_array[i]->isActive()) { set_harp_voice_frequency(i, current_harp_notes[i]); } }",
       "iterate": 1,
-      "introduction_version": "3"
+      "introduction_version": "7"
     },
     {
       "name": "sharp function",
@@ -88,7 +88,7 @@
       "tooltip": "change the sharp button to a flat button",
       "iterate": 1,
       "method": "flat_button_modifier=value;",
-      "introduction_version": 3,
+      "introduction_version": 0.03,
       "ui_type": "select",
       "step": 1,
       "options":[
@@ -114,7 +114,7 @@
       "tooltip": "pans the chord and harp sound, from fully separated to both in the middle ",
       "iterate": 1,
       "method": "pan=value;apply_audio_parameter(85, current_sysex_parameters[85]);apply_audio_parameter(184, current_sysex_parameters[184]);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -130,7 +130,7 @@
       "tooltip": "size of the reverb room",
       "iterate": 1,
       "method": "main_reverb.size(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -146,7 +146,7 @@
       "tooltip": "damping of high frequencies in the reverb room",
       "iterate": 1,
       "method": "main_reverb.hidamp(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -162,7 +162,7 @@
       "tooltip": "damping of low frequencies in the reverb room",
       "iterate": 1,
       "method": "main_reverb.lodamp(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -178,7 +178,7 @@
       "tooltip": "additional low pass in the reverb room",
       "iterate": 1,
       "method": "main_reverb.lowpass(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -194,7 +194,7 @@
       "tooltip": "diffusion within the reverb room",
       "iterate": 1,
       "method": "main_reverb.diffusion(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     }
@@ -212,7 +212,7 @@
       "tooltip": "global gain of the chord section",
       "iterate": 1,
       "method": "chords_gain.amplitude(value,100); chord_attack_velocity=value*127;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -228,7 +228,7 @@
       "tooltip": "changes the octave of the chord section up or down",
       "iterate": 4,
       "method": "chord_octave_change=value; current_chord_notes[i]=calculate_note_chord(i,slash_chord,sharp_active);",
-      "introduction_version": 3,
+      "introduction_version": 0.03,
       "ui_type": "discrete_slider",
       "step": 1
     },
@@ -244,7 +244,7 @@
       "tooltip": "Shifts the register frame up (e.g. 1 makes D the lowest pitched, 2 makes E the lowest pitched",
       "iterate": 6,
       "method": "chord_frame_shift=value;",
-      "introduction_version": 3,
+      "introduction_version": 0.03,
       "ui_type": "discrete_slider",
       "options": [
         {
@@ -301,7 +301,8 @@
         {"value": 9, "label": "Ab"},
         {"value": 10, "label": "Db"},
         {"value": 11, "label": "Gb"}
-      ]
+      ],
+      "introduction_version": 0.06
     },
     {
       "name": "barry harris mode",
@@ -313,7 +314,7 @@
       "tooltip": "change major chords to major 6, the minor chords to minor 6, and the diminished chords to fully diminished. Recommend Harp Shuffling array #5",
       "iterate": 1,
       "method": "barry_harris_mode=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.05,
       "ui_type": "switch",
       "step": 1
     },
@@ -327,7 +328,7 @@
       "tooltip": "defines whether the chords will be retriggered when playing a modulation of the current chord or in continuous chord mode",
       "iterate": 1,
       "method": "retrigger_chord=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "switch",
       "step": 1
     },
@@ -343,7 +344,7 @@
       "tooltip": "defines different chord patterns. 0 is normal, 1 to 4 is one octave up with different additional notes, 5 is two octave up",
       "iterate": 7,
       "method": "chord_shuffling_selection=value; current_chord_notes[i]=calculate_note_chord(i,slash_chord,sharp_active);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "discrete_slider",
       "options": [
         {
@@ -381,7 +382,7 @@
       "tooltip": "level of the scale which will be affected when using slash chords",
       "iterate": 1,
       "method": "note_slash_level=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "discrete_slider",
       "options": [
         {
@@ -411,7 +412,7 @@
       "tooltip": "length in ms of the delay",
       "iterate": 1,
       "method": "delay_chords.delay(0,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -427,7 +428,7 @@
       "tooltip": "corner frequency of the filter in the delay loop",
       "iterate": 1,
       "method": "filter_delay_chords.frequency(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -443,7 +444,7 @@
       "tooltip": "resonance of the filter in the delay loop",
       "iterate": 1,
       "method": "filter_delay_chords.resonance(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -459,7 +460,7 @@
       "tooltip": "lowpass component feedback into the delay",
       "iterate": 1,
       "method": "chord_delay_mix.gain(1,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -475,7 +476,7 @@
       "tooltip": "bandpass component feedback into the delay",
       "iterate": 1,
       "method": "chord_delay_mix.gain(2,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -491,7 +492,7 @@
       "tooltip": "highpass component feedback into the delay",
       "iterate": 1,
       "method": "chord_delay_mix.gain(3,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -507,7 +508,7 @@
       "tooltip": "intensity of the dry signal in the output",
       "iterate": 1,
       "method": "chords_effect_mix.gain(0,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -523,7 +524,7 @@
       "tooltip": "intensity of the delayed signal in the output",
       "iterate": 1,
       "method": "chords_effect_mix.gain(1,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -539,7 +540,7 @@
       "tooltip": "level of the reverb applied to the chord signal",
       "iterate": 1,
       "method": "reverb_mixer.gain(1,value);chords_r_stereo_gain.amplitude(1.0-reverb_dry_proportion*value,100);chords_l_stereo_gain.amplitude((1.0-reverb_dry_proportion*value)*pan,100);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -555,7 +556,7 @@
       "tooltip": "level of crunch applied to the chord signal",
       "iterate": 1,
       "method": "chord_waveshaper_mix.gain(0,1-value);chord_waveshaper_mix.gain(1,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -571,7 +572,7 @@
       "tooltip": "selects the waveshaper transfert function, with more and more distorted shape",
       "iterate": 1,
       "method": "ws_sin_param=value;calculate_ws_array(); chord_waveshape.shape(wave_shape,257);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "options": [
         {
@@ -601,7 +602,7 @@
       "tooltip": "amplitude of the first oscillator",
       "iterate": 4,
       "method": "chord_osc_1_array[i]->amplitude(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -617,7 +618,7 @@
       "tooltip": "defines the waveform amongst 12 oscillators for the first oscillator. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.",
       "iterate": 4,
       "method": "chord_osc_1_array[i]->begin(waveform_array[value]);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1,
       "options": [
@@ -683,7 +684,7 @@
       "tooltip": "amplitude of the second oscillator",
       "iterate": 4,
       "method": "chord_osc_2_array[i]->amplitude(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -699,7 +700,7 @@
       "tooltip": "defines the waveform amongst 12 oscillators for the second oscillator. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.",
       "iterate": 4,
       "method": "chord_osc_2_array[i]->begin(waveform_array[value]);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1,
       "options": [
@@ -765,7 +766,7 @@
       "tooltip": "amplitude of the third oscillator",
       "iterate": 4,
       "method": "chord_osc_3_array[i]->amplitude(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -781,7 +782,7 @@
       "tooltip": "defines the waveform amongst 12 oscillators for the third oscillator. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.",
       "iterate": 4,
       "method": "chord_osc_3_array[i]->begin(waveform_array[value]);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1,
       "options": [
@@ -847,7 +848,7 @@
       "tooltip": "amplitude of the noise oscillator",
       "iterate": 4,
       "method": "chord_voice_mixer_array[i]->gain(3,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -863,7 +864,7 @@
       "tooltip": "amplitude of the first chord note",
       "iterate": 1,
       "method": "chord_voice_mixer.gain(0,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -879,7 +880,7 @@
       "tooltip": "amplitude of the second chord note",
       "iterate": 1,
       "method": "chord_voice_mixer.gain(1,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -895,7 +896,7 @@
       "tooltip": "amplitude of the third chord note",
       "iterate": 1,
       "method": "chord_voice_mixer.gain(2,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -911,7 +912,7 @@
       "tooltip": "amplitude of the fourht chord note",
       "iterate": 1,
       "method": "chord_voice_mixer.gain(3,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -927,7 +928,7 @@
       "tooltip": "frequency multiplier for the first oscillator. 1 is normal, 0.5 an octave below and 1 an octave above",
       "iterate": 1,
       "method": "osc_1_freq_multiplier=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -943,7 +944,7 @@
       "tooltip": "frequency multiplier for the second oscillator. 1 is normal, 0.5 an octave below and 1 an octave above",
       "iterate": 1,
       "method": "osc_2_freq_multiplier=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -959,7 +960,7 @@
       "tooltip": "frequency multiplier for the third oscillator. 1 is normal, 0.5 an octave below and 1 an octave above",
       "iterate": 1,
       "method": "osc_3_freq_multiplier=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -975,7 +976,7 @@
       "tooltip": "delay between each note of the chord",
       "iterate": 1,
       "method": "inter_string_delay=value*1000;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -991,7 +992,7 @@
       "tooltip": "random delay between each note of the chord",
       "iterate": 1,
       "method": "random_delay=value*1000;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -1007,7 +1008,7 @@
       "tooltip": "attack time of the envelope",
       "iterate": 4,
       "method": "chord_envelope_array[i]->attack(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1023,7 +1024,7 @@
       "tooltip": "hold time of the envelope",
       "iterate": 4,
       "method": "chord_envelope_array[i]->hold(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1039,7 +1040,7 @@
       "tooltip": "decay time of the envelope",
       "iterate": 4,
       "method": "chord_envelope_array[i]->decay(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1055,7 +1056,7 @@
       "tooltip": "sustain level of the envelope",
       "iterate": 4,
       "method": "    chord_envelope_array[i]->sustain(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1071,7 +1072,7 @@
       "tooltip": "release time of the envelope",
       "iterate": 4,
       "method": "chord_envelope_array[i]->release(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1087,7 +1088,7 @@
       "tooltip": "retrigger time of the envelope",
       "iterate": 4,
       "method": "chord_envelope_array[i]->releaseNoteOn(value); chord_retrigger_release=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1103,7 +1104,7 @@
       "tooltip": "corner frequency of the filter in the absence of control signal",
       "iterate": 4,
       "method": "chord_filter_base_freq=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -1119,7 +1120,7 @@
       "tooltip": "value that is multiplied by the note frequency and added to the base corner frequency to allow for keytracking",
       "iterate": 4,
       "method": "chord_filter_keytrack=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1135,7 +1136,7 @@
       "tooltip": "resonance of the filter",
       "iterate": 4,
       "method": "chord_voice_filter_array[i]->resonance(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1151,7 +1152,7 @@
       "tooltip": "attack time of the envelope filter",
       "iterate": 4,
       "method": "chord_envelope_filter_array[i]->attack(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1167,7 +1168,7 @@
       "tooltip": "hold time of the envelope filter",
       "iterate": 4,
       "method": "chord_envelope_filter_array[i]->hold(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1183,7 +1184,7 @@
       "tooltip": "decay time of the envelope filter",
       "iterate": 4,
       "method": "chord_envelope_filter_array[i]->decay(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1199,7 +1200,7 @@
       "tooltip": "sustain level of the envelope filter",
       "iterate": 4,
       "method": "chord_envelope_filter_array[i]->sustain(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1215,7 +1216,7 @@
       "tooltip": "release time of the envelope filter",
       "iterate": 4,
       "method": "chord_envelope_filter_array[i]->release(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1231,7 +1232,7 @@
       "tooltip": "retrigger time of the envelope filter",
       "iterate": 4,
       "method": "chord_envelope_filter_array[i]->releaseNoteOn(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1247,7 +1248,7 @@
       "tooltip": "defines the waveform amongst 12 oscillators for the low pass filter control LFO. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.",
       "iterate": 1,
       "method": "chords_filter_LFO.begin(waveform_array[value]);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1,
       "options": [
@@ -1313,7 +1314,7 @@
       "tooltip": "frequency of the low pass filter control LFO",
       "iterate": 1,
       "method": "chords_filter_LFO.frequency(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1329,7 +1330,7 @@
       "tooltip": "amplitude of the low pass filter control LFO",
       "iterate": 1,
       "method": "chords_filter_LFO.amplitude(0.01+value);chords_filter_LFO.offset(1-value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1345,7 +1346,7 @@
       "tooltip": "sensitivity of the low pass filter to control envelope and LFO",
       "iterate": 4,
       "method": "chord_voice_filter_array[i]->octaveControl(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1361,7 +1362,7 @@
       "tooltip": "defines the waveform amongst 12 oscillators for the tremolo (amplitude variation). In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.. Discontinuous signal will cause clicks",
       "iterate": 4,
       "method": "chords_tremolo_lfo.begin(waveform_array[value]);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1,
       "options": [
@@ -1427,7 +1428,7 @@
       "tooltip": "frequency of the tremolo",
       "iterate": 1,
       "method": "chord_tremolo_base_freq=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1443,7 +1444,7 @@
       "tooltip": "value that is multiplied by the note frequency and added to the base frequency of the tremolo to allow for keytracking",
       "iterate": 1,
       "method": "chord_tremolo_keytrack=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1459,7 +1460,7 @@
       "tooltip": "amplitude of the tremolo",
       "iterate": 4,
       "method": "chords_tremolo_lfo.amplitude(0.01+value);chords_tremolo_lfo.offset(1-value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1475,7 +1476,7 @@
       "tooltip": "defines the waveform amongst 12 oscillators for the vibrato (pitch variation). In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square..",
       "iterate": 4,
       "method": "chords_vibrato_lfo.begin(waveform_array[value]);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1,
       "options": [
@@ -1541,7 +1542,7 @@
       "tooltip": "frequency of the vibrato oscillation",
       "iterate": 1,
       "method": "chord_vibrato_base_freq=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1557,7 +1558,7 @@
       "tooltip": "value that is multiplied by the note frequency and added to the base frequency to allow for keytracking",
       "iterate": 1,
       "method": "chord_vibrato_keytrack=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1573,7 +1574,7 @@
       "tooltip": "amplitude of the vibrato oscillation",
       "iterate": 1,
       "method": "chords_vibrato_lfo.amplitude(0.01+value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1589,7 +1590,7 @@
       "tooltip": "attack time of the vibrato envelope",
       "iterate": 4,
       "method": "chord_vibrato_envelope_array[i]->attack(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1605,7 +1606,7 @@
       "tooltip": "hold time of the vibrato envelope",
       "iterate": 4,
       "method": "chord_vibrato_envelope_array[i]->hold(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1621,7 +1622,7 @@
       "tooltip": "decay time of the vibrato envelope",
       "iterate": 4,
       "method": "chord_vibrato_envelope_array[i]->decay(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1637,7 +1638,7 @@
       "tooltip": "sustain level of the vibrato envelope",
       "iterate": 4,
       "method": "chord_vibrato_envelope_array[i]->sustain(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1653,7 +1654,7 @@
       "tooltip": "release time of the vibrato envelope",
       "iterate": 4,
       "method": "chord_vibrato_envelope_array[i]->release(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1669,7 +1670,7 @@
       "tooltip": "retrigger time of the vibrato envelope",
       "iterate": 4,
       "method": "chord_vibrato_envelope_array[i]->releaseNoteOn(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1685,7 +1686,7 @@
       "tooltip": "continuous signal added to the envelope for pitch variation. 1 is the center, before will be negative pitch bending, after positive pitch bending",
       "iterate": 1,
       "method": "chords_vibrato_dc.amplitude(value-1);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1701,7 +1702,7 @@
       "tooltip": "attack time of the pitch bend envelope",
       "iterate": 4,
       "method": "chord_vibrato_dc_envelope_array[i]->attack(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1717,7 +1718,7 @@
       "tooltip": "hold time of the pitch bend envelope",
       "iterate": 4,
       "method": "chord_vibrato_dc_envelope_array[i]->hold(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1733,7 +1734,7 @@
       "tooltip": "decay time of the pitch bend envelope",
       "iterate": 4,
       "method": "chord_vibrato_dc_envelope_array[i]->decay(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1749,7 +1750,7 @@
       "tooltip": "retrigger time of the bend envelope",
       "iterate": 4,
       "method": "chord_vibrato_dc_envelope_array[i]->releaseNoteOn(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -1765,7 +1766,7 @@
       "tooltip": "intensity of the vibrato effect",
       "iterate": 4,
       "method": "chord_osc_1_array[i]->frequencyModulation(value);chord_osc_2_array[i]->frequencyModulation(value);chord_osc_3_array[i]->frequencyModulation(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1781,7 +1782,7 @@
       "tooltip": "corner frequency of the output filter",
       "iterate": 1,
       "method": "chords_main_filter.frequency(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -1797,7 +1798,7 @@
       "tooltip": "resonance of the output filter",
       "iterate": 1,
       "method": "chords_main_filter.resonance(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1813,7 +1814,7 @@
       "tooltip": "output lowpass component",
       "iterate": 1,
       "method": "chords_main_filter_mixer.gain(0,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1829,7 +1830,7 @@
       "tooltip": "output bandpass component",
       "iterate": 1,
       "method": "chords_main_filter_mixer.gain(1,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1845,7 +1846,7 @@
       "tooltip": "output highpass component",
       "iterate": 1,
       "method": "chords_main_filter_mixer.gain(2,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1861,7 +1862,7 @@
       "tooltip": "amplifies the volume of the chords",
       "iterate": 1,
       "method": "chords_amplifier.gain(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     }
@@ -1879,7 +1880,7 @@
       "tooltip": "global gain of the harp section",
       "iterate": 1,
       "method": "string_gain.amplitude(value,100);  harp_attack_velocity=value*127;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -1895,7 +1896,7 @@
       "tooltip": "changes the octave of the harp section up or down",
       "iterate": 12,
       "method": "harp_octave_change=value; current_harp_notes[i]=calculate_note_harp(i,slash_chord,sharp_active);",
-      "introduction_version": 3,
+      "introduction_version": 0.03,
       "ui_type": "discrete_slider",
       "step": 1
     },
@@ -1911,7 +1912,7 @@
       "tooltip": "defines different harp patterns. 0 is normal, 1 i with second, 2 is with fourth, 3 with sixth, 4 octaves and 5 chromatics",
       "iterate": 12,
       "method": "harp_shuffling_selection=value; current_harp_notes[i]=calculate_note_harp(i,slash_chord,sharp_active);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "discrete_slider",
       "options": [
         {
@@ -1947,7 +1948,7 @@
       "tooltip": "puts the harp in chromatic mode, with static notes not dependant on chord selection",
       "iterate": 1,
       "method": "chromatic_harp_mode=value;",
-      "introduction_version": 3,
+      "introduction_version": 0.03,
       "ui_type": "switch",
       "step": 1
     },
@@ -1963,7 +1964,7 @@
       "tooltip": "Sets harp to ascending scales: 0=Chord Tones (default), 1=Major, 2=Major Pentatonic, 3=Minor Pentatonic, 4=Diminished 6th, 5=Relative Natural Minor, 6=Relative Harmonic Minor, 7=Relative Minor Pentatonic, 8=Scale Per Chord Mode, 9=Mode 8 but Pentatonic",
       "iterate": 1,
       "method": "scalar_harp_selection=value;",
-      "introduction_version": 3,
+      "introduction_version": 0.07,
       "ui_type": "select",
       "step": 1,
       "options": [
@@ -1989,7 +1990,7 @@
       "tooltip": "defines whether a held harp note will change when changing chord",
       "iterate": 1,
       "method": "change_held_strings=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "switch",
       "step": 1
     },
@@ -2005,7 +2006,7 @@
       "tooltip": "length in ms of the delay",
       "iterate": 1,
       "method": "delay_strings.delay(0,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -2021,7 +2022,7 @@
       "tooltip": "corner frequency of the filter in the delay loop",
       "iterate": 1,
       "method": "filter_delay_strings.frequency(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -2037,7 +2038,7 @@
       "tooltip": "resonance of the filter in the delay loop",
       "iterate": 1,
       "method": "filter_delay_strings.resonance(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2053,7 +2054,7 @@
       "tooltip": "lowpass component feedback into the delay",
       "iterate": 1,
       "method": "string_delay_mix.gain(1,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2069,7 +2070,7 @@
       "tooltip": "bandpass component feedback into the delay",
       "iterate": 1,
       "method": "string_delay_mix.gain(2,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2085,7 +2086,7 @@
       "tooltip": "highpass component feedback into the delay",
       "iterate": 1,
       "method": "string_delay_mix.gain(3,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2101,7 +2102,7 @@
       "tooltip": "intensity of the dry signal in the output",
       "iterate": 1,
       "method": "strings_effect_mix.gain(0,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2117,7 +2118,7 @@
       "tooltip": "intensity of the delayed signal in the output",
       "iterate": 1,
       "method": "strings_effect_mix.gain(1,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2133,7 +2134,7 @@
       "tooltip": "level of the reverb applied to the harp signal",
       "iterate": 1,
       "method": "reverb_mixer.gain(0,value);string_r_stereo_gain.amplitude((1-reverb_dry_proportion*value)*pan,100);string_l_stereo_gain.amplitude(1-reverb_dry_proportion*value,100);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2149,7 +2150,7 @@
       "tooltip": "level of crunch applied to the harp signal",
       "iterate": 1,
       "method": "string_waveshaper_mix.gain(0,1-value);string_waveshaper_mix.gain(1,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2165,7 +2166,7 @@
       "tooltip": "selects the waveshaper transfert function, with more and more distorted shape",
       "iterate": 1,
       "method": "ws_sin_param=value;calculate_ws_array(); string_waveshape.shape(wave_shape,257);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "options": [
         {
@@ -2195,7 +2196,7 @@
       "tooltip": "amplitude of the 12 initial oscillators",
       "iterate": 12,
       "method": "string_waveform_array[i]->amplitude(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2211,7 +2212,7 @@
       "tooltip": "defines the waveform amongst 12 oscillators. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.",
       "iterate": 12,
       "method": "string_waveform_array[i]->begin(waveform_array[value]);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1,
       "options": [
@@ -2277,7 +2278,7 @@
       "tooltip": "attack time of the envelope",
       "iterate": 12,
       "method": "string_enveloppe_array[i]->attack(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2293,7 +2294,7 @@
       "tooltip": "hold time of the envelope",
       "iterate": 12,
       "method": "string_enveloppe_array[i]->hold(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2309,7 +2310,7 @@
       "tooltip": "decay time of the envelope",
       "iterate": 12,
       "method": "string_enveloppe_array[i]->decay(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2325,7 +2326,7 @@
       "tooltip": "sustain level of the envelope",
       "iterate": 12,
       "method": "    string_enveloppe_array[i]->sustain(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2341,7 +2342,7 @@
       "tooltip": "release time of the envelope",
       "iterate": 12,
       "method": "string_enveloppe_array[i]->release(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2357,7 +2358,7 @@
       "tooltip": "retrigger time of the envelope",
       "iterate": 12,
       "method": "string_enveloppe_array[i]->releaseNoteOn(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2373,7 +2374,7 @@
       "tooltip": "corner frequency of the filter in the absence of control signal",
       "iterate": 1,
       "method": "string_filter_base_freq=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -2389,7 +2390,7 @@
       "tooltip": "value that is multiplied by the note frequency and added to the base corner frequency to allow for keytracking",
       "iterate": 1,
       "method": "string_filter_keytrack=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2405,7 +2406,7 @@
       "tooltip": "resonance of the filter",
       "iterate": 12,
       "method": "string_filter_array[i]->resonance(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2421,7 +2422,7 @@
       "tooltip": "attack time of the envelope filter",
       "iterate": 12,
       "method": "string_enveloppe_filter_array[i]->attack(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2437,7 +2438,7 @@
       "tooltip": "hold time of the envelope filter",
       "iterate": 12,
       "method": "string_enveloppe_filter_array[i]->hold(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2453,7 +2454,7 @@
       "tooltip": "decay time of the envelope filter",
       "iterate": 12,
       "method": "string_enveloppe_filter_array[i]->decay(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2469,7 +2470,7 @@
       "tooltip": "sustain level of the envelope filter",
       "iterate": 12,
       "method": "string_enveloppe_filter_array[i]->sustain(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2485,7 +2486,7 @@
       "tooltip": "release time of the envelope filter",
       "iterate": 12,
       "method": "string_enveloppe_filter_array[i]->release(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2501,7 +2502,7 @@
       "tooltip": "retrigger time of the envelope filter",
       "iterate": 12,
       "method": "string_enveloppe_filter_array[i]->releaseNoteOn(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2517,7 +2518,7 @@
       "tooltip": "sensitivity of the filter to the control envelope",
       "iterate": 12,
       "method": "string_filter_array[i]->octaveControl(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2533,7 +2534,7 @@
       "tooltip": "defines the waveform of the transient. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.",
       "iterate": 12,
       "method": "string_transient_waveform_array[i]->begin(waveform_array[value]);",
-      "introduction_version": 5,
+      "introduction_version": 0.05,
       "ui_type": "select",
       "step": 1,
       "options": [
@@ -2599,7 +2600,7 @@
       "tooltip": "amplitude of the transient",
       "iterate": 12,
       "method": "string_transient_waveform_array[i]->amplitude(value);",
-      "introduction_version": 5,
+      "introduction_version": 0.05,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2615,7 +2616,7 @@
       "tooltip": "level in the scale of the transient",
       "iterate": 1,
       "method": "transient_note_level=value;",
-      "introduction_version": 5,
+      "introduction_version": 0.05,
       "ui_type": "discrete_slider",
       "step": 1
     },
@@ -2631,7 +2632,7 @@
       "tooltip": "attack time of the transient",
       "iterate": 12,
       "method": "string_transient_envelope_array[i]->attack(value);",
-      "introduction_version": 5,
+      "introduction_version": 0.05,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2647,7 +2648,7 @@
       "tooltip": "hold time of the transient",
       "iterate": 12,
       "method": "string_transient_envelope_array[i]->hold(value);",
-      "introduction_version": 5,
+      "introduction_version": 0.05,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2663,7 +2664,7 @@
       "tooltip": "decay time of the transient",
       "iterate": 12,
       "method": "string_transient_envelope_array[i]->decay(value);string_transient_envelope_array[i]->release(value);",
-      "introduction_version": 5,
+      "introduction_version": 0.05,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2679,7 +2680,7 @@
       "tooltip": "defines the waveform amongst 12 oscillators for the tremolo (amplitude variation). In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.. Discontinuous signal will cause clicks",
       "iterate": 1,
       "method": "string_tremolo_lfo.begin(waveform_array[value]);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1,
       "options": [
@@ -2745,7 +2746,7 @@
       "tooltip": "frequency of the tremolo",
       "iterate": 1,
       "method": "string_tremolo_lfo.frequency(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2761,7 +2762,7 @@
       "tooltip": "amplitude of the tremolo.",
       "iterate": 1,
       "method": "string_tremolo_lfo.amplitude(0.01+value);string_tremolo_lfo.offset(1-value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2777,7 +2778,7 @@
       "tooltip": "defines the waveform amongst 12 oscillators for the vibrato (pitch variation). In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square..",
       "iterate": 1,
       "method": "string_vibrato_lfo.begin(waveform_array[value]);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1,
       "options": [
@@ -2843,7 +2844,7 @@
       "tooltip": "frequency of the vibrato oscillation",
       "iterate": 1,
       "method": "string_vibrato_lfo.frequency(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2859,7 +2860,7 @@
       "tooltip": "amplitude of the vibrato oscillation",
       "iterate": 1,
       "method": "string_vibrato_lfo.amplitude(0.01+value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2875,7 +2876,7 @@
       "tooltip": "attack time of the vibrato envelope",
       "iterate": 1,
       "method": "envelope_string_vibrato_lfo.attack(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2891,7 +2892,7 @@
       "tooltip": "hold time of the vibrato envelope",
       "iterate": 1,
       "method": "envelope_string_vibrato_lfo.hold(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2907,7 +2908,7 @@
       "tooltip": "decay time of the vibrato envelope",
       "iterate": 1,
       "method": "envelope_string_vibrato_lfo.decay(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2923,7 +2924,7 @@
       "tooltip": "sustain level of the vibrato envelope.",
       "iterate": 1,
       "method": "envelope_string_vibrato_lfo.sustain(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2939,7 +2940,7 @@
       "tooltip": "release time of the vibrato envelope",
       "iterate": 1,
       "method": "envelope_string_vibrato_lfo.release(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2955,7 +2956,7 @@
       "tooltip": "retrigger time of the vibrato envelope",
       "iterate": 1,
       "method": "envelope_string_vibrato_lfo.releaseNoteOn(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -2971,7 +2972,7 @@
       "tooltip": "continuous signal added to the envelope for pitch variation. 1 is the center, before will be negative pitch bending, after positive pitch bending",
       "iterate": 1,
       "method": "string_vibrato_dc.amplitude(value-1);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -2987,7 +2988,7 @@
       "tooltip": "attack time of the pitch bend envelope",
       "iterate": 1,
       "method": "envelope_string_vibrato_dc.attack(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -3003,7 +3004,7 @@
       "tooltip": "hold time of the pitch bend envelope",
       "iterate": 1,
       "method": "envelope_string_vibrato_dc.hold(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -3019,7 +3020,7 @@
       "tooltip": "decay time of the pitch bend envelope",
       "iterate": 1,
       "method": "envelope_string_vibrato_dc.decay(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -3035,7 +3036,7 @@
       "tooltip": "retrigger time of the pitch bend envelope",
       "iterate": 1,
       "method": "envelope_string_vibrato_dc.releaseNoteOn(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.1
     },
@@ -3051,7 +3052,7 @@
       "tooltip": "intensity of the vibrato and bend effect",
       "iterate": 12,
       "method": "string_waveform_array[i]->frequencyModulation(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -3067,7 +3068,7 @@
       "tooltip": "corner frequency of the output filter",
       "iterate": 1,
       "method": "string_filter.frequency(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -3083,7 +3084,7 @@
       "tooltip": "resonance of the output filter",
       "iterate": 1,
       "method": "string_filter.resonance(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -3099,7 +3100,7 @@
       "tooltip": "output lowpass component",
       "iterate": 1,
       "method": "string_filter_mixer.gain(0,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -3115,7 +3116,7 @@
       "tooltip": "output bandpass component",
       "iterate": 1,
       "method": "string_filter_mixer.gain(1,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -3131,7 +3132,7 @@
       "tooltip": "output highpass component",
       "iterate": 1,
       "method": "string_filter_mixer.gain(2,value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -3147,7 +3148,7 @@
       "tooltip": "defines the waveform amongst 12 oscillators for the output filter control LFO. In order: sine, sawtooth, square, triangle, bandlimited pulse, pulse, reverse sawtooth, sample and hold, variable triangle, bandlimited sawtooth, reverse bandlimited sawtooth, bandlimited square.",
       "iterate": 1,
       "method": "string_filter_lfo.begin(waveform_array[value]);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1,
       "options": [
@@ -3213,7 +3214,7 @@
       "tooltip": "frequency of the output filter control LFO",
       "iterate": 1,
       "method": "string_filter_lfo.frequency(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -3229,7 +3230,7 @@
       "tooltip": "amplitude of the output filter control LFO",
       "iterate": 1,
       "method": "string_filter_lfo.amplitude(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -3245,7 +3246,7 @@
       "tooltip": "sensitivity of the output filter to the control LFO",
       "iterate": 1,
       "method": "string_filter.octaveControl(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -3261,7 +3262,7 @@
       "tooltip": "amplifies the volume of the harp",
       "iterate": 1,
       "method": "string_amplifier.gain(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     }
@@ -3279,7 +3280,7 @@
       "tooltip": "defines the adress targeted by the chord potentiometer alternate function",
       "iterate": 1,
       "method": "chord_pot.set_alternate(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3295,7 +3296,7 @@
       "tooltip": "defines the control range of the chord potentiometer alternate function",
       "iterate": 1,
       "method": "chord_pot.set_alternate_range(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     }
@@ -3313,7 +3314,7 @@
       "tooltip": "defines the adress targeted by the harp potentiometer alternate function",
       "iterate": 1,
       "method": "harp_pot.set_alternate(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3329,7 +3330,7 @@
       "tooltip": "defines the control range of the harp potentiometer alternate function",
       "iterate": 1,
       "method": "harp_pot.set_alternate_range(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     }
@@ -3347,7 +3348,7 @@
       "tooltip": "defines the adress targeted by the modulation potentiometer main function",
       "iterate": 1,
       "method": "mod_pot.set_main(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3363,7 +3364,7 @@
       "tooltip": "defines the control range of the modulation potentiometer main function",
       "iterate": 1,
       "method": "mod_pot.set_main_range(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -3379,7 +3380,7 @@
       "tooltip": "defines the adress targeted by the modulation potentiometer alternate function",
       "iterate": 1,
       "method": "mod_pot.set_alternate(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3395,7 +3396,7 @@
       "tooltip": "defines the control range of the modulation potentiometer alternate function",
       "iterate": 1,
       "method": "mod_pot.set_alternate_range(value);",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     }
@@ -3413,7 +3414,7 @@
       "tooltip": "default bpm of the rythm mode",
       "iterate": 1,
       "method": "rythm_bpm=value;recalculate_timer();",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -3429,7 +3430,7 @@
       "tooltip": "length of the rythm loop",
       "iterate": 1,
       "method": "rythm_loop_length=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -3445,7 +3446,7 @@
       "tooltip": "selects the beats where a new chord selection will be taken into account. Select 1 for every beat",
       "iterate": 1,
       "method": "rythm_limit_change_to_every=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "discrete_slider",
       "options": [
         {
@@ -3495,7 +3496,7 @@
       "tooltip": "shuffles the time by giving unequal time between two subsequent beat. Select 1 for no shuffle",
       "iterate": 1,
       "method": "shuffle=value;recalculate_timer();",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     },
@@ -3511,7 +3512,7 @@
       "tooltip": "length of the on time of each note played",
       "iterate": 1,
       "method": "note_pushed_duration=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -3527,7 +3528,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[0]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3543,7 +3544,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[1]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3559,7 +3560,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[2]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3575,7 +3576,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[3]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3591,7 +3592,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[4]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3607,7 +3608,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[5]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3623,7 +3624,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[6]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3639,7 +3640,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[7]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3655,7 +3656,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[8]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3671,7 +3672,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[9]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3687,7 +3688,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[10]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3703,7 +3704,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[11]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3719,7 +3720,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[12]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3735,7 +3736,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[13]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3751,7 +3752,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[14]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     },
@@ -3767,7 +3768,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "rythm_pattern[15]=value;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "select",
       "step": 1
     }
@@ -3785,7 +3786,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "chord_pot.set_alternate_default(value);chord_pot.force_update();",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -3801,7 +3802,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "harp_pot.set_alternate_default(value);harp_pot.force_update();",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -3817,7 +3818,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "mod_pot.set_alternate_default(value);mod_pot.force_update();",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 1
     },
@@ -3833,7 +3834,7 @@
       "tooltip": "nothing yet",
       "iterate": 1,
       "method": "current_sysex_parameters[7]=version_ID;",
-      "introduction_version": 2,
+      "introduction_version": 0.02,
       "ui_type": "slider",
       "step": 0.01
     }

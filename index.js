@@ -79,6 +79,13 @@ function updateConnectionStatus(connected, message) {
   textElement.textContent = connected ? `minichord connected${bankText}` : "minichord disconnected";
   bubbleElement.style.display = 'flex';
   if (message) showNotification(message, connected ? "success" : "error");
+  // Update UI elements' active state when disconnected
+  if (!connected) {
+    document.querySelectorAll('input, button, select').forEach(element => {
+      element.classList.add("inactive");
+      element.classList.remove("active");
+    });
+  }
 }
 
 function showNotification(message, type = 'info') {
@@ -100,9 +107,7 @@ function updateUIColor() {
   const bankColor = currentValues[20] ?? defaultValues[20] ?? param.default_value;
   const hue = bankColor % 360;
   const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
-  // Set primary color based on theme
   const primaryColor = isDarkMode ? `hsl(${hue}, 70%, 60%)` : `hsl(${hue}, 70%, 50%)`;
-  // Set text color based on hue for readability
   const textColor = (hue >= 45 && hue <= 75) || (hue >= 90 && hue <= 150) ? '#000000' : '#ffffff';
   document.documentElement.style.setProperty('--primary-color-hue', hue);
   document.documentElement.style.setProperty('--primary-color', primaryColor);
@@ -113,10 +118,11 @@ function updateUIColor() {
     slider.style.background = `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${value}%, ${trackColor} ${value}%, ${trackColor} 100%)`;
     // console.log(`[updateUIColor] Slider ${slider.id}, Hue=${hue}, Value=${value}%, Theme=${isDarkMode ? 'dark' : 'light'}`);
   });
-  // Update button styles
   document.querySelectorAll('button, #bank_number_selection').forEach(element => {
-    element.style.backgroundColor = primaryColor;
-    element.style.color = textColor;
+    if (element.classList.contains('active')) {
+      element.style.backgroundColor = primaryColor;
+      element.style.color = textColor;
+    }
   });
 }
 
@@ -127,7 +133,7 @@ function toggleTheme() {
   html.setAttribute('data-theme', newTheme);
   localStorage.setItem('theme', newTheme);
   // console.log(`[toggleTheme] Switched to ${newTheme} mode`);
-  updateUIColor(); // Ensure sliders update with theme
+  updateUIColor();
 }
 
 function loadTheme() {
@@ -239,6 +245,11 @@ async function setupParameterControls() {
 
 function handleDataReceived(data) {
   // console.log(`[handleDataReceived] Bank=${data.bankNumber}, parameters.length=${data.parameters.length}`);
+  if (data.firmwareVersion === undefined || isNaN(data.firmwareVersion)) {
+    console.warn("[handleDataReceived] Invalid or missing firmware version");
+    showNotification("Invalid firmware version", "error");
+    return;
+  }
   currentValues = {};
   data.parameters.forEach((value, sysex) => {
     if (value !== undefined) {
@@ -250,10 +261,21 @@ function handleDataReceived(data) {
   rhythmPattern = data.rhythmData.map(bits => bits.reduce((acc, bit, i) => acc | (bit ? (1 << i) : 0), 0));
   targetBank = data.bankNumber;
   updateUI(data.bankNumber);
+  // Toggle active/inactive based on firmware version
+  document.querySelectorAll('input, button, select').forEach(element => {
+    const requiredVersion = parseFloat(element.getAttribute('version') || 0.01);
+    if (requiredVersion <= data.firmwareVersion) {
+      element.classList.add('active');
+      element.classList.remove('inactive');
+    } else {
+      element.classList.add('inactive');
+      element.classList.remove('active');
+    }
+  });
 }
 
 async function updateUI(bankNumber) {
-  // console.log(`[updateUI] Bank ${bankNumber + 1}, targetBank=${targetBank + 1}`);
+  console.log(`[updateUI] Bank ${bankNumber + 1}, targetBank=${targetBank + 1}`);
   currentBankNumber = bankNumber;
   const bankSelect = document.getElementById("bank_number_selection");
   if (bankSelect && parseInt(bankSelect.value) !== bankNumber) bankSelect.value = bankNumber;
@@ -436,7 +458,7 @@ async function initialize() {
   controller.onDataReceived = handleDataReceived;
   const connected = await controller.initialize();
   if (connected) loadBankSettings(0);
-  loadTheme(); // Load saved theme
+  loadTheme();
   document.getElementById("toggle-theme-btn")?.addEventListener("click", toggleTheme);
 }
 

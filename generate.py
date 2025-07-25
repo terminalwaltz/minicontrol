@@ -219,13 +219,15 @@ def generate_param_html(param):
     step = param.get('step', 0.01 if data_type == 'float' else 1)
     default_value = param.get('default_value', 0)
     float_multiplier = param.get('float_multiplier', 100.0 if data_type == 'float' else 1)
+    introduction_version = param.get('introduction_version', 0.01)  # Default to 0.01
 
     attrs = [
         f'data-sysex-address="{sysex_address}"',
         f'data-ui-type="{ui_type}"',
         f'data-data-type="{data_type}"',
         f'data-float-multiplier="{float_multiplier}"',
-        f'title="{tooltip}"'
+        f'title="{tooltip}"',
+        f'version="{introduction_version}"'  # Add version attribute
     ]
     if 'special_handling' in param:
         attrs.append(f'data-special-handling="{param["special_handling"]}"')
@@ -241,14 +243,14 @@ def generate_param_html(param):
         html.append(f'''
             <div style="display: flex; align-items: center; margin: 8px 0;">
                 <label for="param-{sysex_address}" style="width: 150px; font-weight: bold;">{name}</label>
-                <input type="range" id="param-{sysex_address}" name="{name}"
+                <input type="range" id="param-{sysex_address}" name="{name}" class="inactive"
                        min="{min_value * float_multiplier}" max="{max_value * float_multiplier}" 
                        step="{0.01 * float_multiplier if data_type == 'float' else 1}" 
                        value="{slider_value}"
                        {"data-discrete='true'" if ui_type == 'discrete_slider' else ''}
                        {' '.join(attrs)}
                        style="width: 150px; margin: 0 8px;">
-                <input type="number" id="value-{sysex_address}" 
+                <input type="number" id="value-{sysex_address}" class="inactive"
                        value="{display_value_str}"
                        min="{min_value}" max="{max_value}" step="{0.01 if data_type == 'float' else 1}"
                        style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
@@ -270,7 +272,7 @@ def generate_param_html(param):
         html.append(f'''
             <div style="display: flex; align-items: center; margin: 8px 0;">
                 <label for="param-{sysex_address}" style="width: 150px; font-weight: bold;">{name}</label>
-                <select id="param-{sysex_address}" name="{name}" {' '.join(attrs)}
+                <select id="param-{sysex_address}" name="{name}" class="inactive" {' '.join(attrs)}
                         style="width: 150px; padding: 5px; margin: 0 8px;">
                     {options_html}
                 </select>
@@ -280,7 +282,7 @@ def generate_param_html(param):
         html.append(f'''
             <div style="display: flex; align-items: center; margin: 8px 0;">
                 <label for="param-{sysex_address}" style="width: 150px; font-weight: bold;">{name}</label>
-                <input type="checkbox" id="param-{sysex_address}" name="{name}"
+                <input type="checkbox" id="param-{sysex_address}" name="{name}" class="inactive"
                        {'checked' if default_value else ''} {' '.join(attrs)}
                        style="margin: 0 8px;">
             </div>
@@ -293,14 +295,15 @@ def generate_rhythm_grid_html():
     if not rhythm_params:
         return ''
     html = ['<div style="display: grid; grid-template-columns: repeat(16, 15px); gap: 5px; margin: 10px 0;">']
+    rhythm_version = rhythm_params[0].get('introduction_version', 0.01) if rhythm_params else 0.01
     for step in range(16):
         html.append(f'<div style="display: flex; flex-direction: column; align-items: center;">')
         for voice in range(7):
             sysex_address = 220 + step
             html.append(f'''
-                <input type="checkbox" id="rhythm-checkbox-{step}-{voice}"
+                <input type="checkbox" id="rhythm-checkbox-{step}-{voice}" class="inactive"
                        data-sysex-address="{sysex_address}" data-rhythm-step="{step}"
-                       data-voice="{voice}" style="margin: 2px;">
+                       data-voice="{voice}" version="{rhythm_version}" style="margin: 2px;">
             ''')
         html.append('</div>')
     html.append('</div>')
@@ -498,12 +501,26 @@ html_template = '''<!DOCTYPE html>
       background-color: var(--primary-color);
       color: var(--text-color);
       cursor: pointer;
+      transition: opacity 0.2s, background-color 0.2s;
     }}
     button:hover {{
       background-color: hsl(var(--primary-color-hue, 0), 70%, 45%);
     }}
     [data-theme="dark"] button:hover {{
       background-color: hsl(var(--primary-color-hue, 0), 70%, 55%);
+    }}
+    button.inactive {{
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: not-allowed;
+      background-color: #ccc;
+    }}
+    [data-theme="dark"] button.inactive {{
+      background-color: #555;
+    }}
+    button.active {{
+      opacity: 1;
+      pointer-events: auto;
     }}
     #bank_number_selection {{
       padding: 8px;
@@ -519,6 +536,19 @@ html_template = '''<!DOCTYPE html>
     [data-theme="dark"] #bank_number_selection:hover {{
       background-color: hsl(var(--primary-color-hue, 0), 70%, 55%);
     }}
+    #bank_number_selection.inactive {{
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: not-allowed;
+      background-color: #ccc;
+    }}
+    [data-theme="dark"] #bank_number_selection.inactive {{
+      background-color: #555;
+    }}
+    #bank_number_selection.active {{
+      opacity: 1;
+      pointer-events: auto;
+    }}
     input[type="range"] {{
       -webkit-appearance: none;
       width: 150px;
@@ -526,6 +556,7 @@ html_template = '''<!DOCTYPE html>
       border-radius: 5px;
       background: linear-gradient(to right, var(--primary-color, hsl(0, 70%, 50%)) 0%, var(--primary-color, hsl(0, 70%, 50%)) 0%, #ccc 0%, #ccc 100%);
       outline: none;
+      transition: opacity 0.2s;
     }}
     [data-theme="dark"] input[type="range"] {{
       background: linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) 0%, #555 0%, #555 100%);
@@ -552,6 +583,58 @@ html_template = '''<!DOCTYPE html>
       border-radius: 50%;
       background: var(--primary-color);
       cursor: pointer;
+    }}
+    input[type="range"].inactive {{
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: not-allowed;
+      background: #ccc;
+    }}
+    [data-theme="dark"] input[type="range"].inactive {{
+      background: #555;
+    }}
+    input[type="range"].active {{
+      opacity: 1;
+      pointer-events: auto;
+    }}
+    input[type="checkbox"].inactive {{
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: not-allowed;
+    }}
+    input[type="checkbox"].active {{
+      opacity: 1;
+      pointer-events: auto;
+    }}
+    select.inactive {{
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: not-allowed;
+      background-color: #ccc;
+    }}
+    [data-theme="dark"] select.inactive {{
+      background-color: #555;
+    }}
+    select.active {{
+      opacity: 1;
+      pointer-events: auto;
+    }}
+    input[type="number"].inactive {{
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: not-allowed;
+      background-color: #ccc;
+    }}
+    [data-theme="dark"] input[type="number"].inactive {{
+      background-color: #555;
+    }}
+    input[type="number"].active {{
+      opacity: 1;
+      pointer-events: auto;
+      background-color: hsl(var(--primary-color-hue, 0), 10%, 95%);
+    }}
+    [data-theme="dark"] input[type="number"].active {{
+      background-color: #333;
     }}
     a {{
       color: var(--primary-color);
@@ -648,7 +731,7 @@ html_template = '''<!DOCTYPE html>
           <div class="button_div">
             <div class="select_container">
               <span style="margin-right: 5px;">target bank:</span>
-              <select id="bank_number_selection">
+              <select id="bank_number_selection" class="inactive" version="0.01">
                 <option value="0">1</option>
                 <option value="1">2</option>
                 <option value="2">3</option>
@@ -665,7 +748,7 @@ html_template = '''<!DOCTYPE html>
             </div>
           </div>
           <div class="button_div">
-            <button id="save-to-bank-btn">save to bank</button>
+            <button id="save-to-bank-btn" class="inactive" version="0.01">save to bank</button>
           </div>
         </div>
         <div class="section">
@@ -673,10 +756,10 @@ html_template = '''<!DOCTYPE html>
         </div>
         <div class="controls">
           <div class="button_div">
-            <button id="export-settings-btn">export settings</button>
+            <button id="export-settings-btn" class="inactive" version="0.01">export settings</button>
           </div>
           <div class="button_div">
-            <button id="load-settings-btn">load settings</button>
+            <button id="load-settings-btn" class="inactive" version="0.01">load settings</button>
           </div>
         </div>
         <div class="section">
@@ -684,10 +767,10 @@ html_template = '''<!DOCTYPE html>
         </div>
         <div class="controls">
           <div class="button_div">
-            <button id="reset-bank-btn">reset bank</button>
+            <button id="reset-bank-btn" class="inactive" version="0.01">reset bank</button>
           </div>
           <div class="button_div">
-            <button id="reset-all-banks-btn">reset all banks</button>
+            <button id="reset-all-banks-btn" class="inactive" version="0.01">reset all banks</button>
           </div>
         </div>
         <div class="section">
@@ -695,7 +778,7 @@ html_template = '''<!DOCTYPE html>
         </div>
         <div class="controls">
           <div class="button_div">
-            <button id="randomise_btn">randomise</button>
+            <button id="randomise_btn" class="inactive" version="0.01">randomise</button>
           </div>
         </div>
         <div class="section">
@@ -737,8 +820,6 @@ html_template = '''<!DOCTYPE html>
 </body>
 </html>
 '''
-
-
 # Generate parameter sections in specified order
 parameter_sections = []
 for group_name in group_order:
