@@ -11,6 +11,8 @@ let notificationTimeout = null;
 let rhythmPattern = new Array(16).fill(0);
 let minichord_device = false;
 const BASE_ADDRESS_RHYTHM = 220;
+let notificationQueue = [];
+let isShowingNotification = false;
 
 function getFloatMultiplier(param) {
   return parseFloat(param.float_multiplier) || (param.data_type === 'float' ? (controller.float_multiplier || 100.0) : 1);
@@ -67,6 +69,7 @@ function findParameterBySysex(sysex) {
 }
 
 function updateConnectionStatus(connected, message) {
+  console.log(`[updateConnectionStatus] Called with connected: ${connected}, message: ${message}`);
   const bubbleElement = document.getElementById("notification-bubble");
   const textElement = document.getElementById("connection-text");
   if (!bubbleElement || !textElement) {
@@ -74,33 +77,59 @@ function updateConnectionStatus(connected, message) {
     return;
   }
   minichord_device = connected;
-  bubbleElement.className = connected ? 'connected' : 'disconnected';
-  const bankText = currentBankNumber >= 0 ? ` | Bank ${currentBankNumber + 1}` : '';
-  textElement.textContent = connected ? `minichord connected${bankText}` : "minichord disconnected";
-  bubbleElement.style.display = 'flex';
-  if (message) showNotification(message, connected ? "success" : "error");
-  // Only update UI elements if they exist
-  document.querySelectorAll('input, button, select').forEach(element => {
-    if (connected) {
-      element.classList.add("active");
-      element.classList.remove("inactive");
-    } else {
+  if (!isShowingNotification) {
+    bubbleElement.className = connected ? 'connected' : 'disconnected';
+    const bankText = currentBankNumber >= 0 ? ` | Bank ${currentBankNumber + 1}` : '';
+    textElement.textContent = connected ? `minichord connected${bankText}` : "minichord disconnected";
+    bubbleElement.style.display = 'flex';
+  }
+  if (message && !isShowingNotification) {
+    showNotification(message, connected ? "success" : "error");
+  }
+  if (!connected) {
+    document.querySelectorAll('input, button, select').forEach(element => {
       element.classList.add("inactive");
       element.classList.remove("active");
-    }
-  });
+    });
+  }
 }
 
 function showNotification(message, type = 'info') {
+  console.log(`[showNotification] Queuing message: ${message}, type: ${type}`);
+  notificationQueue.push({ message, type });
+  if (isShowingNotification) return;
+  displayNextNotification();
+}
+
+function displayNextNotification() {
+  if (notificationQueue.length === 0) {
+    isShowingNotification = false;
+    updateConnectionStatus(controller.isConnected(), null); // Ensure reset when queue is empty
+    return;
+  }
+  isShowingNotification = true;
+  const { message, type } = notificationQueue.shift();
   const bubbleElement = document.getElementById("notification-bubble");
   const textElement = document.getElementById("connection-text");
-  if (!bubbleElement || !textElement) return;
-  if (notificationTimeout) clearTimeout(notificationTimeout);
+  if (!bubbleElement || !textElement) {
+    console.warn("[showNotification] Notification elements not found");
+    isShowingNotification = false;
+    notificationQueue = []; // Clear queue to prevent infinite loop
+    updateConnectionStatus(controller.isConnected(), null);
+    return;
+  }
+  if (notificationTimeout) {
+    console.log("[showNotification] Clearing existing timeout");
+    clearTimeout(notificationTimeout);
+  }
   textElement.textContent = message;
   bubbleElement.className = type === 'success' ? 'connected' : 'disconnected';
   bubbleElement.style.display = 'flex';
   notificationTimeout = setTimeout(() => {
+    console.log("[showNotification] Timeout executed");
+    isShowingNotification = false; // Set to false before updating connection status
     updateConnectionStatus(controller.isConnected(), null);
+    displayNextNotification();
   }, 3000);
 }
 
@@ -301,7 +330,9 @@ async function updateUI(bankNumber) {
   });
   updateUIColor();
   refreshRhythmGrid();
-  updateConnectionStatus(controller.isConnected(), null);
+    if (!isShowingNotification) {
+    updateConnectionStatus(controller.isConnected(), null);
+  }
 }
 
 function loadBankSettings(bankNumber) {
