@@ -3403,7 +3403,7 @@
   ],
   "rhythm_parameter": [
     {
-      "name": "default_bpm",
+      "name": "default bpm",
       "group": "Rhythm",
       "default_value": 90,
       "data_type": "int",

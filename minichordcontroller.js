@@ -10,18 +10,24 @@ class MiniChordController {
     this.MIDI_request_option = { sysex: true };
     this.onConnectionChange = null;
     this.onDataReceived = null;
+    this.isInitializing = false; // New flag
+
   }
 
-  async initialize() {
+   async initialize() {
+    if (this.isInitializing) return false; // Prevent concurrent initialization
+    this.isInitializing = true;
     try {
       const midiAccess = await navigator.requestMIDIAccess(this.MIDI_request_option);
-      return this.handleMIDIAccess(midiAccess);
+      return await this.handleMIDIAccess(midiAccess);
     } catch (err) {
       console.error("MIDI init failed:", err);
       if (this.onConnectionChange) {
         this.onConnectionChange(false, "MIDI init failed: " + err.message);
       }
       return false;
+    } finally {
+      this.isInitializing = false;
     }
   }
 
@@ -72,67 +78,79 @@ class MiniChordController {
     const name = event.port.name.toLowerCase();
     if (event.port.state === "disconnected" && name.includes("minichord")) {
       this.device = false;
+      this.pendingSave = false; // Reset pendingSave
+      // Clean up input handlers
+      for (const input of event.target.inputs.values()) {
+        if (input.name.toLowerCase().includes("minichord")) {
+          input.onmidimessage = null;
+        }
+      }
       if (this.onConnectionChange) {
         this.onConnectionChange(false, "minichord disconnected");
       }
     }
-
     if (event.port.state === "connected" && !this.device && name.includes("minichord")) {
-      this.initialize();
+      this.initialize(); // Note: This is async, but we don’t await it here to avoid blocking
     }
   }
+
 
   processCurrentData(midiMessage) {
-    const data = midiMessage.data.slice(1);
-    const expectedLength = this.parameter_size * 2 + 1;
-    if (data.length !== expectedLength) {
-      console.warn(`[processCurrentData] Invalid data length, got ${data.length}, expected ${expectedLength}`);
+  if (!midiMessage.data) {
+    console.warn("[processCurrentData] No data received");
+    return;
+  }
+  const data = midiMessage.data.slice(1);
+  const expectedLength = this.parameter_size * 2 + 1;
+  if (data.length !== expectedLength) {
+    console.warn(`[processCurrentData] Invalid data length, got ${data.length}, expected ${expectedLength}`);
+    return;
+  }
+  const processedData = {
+    parameters: [],
+    rhythmData: [],
+    bankNumber: data[2 * 1],
+    firmwareVersion: 0
+  };
+  console.log(`[processCurrentData] Received data for bank ${processedData.bankNumber}, timestamp=${Date.now()}`);
+  for (let i = 2; i < this.parameter_size; i++) {
+    if (2 * i + 1 >= data.length) {
+      console.warn(`[processCurrentData] Data index out of bounds at i=${i}`);
       return;
     }
-    const processedData = {
-      parameters: [],
-      rhythmData: [],
-      bankNumber: data[2 * 1],
-      firmwareVersion: 0
-    };
-    console.log(`[processCurrentData] Received data for bank ${processedData.bankNumber}, timestamp=${Date.now()}`);
-    for (let i = 2; i < this.parameter_size; i++) {
-      const sysex_value = data[2 * i] + 128 * data[2 * i + 1];
-      if (i === this.firmware_adress) {
-        processedData.firmwareVersion = sysex_value / 100.0;
-        console.log(`[PROCESS DATA] Firmware version: ${processedData.firmwareVersion}`);
-      } else if (i >= this.base_adress_rythm && i < this.base_adress_rythm + 16) {
-        const j = i - this.base_adress_rythm;
-        const rhythmBits = [];
-        for (let k = 0; k < 7; k++) {
-          rhythmBits[k] = !!(sysex_value & (1 << k));
-        }
-        processedData.rhythmData[j] = rhythmBits;
-        processedData.parameters[i] = sysex_value;
-      } else {
-        processedData.parameters[i] = sysex_value;
+    const sysex_value = data[2 * i] + 128 * data[2 * i + 1];
+    if (i === this.firmware_adress) {
+      processedData.firmwareVersion = sysex_value / 100.0;
+      console.log(`[PROCESS DATA] Firmware version: ${processedData.firmwareVersion}`);
+    } else if (i >= this.base_adress_rythm && i < this.base_adress_rythm + 16) {
+      const j = i - this.base_adress_rythm;
+      const rhythmBits = [];
+      for (let k = 0; k < 7; k++) {
+        rhythmBits[k] = !!(sysex_value & (1 << k));
       }
-      if (i === 32 || i === 20 || (i >= 187 && i <= 191) || i === 99 || i === 30) {
-        console.log(`[PROCESS DATA] Sysex=${i}, value=${sysex_value}, bank=${processedData.bankNumber}`);
-      }
+      processedData.rhythmData[j] = rhythmBits;
+      processedData.parameters[i] = sysex_value;
+    } else {
+      processedData.parameters[i] = sysex_value;
     }
-    this.active_bank_number = processedData.bankNumber;
-    if (this.pendingSave) {
-      console.log(`[processCurrentData] Received settings for bank ${processedData.bankNumber} after save, verifying...`);
-      if (typeof currentValues !== 'undefined') {
-        for (let i = 2; i < this.parameter_size; i++) {
-          if (processedData.parameters[i] !== undefined && currentValues[i] !== undefined) {
-            if (processedData.parameters[i] !== currentValues[i]) {
-              console.warn(`[processCurrentData] Mismatch for Sysex=${i}, device=${processedData.parameters[i]}, currentValues=${currentValues[i]}`);
-            }
-          }
-        }
-      }
-    }
-    if (this.onDataReceived) {
-      this.onDataReceived(processedData);
+    if (i === 32 || i === 20 || (i >= 187 && i <= 191) || i === 99 || i === 30) {
+      console.log(`[PROCESS DATA] Sysex=${i}, value=${sysex_value}, bank=${processedData.bankNumber}`);
     }
   }
+  this.active_bank_number = processedData.bankNumber;
+  if (this.pendingSave && typeof currentValues !== 'undefined') {
+    for (let i = 2; i < this.parameter_size; i++) {
+      if (processedData.parameters[i] !== undefined && currentValues[i] !== undefined) {
+        if (processedData.parameters[i] !== currentValues[i]) {
+          console.warn(`[processCurrentData] Mismatch for Sysex=${i}, device=${processedData.parameters[i]}, currentValues=${currentValues[i]}`);
+        }
+      }
+    }
+  }
+  if (this.onDataReceived) {
+    this.onDataReceived(processedData);
+  }
+}
 
   sendSysEx(bytes) {
     if (!this.device) return;

@@ -69,20 +69,26 @@ function findParameterBySysex(sysex) {
 function updateConnectionStatus(connected, message) {
   const bubbleElement = document.getElementById("notification-bubble");
   const textElement = document.getElementById("connection-text");
-  if (!bubbleElement || !textElement) return;
+  if (!bubbleElement || !textElement) {
+    console.warn("[updateConnectionStatus] Notification elements not found");
+    return;
+  }
   minichord_device = connected;
   bubbleElement.className = connected ? 'connected' : 'disconnected';
   const bankText = currentBankNumber >= 0 ? ` | Bank ${currentBankNumber + 1}` : '';
   textElement.textContent = connected ? `minichord connected${bankText}` : "minichord disconnected";
   bubbleElement.style.display = 'flex';
   if (message) showNotification(message, connected ? "success" : "error");
-  // Update UI elements' active state when disconnected
-  if (!connected) {
-    document.querySelectorAll('input, button, select').forEach(element => {
+  // Only update UI elements if they exist
+  document.querySelectorAll('input, button, select').forEach(element => {
+    if (connected) {
+      element.classList.add("active");
+      element.classList.remove("inactive");
+    } else {
       element.classList.add("inactive");
       element.classList.remove("active");
-    });
-  }
+    }
+  });
 }
 
 function showNotification(message, type = 'info') {
@@ -272,11 +278,18 @@ function handleDataReceived(data) {
 }
 
 async function updateUI(bankNumber) {
+  if (bankNumber < 0) {
+    console.warn(`[updateUI] Invalid bank number: ${bankNumber}`);
+    return;
+  }
   console.log(`[updateUI] Bank ${bankNumber + 1}, targetBank=${targetBank + 1}`);
   currentBankNumber = bankNumber;
   const bankSelect = document.getElementById("bank_number_selection");
-  if (bankSelect && parseInt(bankSelect.value) !== bankNumber) bankSelect.value = bankNumber;
+  if (bankSelect && parseInt(bankSelect.value) !== bankNumber) {
+    bankSelect.value = bankNumber;
+  }
   const params = await loadParameters();
+  if (!params) return;
   Object.keys(params).forEach(group => {
     if (group === 'sysex_name_map') return;
     params[group].forEach(param => {
