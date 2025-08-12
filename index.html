@@ -166,7 +166,7 @@
         
             <div style="display: flex; align-items: center; margin: 8px 0;">
                 <label for="param-255" style="width: 150px; font-weight: bold;">master tuning</label>
-                <select id="param-255" name="master tuning" class="inactive" data-sysex-address="255" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="recalibrates notes around different reference concert A (default 440)" version="0.07"
+                <select id="param-255" name="master tuning" class="inactive" data-sysex-address="255" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="recalibrates notes around different reference concert A (default 440)" version="0.09"
                         style="width: 150px; padding: 5px; margin: 0 8px;">
                     <option value="432">432 Hz</option><option value="433">433 Hz</option><option value="434">434 Hz</option><option value="435">435 Hz</option><option value="436">436 Hz</option><option value="437">437 Hz</option><option value="438">438 Hz</option><option value="439">439 Hz</option><option value="440">440 Hz</option><option value="441">441 Hz</option><option value="442">442 Hz</option><option value="443">443 Hz</option><option value="444">444 Hz</option>
                 </select>
@@ -303,7 +303,7 @@
                 <label for="param-35" style="width: 150px; font-weight: bold;">key selection</label>
                 <select id="param-35" name="key selection" class="inactive" data-sysex-address="35" data-ui-type="select" data-data-type="int" data-float-multiplier="1" title="key selection" version="0.06"
                         style="width: 150px; padding: 5px; margin: 0 8px;">
-                    <option value="0">C</option><option value="1">G</option><option value="2">D</option><option value="3">A</option><option value="4">E</option><option value="5">B</option><option value="6">F</option><option value="7">Bb</option><option value="8">Eb</option><option value="9">Ab</option><option value="10">Db</option><option value="11">Gb</option>
+                    <option value="0">C</option><option value="1">G</option><option value="2">D</option><option value="3">A</option><option value="4">E</option><option value="5">B</option><option value="6">F</option><option value="7">Bb</option><option value="8">Eb</option><option value="9">Ab</option><option value="10">Db</option><option value="11">Gb</option><option value="12">F#</option><option value="13">C#</option><option value="14">G#</option><option value="15">D#</option><option value="16">A#</option><option value="17">E#</option><option value="18">B#</option><option value="19">Fb</option><option value="20">Cb</option>
                 </select>
             </div>
         
@@ -2465,21 +2465,6 @@
                     <div style="padding: 10px;">
                         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Rhythm</h3>
             <div style="display: flex; align-items: center; margin: 8px 0;">
-                <label for="param-187" style="width: 150px; font-weight: bold;">default_bpm</label>
-                <input type="range" id="param-187" name="default_bpm" class="inactive"
-                       min="30" max="300" 
-                       step="1" 
-                       value="90"
-                       
-                       data-sysex-address="187" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="default bpm of the rythm mode" version="0.02"
-                       style="width: 150px; margin: 0 8px;">
-                <input type="number" id="value-187" class="inactive"
-                       value="90"
-                       min="30" max="300" step="1"
-                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
-            </div>
-        
-            <div style="display: flex; align-items: center; margin: 8px 0;">
                 <label for="param-188" style="width: 150px; font-weight: bold;">cycle length</label>
                 <input type="range" id="param-188" name="cycle length" class="inactive"
                        min="1" max="16" 
@@ -2536,6 +2521,21 @@
                 <input type="number" id="value-191" class="inactive"
                        value="30"
                        min="20" max="1000" step="1"
+                       style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
+            </div>
+        
+            <div style="display: flex; align-items: center; margin: 8px 0;">
+                <label for="param-187" style="width: 150px; font-weight: bold;">default bpm</label>
+                <input type="range" id="param-187" name="default bpm" class="inactive"
+                       min="30" max="300" 
+                       step="1" 
+                       value="90"
+                       
+                       data-sysex-address="187" data-ui-type="slider" data-data-type="int" data-float-multiplier="1" title="default bpm of the rythm mode" version="0.02"
+                       style="width: 150px; margin: 0 8px;">
+                <input type="number" id="value-187" class="inactive"
+                       value="90"
+                       min="30" max="300" step="1"
                        style="background-color: hsl(var(--primary-color-hue, 0), 10%, 95%); width: 50px; text-align: right; border: none; padding: 2px;">
             </div>
         <h3 style="margin: 30px 0 10px; font-size: 1.5em;">Rhythm Pattern</h3><div style="display: grid; grid-template-columns: repeat(16, 15px); gap: 5px; margin: 10px 0;">

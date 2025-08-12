@@ -76,7 +76,7 @@
       ],
       "method": "a4_master_tuning = constrain(value, 432, 444); c_frequency = 130.81 * (a4_master_tuning / 440.0); save_master_tuning(); /* Note: current_sysex_parameters[255] is not updated to keep master tuning independent of presets */ if (current_line >= 0) { for (int i = 0; i < 4; i++) { if (chord_envelope_array[i]->isActive()) { set_chord_voice_frequency(i, current_chord_notes[i]); } } } for (int i = 0; i < 12; i++) { if (string_enveloppe_array[i]->isActive()) { set_harp_voice_frequency(i, current_harp_notes[i]); } }",
       "iterate": 1,
-      "introduction_version": 0.07
+      "introduction_version": 0.09
     },
     {
       "name": "sharp function",
@@ -300,7 +300,16 @@
         {"value": 8, "label": "Eb"},
         {"value": 9, "label": "Ab"},
         {"value": 10, "label": "Db"},
-        {"value": 11, "label": "Gb"}
+        {"value": 11, "label": "Gb"},
+        {"value": 12, "label": "F#"},
+        {"value": 13, "label": "C#"},
+        {"value": 14, "label": "G#"},
+        {"value": 15, "label": "D#"},
+        {"value": 16, "label": "A#"},
+        {"value": 17, "label": "E#"},
+        {"value": 18, "label": "B#"},
+        {"value": 19, "label": "Fb"},
+        {"value": 20, "label": "Cb"}
       ],
       "introduction_version": 0.06
     },
